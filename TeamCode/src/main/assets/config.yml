@@ -1,0 +1,175 @@
+# settings.yml
+# Use this to define changeable values such as max_power.
+# All values are in metric
+# Unit of length is millimeters, not meters
+# Unit of rotation is degrees (angular velocity is in degrees per second)
+
+# Encoder pulses per full revolution http://ftcforum.usfirst.org/archive/index.php/t-5189.html
+# update https://www.reddit.com/r/FTC/comments/3qhfvj/help_with_encoders/
+encoder:
+  output_pulses: 1440
+  encoder_pulses: 28
+
+# The drivetrain's settings.
+drivetrain:
+  motor_wheel_ratio: 2.5
+  motor_max_power: 1
+  motor_left:
+    offset: 0.0
+    map_name: drive_left
+    encodered: true
+    reversed: true
+  motor_right:
+    offset: 0.0
+    map_name: drive_right
+    encodered: true
+    reversed: false
+  wheel:
+    diameter: 101.6 # 4 inches
+
+# Winch settings
+winch:
+  enabled: true
+  linear_movement:
+    motor_reversed: true
+    motor_tape_ratio: 2.5
+    mot_max_power: 1
+    max_extend_power: 1
+    max_retract_power: 1
+  angular_movement:
+    max_ang_vel: 20.0
+    full_rotate: 180.0
+    max_rotate: 66.0
+    preset: 15.0
+    start_pos: 65.0
+  left_servo:
+    reversed: true
+    offset: 15.75
+  right_servo:
+    reversed: false
+    offset: 0.0
+
+# Trigger Arm settings (It's a servo)
+trigger_arm:
+  enabled: true
+  side: right
+  # if it's a motor (must be encodered)
+  motor_pow: 0.3
+  # pulses per full rotate (update!)
+  motor_pulses: 1120
+  # wanted range of motor in degrees (set to match inaccurate pulses)
+  motor_range: 140
+
+
+#Robot Arm Settings
+robot_arm:
+  enabled: true
+  sweep_servo:
+    reversed: true
+    max_ang_vel: 200.0
+    full_rotate: 180.0
+    max_rotate: 180.0
+    min_rotate: 0.0
+    start_pos: 40.0
+  vert_servo:
+    reversed: false
+    max_ang_vel: 180.0
+    full_rotate: 180.0
+    max_rotate: 180.0
+    min_rotate: 0.0
+    start_pos: 170.0
+
+#AllClearSettings
+all_clear:
+  enabled: true
+  reversed: false
+  offset: 0.0
+  full_rotate: 180.0
+  down_angle: 0.0
+  up_angle: 162.0
+
+# Plow settings (It's a servo)
+plow:
+  enabled: true
+  reversed: false
+  offset: 30.0
+  full_rotate: 180.0
+  down_angle: 0.0
+  up_angle: 130.0
+
+autonomous:
+
+  red_alliance:
+    starting_pos:
+      x: 10.0
+      y: 10.0
+      rot: 0.0
+    #Compute later
+    travel_to_beacon:
+      - move 100
+      - stop
+    travel_to_park:
+      - move 100
+      - stop
+    travel_to_low:
+      near:
+        - move 100
+        - stop
+      far:
+        - move 100
+        - stop
+    travel_to_mid:
+      near:
+        - move 100
+        - stop
+      far:
+        - move 100
+        - stop
+
+  blue_alliance:
+    starting_pos:
+      x: 10.0
+      y: 20.0
+      rot: 0.0
+    #Compute later
+    travel_to_beacon:
+      - move 100
+      - stop
+    travel_to_park:
+      - move 100
+      - stop
+    travel_to_low:
+      near:
+        - move 100
+        - stop
+      far:
+        - move 100
+        - stop
+    travel_to_mid:
+      near:
+        - move 100
+        - stop
+      far:
+        - move 100
+        - stop
+
+  # This is the autonomous commands!
+  command_list:
+    - move 500
+    - travel_to_beacon
+    - drop_off_people
+    - move -1000
+    - climb_mountain_low near
+    - stop
+
+  # Time to rotate 5 circles in millis
+  rotate_s: 33000
+
+  # The below define the other commands that aren't alliance specific (make up your own if you want)
+  drop_off_people:
+    - winch_servo 50
+    - winch_motor out,2
+    - winch_servo down,5
+    - winch_motor in,1
+
+
