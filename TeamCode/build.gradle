@@ -14,6 +14,27 @@
 // Include common definitions from above.
 apply from: '../build.common.gradle'
 
+android {
+    signingConfigs {
+        release {
+            storeFile file("key/packagekey.jks")
+            storePassword "freedomrobotics"
+            keyAlias "FTC_TEAM_10771_KEY"
+            keyPassword "freedomrobotics"
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
 repositories {
     maven { url "https://jitpack.io" }
 }
