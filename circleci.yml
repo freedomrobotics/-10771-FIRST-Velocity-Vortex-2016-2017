@@ -1,0 +1,22 @@
+machine:
+  timezone:
+    America/New_York
+  java:
+    version: openjdk7
+
+#dependencies:
+  #pre:
+    #- echo y | android update sdk --no-ui --all --filter "package-name"
+
+test:
+  override:
+    # compile and produce coverage report
+    - ./gradlew clean
+    - ./gradlew check
+    - ./gradlew test
+    #- ./gradlew cobertura
+    - ./gradlew assembleDebug assembleRelease
+    # copy the build outputs to artifacts
+    - cp -r TeamCode/build/outputs $CIRCLE_ARTIFACTS
+    # copy the test results to the test results directory.
+    #- cp -r build/outputs/test $CIRCLE_TEST_REPORTS
