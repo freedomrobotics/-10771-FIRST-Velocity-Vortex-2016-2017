@@ -66,7 +66,7 @@ public final class CameraObject {
      */
     public CameraData cameraData = new CameraData();
     //The only config for this class you'll ever need.
-    private int frameLayoutId = com.qualcomm.ftcrobotcontroller.R.id.cameraPreview;
+    private int frameLayoutId = com.qualcomm.ftcrobotcontroller.R.id.cameraMonitorViewId;
     //The context of the app
     private Context context;
     //The downsampling ratio
