@@ -33,6 +33,39 @@ android {
             signingConfig signingConfigs.release
         }
     }
+
+    task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
+        println('compiling jni code with ndk-build...')
+        def ndkDir = android.ndkDirectory
+        if (System.properties['os.name'].toLowerCase().contains('windows')) {
+            commandLine "$ndkDir/ndk-build.cmd",
+                    '-C', file('src/main/jni').absolutePath
+            // Additional ndk-build arguments, such as NDK_DEBUG, can be provided here
+        } else {
+            commandLine "$ndkDir/ndk-build",
+                    '-C', file('src/main/jni').absolutePath
+            // Additional ndk-build arguments, such as NDK_DEBUG, can be provided here
+        }
+    }
+
+    task cleanNative(type: Exec, description: 'Clean JNI object files') {
+        def ndkDir = android.ndkDirectory
+        if (System.properties['os.name'].toLowerCase().contains('windows')) {
+            commandLine "$ndkDir/ndk-build.cmd",
+                    '-C', file('src/main/jni').absolutePath,
+                    'clean'
+        } else {
+            commandLine "$ndkDir/ndk-build",
+                    '-C', file('src/main/jni').absolutePath,
+                    'clean'
+        }
+    }
+
+    clean.dependsOn 'cleanNative'
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn buildNative
+    }
 }
 
 repositories {
