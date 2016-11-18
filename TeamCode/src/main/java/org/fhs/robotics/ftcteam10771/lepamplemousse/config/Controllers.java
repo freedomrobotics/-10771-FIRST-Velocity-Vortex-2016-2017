@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * Configuration class for controllers
  */
-public class Controllers extends Config {
+public class Controllers extends ConfigOld {
 
     // Filename with the suffix
     private String fileName = Static.configControlFileName + Static.configFileSufffix;
@@ -41,7 +41,7 @@ public class Controllers extends Config {
      * @param telemetry Telemetry output for Debug
      */
     public Controllers(Telemetry telemetry) {
-        //Calling the superclass' (Config.class) constructor.
+        //Calling the superclass' (ConfigOld.class) constructor.
         super(telemetry);
         this.telemetry = telemetry;
         init();
@@ -51,7 +51,7 @@ public class Controllers extends Config {
      * Non-debuggable constructor
      */
     public Controllers() {
-        //Calling the superclass' (Config.class) constructor.
+        //Calling the superclass' (ConfigOld.class) constructor.
         super();
         init();
     }

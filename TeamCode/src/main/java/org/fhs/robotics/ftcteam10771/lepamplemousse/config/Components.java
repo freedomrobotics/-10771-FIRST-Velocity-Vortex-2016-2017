@@ -22,7 +22,7 @@ import java.util.Map;
  * todo improve
  * todo make more standalone for plug and play capability into config app
  */
-public class Components extends Config {
+public class Components extends ConfigOld {
 
     // Filename with the suffix
     private String fileName = Static.configCompFileName + Static.configFileSufffix;
@@ -43,7 +43,7 @@ public class Components extends Config {
      * @param telemetry Telemetry output for Debug
      */
     public Components(Telemetry telemetry) {
-        //Calling the superclass' (Config.class) constructor.
+        //Calling the superclass' (ConfigOld.class) constructor.
         super(telemetry);
         this.telemetry = telemetry;
         init();
@@ -53,7 +53,7 @@ public class Components extends Config {
      * Non-debuggable constructor
      */
     public Components() {
-        //Calling the superclass' (Config.class) constructor.
+        //Calling the superclass' (ConfigOld.class) constructor.
         super();
         init();
     }

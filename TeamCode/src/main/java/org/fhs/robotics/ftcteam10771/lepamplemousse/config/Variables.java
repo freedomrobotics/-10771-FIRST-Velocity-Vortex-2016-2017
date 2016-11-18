@@ -18,11 +18,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Configuration fie accessor for a Variables Config File
+ * Configuration fie accessor for a Variables ConfigOld File
  * todo simplify and make some more merges with config.java
  * todo improve
  */
-public class Variables extends Config {
+public class Variables extends ConfigOld {
 
     // Filename with the suffix
     private String fileName = Static.configVarFileName + Static.configFileSufffix;
@@ -43,7 +43,7 @@ public class Variables extends Config {
      * @param telemetry Telemetry output for Debug
      */
     public Variables(Telemetry telemetry) {
-        //Calling the superclass' (Config.class) constructor.
+        //Calling the superclass' (ConfigOld.class) constructor.
         super(telemetry);
         this.telemetry = telemetry;
         init();
@@ -53,7 +53,7 @@ public class Variables extends Config {
      * Non-debuggable constructor
      */
     public Variables() {
-        //Calling the superclass' (Config.class) constructor.
+        //Calling the superclass' (ConfigOld.class) constructor.
         super();
         init();
     }
