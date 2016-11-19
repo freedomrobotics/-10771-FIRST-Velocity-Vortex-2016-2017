@@ -3,7 +3,6 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.core;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.ReturnValues;
 
 import java.util.HashMap;
@@ -77,7 +76,7 @@ public class Controllers {
      * @param id The name of hte overarching device
      * @return a boolean of the device's existence
      */
-    public boolean gamepadExists(Integer id) {
+    private boolean gamepadExists(Integer id) {
         return controllerMap.containsKey("gamepad" + id);
     }
 
@@ -87,7 +86,7 @@ public class Controllers {
      * @param id The id of the gamepad to retrieve
      * @return The map of the controller
      */
-    public Map getGamepad(Integer id) {
+    private Map getGamepad(Integer id) {
         if (gamepadExists(id)) {
             return (Map) controllerMap.get("gamepad" + id);
         }
@@ -101,27 +100,12 @@ public class Controllers {
      * @param input The specified input as string
      * @return The mapping of the input
      */
-    public Map getInput(Integer id, String input) {
+    private Map getInput(Integer id, String input) {
         Map controller;
         if ((controller = getGamepad(id)) != null) {
             return (Map) controller.get(input);
         }
         return null;
-    }
-
-    /**
-     * Checker for the input's existence in the mapping
-     *
-     * @param id    Id of the controller
-     * @param input The input to be checked
-     * @return whether or not the input exists
-     */
-    public boolean inputExists(Integer id, String input) {
-        Map controller;
-        if ((controller = getGamepad(id)) != null) {
-            return controller.containsKey(input);
-        }
-        return false;
     }
 
     /**
@@ -132,7 +116,7 @@ public class Controllers {
      * @param setting The setting to be checked as string
      * @return Boolean value of setting key
      */
-    public boolean getBoolean(Integer id, String input, String setting) {
+    private boolean getBoolean(Integer id, String input, String setting) {
         Map controller;
         if ((controller = getInput(id, input)) != null) {
             if (controller.get(setting) != null) {
@@ -149,7 +133,7 @@ public class Controllers {
      * @param input the input to check
      * @return Whether or not the input is digital
      */
-    public boolean digitalEnabled(Integer id, String input) {
+    private boolean digitalEnabled(Integer id, String input) {
         return getBoolean(id, input, "digital");
     }
 
@@ -160,7 +144,7 @@ public class Controllers {
      * @param input the input to check
      * @return Whether or not the input is inverted
      */
-    public boolean invertedEnabled(Integer id, String input) {
+    private boolean invertedEnabled(Integer id, String input) {
         return getBoolean(id, input, "inverted");
     }
 
@@ -171,7 +155,7 @@ public class Controllers {
      * @param input the input to check
      * @return The function of the input
      */
-    public String getFunction(Integer id, String input) {
+    private String getFunction(Integer id, String input) {
         Map controller;
         if ((controller = getInput(id, input)) != null) {
             if (controller.get("function") != null) {
@@ -187,7 +171,7 @@ public class Controllers {
      * @param id id of the controller
      * @return A set with an entryset of the nested map within a controller
      */
-    public Set<Map.Entry<String, Object>> getEntrySet(Integer id) {
+    private Set<Map.Entry<String, Object>> getEntrySet(Integer id) {
         Map controller;
         if ((controller = getGamepad(id)) != null) {
             return controller.entrySet();
@@ -381,7 +365,12 @@ public class Controllers {
         return false;
     }
 
-    class inputMethods {
+    public Boolean getToggle(String name) {
+        // TODO: 11/19/2016 implement
+        return false;
+    }
+
+    private class inputMethods {
         boolean inverted = false;
         boolean digital = false;
         Integer id = 0;

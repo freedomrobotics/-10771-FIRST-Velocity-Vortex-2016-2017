@@ -34,6 +34,7 @@ public class Controlled {
      */
     public void loop() {
         // code here
+
     }
 
     public void cleanup(){
