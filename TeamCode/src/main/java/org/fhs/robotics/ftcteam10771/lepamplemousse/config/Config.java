@@ -14,11 +14,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Adam Li on 11/17/2016.
  * rewrite of configuration files and management.
+ *
+ * todo: Add ability to set values in the ParsedData object and the convert a whole ParsedData object tree back into a Map.
  */
 public class Config {
 
@@ -36,6 +42,8 @@ public class Config {
     private Yaml yaml = new Yaml();
     /** Data Map. Key is string id, Value is the object held */
     private Map<String, Object> data = null;
+    /** ParsedData object containing processed data */
+    private ParsedData parsedData = null;
 
     /** To debug or not to debug */
     private boolean debug = true;
@@ -47,8 +55,186 @@ public class Config {
     private final Telemetry telemetry;
     private final String id;
 
+    /**
+     * Enumeration of various specific return values.
+     */
     public enum State {
         FAILED, FILE_EXISTS, DEFAULT_EXISTS, MISSING_FILEPATH, SUCCESS
+    }
+
+    /**
+     * Class which contains a HashMap and defines various functions to quickly retrieve values
+     */
+    public class ParsedData {
+        Map<String, Object> data = new HashMap<String, Object>();
+
+        /**
+         * Default constructor for the object which contains a HashMap and various functions to quickly retrieve values
+         */
+        public ParsedData() {
+
+        }
+
+        /**
+         * Cosntructor that copies an existing map to the ParsedData Object
+         *
+         * @param map The map to copy
+         */
+        public ParsedData(Map<String, Object> map) {
+            if (map != null) {
+                data.putAll(map);
+            }
+        }
+
+        /**
+         * Adds a value to the ParsedData object
+         *
+         * @param key    The key associated with the object
+         * @param object The value to store
+         */
+        public void addToMap(String key, Object object) {
+            data.remove(key);
+            if (key != null) {
+                data.put(key, object);
+            }
+        }
+
+        /**
+         * Copies an existing map to the ParsedData Object
+         *
+         * @param map The map to copy
+         */
+        public void addToMap(Map<String, Object> map) {
+            if (map != null) {
+                data.putAll(map);
+            }
+        }
+
+        /**
+         * Retrieves the object associated with the key
+         *
+         * @param key The key to retrieve the object from
+         * @return The object associated with the key
+         */
+        public Object get(String key) {
+            if (valueExists(key)) {
+                return data.get(key);
+            }
+            return null;
+        }
+
+        /**
+         * Removes the object associated with the key
+         *
+         * @param key The key to remove the object association
+         */
+        public void remove(String key) {
+            data.remove(key);
+        }
+
+        /**
+         * Checks to see if a key exists
+         *
+         * @param key The key to check for
+         * @return A boolean stating whether the key exists or not
+         */
+        public boolean valueExists(String key) {
+            return data.containsKey(key);
+        }
+
+        /**
+         * Retrieves the object associated with the key
+         *
+         * @param key The key to retrieve the object from
+         * @return The object associated with the key
+         */
+        public Object getObject(String key) {
+            return get(key);
+        }
+
+        /**
+         * Retrieves the boolean associated with the key
+         *
+         * @param key The key to retrieve the boolean from
+         * @return The boolean associated with the key
+         */
+        public boolean getBool(String key) {
+            return get(key).toString().equals("true");
+        }
+
+        /**
+         * Retrieves the string associated with the key
+         *
+         * @param key The key to retrieve the string from
+         * @return The string associated with the key
+         */
+        public String getString(String key) {
+            return get(key).toString();
+        }
+
+        /**
+         * Retrieves the integer associated with the key
+         *
+         * @param key The key to retrieve the integer from
+         * @return The integer associated with the key
+         */
+        public int getInt(String key) {
+            if (valueExists(key)) {
+                Pattern p = Pattern.compile("[a-zA-Z]");
+                Matcher m = p.matcher(data.get(key).toString());
+                if (m.find()) {
+                    return 0;
+                }
+                if (data.get(key).toString().contains(".")) {
+                    return ((Double) data.get(key)).intValue();
+                }
+                return (Integer) data.get(key);
+            }
+            return 0;
+        }
+
+        /**
+         * Retrieves the float associated with the key
+         *
+         * @param key The key to retrieve the float from
+         * @return The float associated with the key
+         */
+        public float getFloat(String key) {
+            if (valueExists(key)) {
+                Pattern p = Pattern.compile("[a-zA-Z]");
+                Matcher m = p.matcher(data.get(key).toString());
+                if (m.find()) {
+                    return 0;
+                }
+                if (!data.get(key).toString().contains(".")) {
+                    return ((Integer) data.get(key)).floatValue();
+                }
+                return ((Double) data.get(key)).floatValue();
+            }
+            return 0;
+        }
+
+        /**
+         * Retrieves the ParsedData object associated with the key
+         *
+         * @param key The key to retrieve the ParsedData object from
+         * @return The ParsedData object associated with the key
+         */
+        public ParsedData subData(String key) {
+            if (valueExists(key)) {
+                Pattern p = Pattern.compile("[\\{\\}]");
+                Matcher m = p.matcher(data.get(key).toString());
+                if (m.find()) {
+                    return (ParsedData) data.get(key);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return data.toString();
+        }
     }
 
     /**
@@ -247,6 +433,63 @@ public class Config {
     }
 
     /**
+     * Parses the raw data obtained from reading the config file.
+     *
+     * @return ParsedData object
+     */
+    public ParsedData parse() {
+        parsedData = parse(data);
+        return parsedData;
+    }
+
+    /**
+     * Processes a Map to a ParsedData object and returns it.
+     *
+     * @param dataMap Data to process
+     * @return The processed data as a ParsedData object
+     */
+    public ParsedData parse(Map<String, Object> dataMap) {
+        //Processed data
+        ParsedData processed = new ParsedData();
+        //Ternary operation to make sure entrySet does not throw NullPointerException.
+        Set<Map.Entry<String, Object>> dataSet = (dataMap != null ? dataMap.entrySet() : new HashMap<String,Object>().entrySet());
+
+        //Retrieve the iterator and the entry associated with the iteration
+        for (Object o : dataSet) {
+            Map.Entry settingObject = (Map.Entry) o;
+            //Send it to the recursive function to process it all.
+            processed.addToMap(settingObject.getKey().toString(), iterateOverValues(settingObject.getValue()));
+        }
+        return processed;
+    }
+
+    /**
+     * Used to recursively process the whole map from the parse function.
+     *
+     * @param object The object to check as a Map object to convert to settings
+     * @return An object of either the ParsedData object of the map or the original object
+     * passed if not a map.
+     */
+    private Object iterateOverValues(Object object) {
+        //Begin assembling the ParsedData
+        ParsedData parsedData = new ParsedData();
+        //Regular Expressions to determine if the Object is a Map or not
+        Pattern p = Pattern.compile("[\\{\\}]");
+        Matcher m = p.matcher(object.toString());
+        if (m.find()) {
+            //Iterate over the Map if it is
+            for (Object o : ((Map) object).entrySet()) {
+                Map.Entry valuesObject = (Map.Entry) o;
+                //And continue the iteration
+                parsedData.addToMap(valuesObject.getKey().toString(), iterateOverValues(valuesObject.getValue()));
+            }
+            return parsedData;
+        }
+        //Otherwise return the object back
+        return object;
+    }
+
+    /**
      * Creates the config file. This will overwrite the existing config file if it exists.
      * If true is given, the default file is created.
      *
@@ -341,30 +584,29 @@ public class Config {
         return State.SUCCESS;
     }
 
+
     /**
-     * Retrieves the object associated with the string
+     * Returns a the raw map of values read from the configuration file
      *
-     * @param key The string to search and retrieve the object from
-     * @return The object mapped to the string
+     * @return A Hashmap with key as String and values as Object
      */
-    public Object retrieve(String key) {
+    public Map<String, Object> getRawMap() {
         if (data != null) {
-            return data.get(key);
+            return data;
         }
-        return null;
+        return new HashMap<>();
     }
 
     /**
-     * Stores or replaces the object associated with the string
+     * Returns the parsedData object. Contains the processed values
      *
-     * @param key    The string to search and store the object to
-     * @param object The Object to store
+     * @return A {@link ParsedData} object with data processed.
      */
-    public boolean store(String key, Object object) {
-        if (data != null) {
-            data.put(key, object);
+    public ParsedData getParsedData() {
+        if (parsedData != null) {
+            return parsedData;
         }
-        return false;
+        return new ParsedData();
     }
 
     //todo implement
