@@ -2,7 +2,6 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.StartValues;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
 
 /**
@@ -10,7 +9,6 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
  */
 public class Autonomous {
 
-    StartValues values = null;
     Telemetry telemetry;
     private long lastTime;      // The time at the last time check (using System.currentTimeMillis())
 
@@ -18,11 +16,9 @@ public class Autonomous {
     /**
      * The constructor for the autonomous class
      *
-     * @param startValues Reference to the object of an initialized StartValues class
      * @param telemetry   Reference to the Telemetry object of the OpMode
      */
-    public Autonomous(StartValues startValues, Telemetry telemetry) {
-        this.values = startValues;
+    public Autonomous(Telemetry telemetry) {
         this.telemetry = telemetry;
         lastTime = System.currentTimeMillis();
     }
