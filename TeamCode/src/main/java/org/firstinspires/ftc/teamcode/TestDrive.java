@@ -36,7 +36,7 @@ public class TestDrive extends LinearOpMode{
             //double leftXAxis = gamepad1.left_stick_x;
 
 
-            double joystickTheta = Math.atan2((-gamepad1.left_stick_y),(gamepad1.left_stick_x)); //declares the angle of joystick position in standard polar coordinates
+            double joystickTheta = Math.atan2((gamepad1.left_stick_y),(gamepad1.left_stick_x)); //declares the angle of joystick position in standard polar coordinates
             double joystickRadius = Math.sqrt((gamepad1.left_stick_x)*(gamepad1.left_stick_x)+(gamepad1.left_stick_y)*(gamepad1.left_stick_y)); //declares the magnitude of the radius of the joystick position
 
             if((gamepad1.left_stick_x==0)&&(gamepad1.left_stick_y==0)) /**/{
