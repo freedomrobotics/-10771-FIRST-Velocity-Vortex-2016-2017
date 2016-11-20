@@ -1,17 +1,15 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.ControllersInit;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.StartValues;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
 
 /**
  * Driver controlled class
  */
 public class Controlled {
-    ControllersInit controls;
-    StartValues values = null;
+    Controllers controls;
     Telemetry telemetry;
     private long lastTime;      // The time at the last time check (using System.currentTimeMillis())
 
@@ -19,13 +17,11 @@ public class Controlled {
     /**
      * The constructor for the driver controlled class
      *
-     * @param controls    Reference to the object of an initialized ControllersInit class
-     * @param startValues Reference to the object of an initialized StartValues class
+     * @param controls    Reference to the object of an initialized Controllers class
      * @param telemetry   Reference to the Telemetry object of the OpMode
      */
-    public Controlled(ControllersInit controls, StartValues startValues, Telemetry telemetry) {
+    public Controlled(Controllers controls, Telemetry telemetry) {
         this.controls = controls;
-        this.values = startValues;
         this.telemetry = telemetry;
         lastTime = System.currentTimeMillis();
 
@@ -38,6 +34,7 @@ public class Controlled {
      */
     public void loop() {
         // code here
+
     }
 
     public void cleanup(){
