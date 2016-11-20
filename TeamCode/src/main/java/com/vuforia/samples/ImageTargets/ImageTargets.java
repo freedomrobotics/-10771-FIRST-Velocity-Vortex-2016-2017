@@ -38,11 +38,11 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.vuforia.samples.ImageTargets.ui.SampleAppMenu.SampleAppMenu;
 import com.vuforia.samples.ImageTargets.ui.SampleAppMenu.SampleAppMenuGroup;
 import com.vuforia.samples.ImageTargets.ui.SampleAppMenu.SampleAppMenuInterface;
 import com.vuforia.Vuforia;
-
 
 /** The main activity for the ImageTargets sample. */
 public class ImageTargets extends Activity implements SampleAppMenuInterface
@@ -594,7 +594,7 @@ public class ImageTargets extends Activity implements SampleAppMenuInterface
         // Exit if there is no change in status:
         if (mAppStatus == appStatus)
             return;
-        
+
         // Store new status value:
         mAppStatus = appStatus;
         
