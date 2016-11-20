@@ -7,8 +7,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <Vuforia/CameraDevice.h>
 
 #include "NativeCameraCode.h"
+
 
 extern "C"
 {

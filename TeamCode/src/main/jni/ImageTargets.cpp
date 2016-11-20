@@ -141,7 +141,7 @@ ImageTargets_UpdateCallback updateCallback;
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_setActivityPortraitMode(JNIEnv *, jobject, jboolean isPortrait)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_setActivityPortraitMode(JNIEnv *, jobject, jboolean isPortrait)
 {
     isActivityInPortraitMode = isPortrait;
 }
@@ -149,7 +149,7 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_setActivityPortraitMode(JNIEn
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_switchDatasetAsap(JNIEnv *, jobject, jint datasetId)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_switchDatasetAsap(JNIEnv *, jobject, jint datasetId)
 {
     selectedDataset = datasetId;
     switchDataSetAsap = true;
@@ -157,9 +157,9 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_switchDatasetAsap(JNIEnv *, j
 
 
 JNIEXPORT int JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_initTracker(JNIEnv *, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_initTracker(JNIEnv *, jobject)
 {
-    LOG("Java_com_vuforia_samples_ImageTargets_ImageTargets_initTracker");
+    LOG("Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_initTracker");
     
     // Initialize the object tracker:
     Vuforia::TrackerManager& trackerManager = Vuforia::TrackerManager::getInstance();
@@ -176,9 +176,9 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_initTracker(JNIEnv *, jobject
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_deinitTracker(JNIEnv *, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_deinitTracker(JNIEnv *, jobject)
 {
-    LOG("Java_com_vuforia_samples_ImageTargets_ImageTargets_deinitTracker");
+    LOG("Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_deinitTracker");
 
     // Deinit the object tracker:
     Vuforia::TrackerManager& trackerManager = Vuforia::TrackerManager::getInstance();
@@ -187,9 +187,9 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_deinitTracker(JNIEnv *, jobje
 
 
 JNIEXPORT int JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_loadTrackerData(JNIEnv *, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_loadTrackerData(JNIEnv *, jobject)
 {
-    LOG("Java_com_vuforia_samples_ImageTargets_ImageTargets_loadTrackerData");
+    LOG("Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_loadTrackerData");
     
     // Get the object tracker:
     Vuforia::TrackerManager& trackerManager = Vuforia::TrackerManager::getInstance();
@@ -243,9 +243,9 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_loadTrackerData(JNIEnv *, job
 
 
 JNIEXPORT int JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_destroyTrackerData(JNIEnv *, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_destroyTrackerData(JNIEnv *, jobject)
 {
-    LOG("Java_com_vuforia_samples_ImageTargets_ImageTargets_destroyTrackerData");
+    LOG("Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_destroyTrackerData");
 
     // Get the object tracker:
     Vuforia::TrackerManager& trackerManager = Vuforia::TrackerManager::getInstance();
@@ -303,7 +303,7 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_destroyTrackerData(JNIEnv *, 
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_onVuforiaInitializedNative(JNIEnv *, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_onVuforiaInitializedNative(JNIEnv *, jobject)
 {
     // Register the update callback where we handle the data set swap:
     Vuforia::registerCallback(&updateCallback);
@@ -315,7 +315,7 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_onVuforiaInitializedNative(JN
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargetsRenderer_renderFrame(JNIEnv *, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_renderFrame(JNIEnv *, jobject)
 {
     // Call renderFrame from SampleAppRenderer which will loop through the rendering primitives
     // views and then it will call renderFrameForView per each of the views available,
@@ -499,10 +499,10 @@ configureVideoBackground()
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_initApplicationNative(
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_initApplicationNative(
                             JNIEnv* env, jobject obj, jint width, jint height)
 {
-    LOG("Java_com_vuforia_samples_ImageTargets_ImageTargets_initApplicationNative");
+    LOG("Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_initApplicationNative");
     
     // Store screen dimensions
     screenWidth = width;
@@ -552,15 +552,15 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_initApplicationNative(
 
         textures[i] = Texture::create(env, textureObject);
     }
-    LOG("Java_com_vuforia_samples_ImageTargets_ImageTargets_initApplicationNative finished");
+    LOG("Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_initApplicationNative finished");
 }
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_deinitApplicationNative(
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_deinitApplicationNative(
                                                         JNIEnv* env, jobject obj)
 {
-    LOG("Java_com_vuforia_samples_ImageTargets_ImageTargets_deinitApplicationNative");
+    LOG("Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_deinitApplicationNative");
 
     isExtendedTrackingActivated = false;
 
@@ -585,10 +585,10 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_deinitApplicationNative(
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_startCamera(JNIEnv *,
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_startCamera(JNIEnv *,
                                                                          jobject, jint camera)
 {
-    LOG("Java_com_vuforia_samples_ImageTargets_ImageTargets_startCamera");
+    LOG("Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_startCamera");
     
     currentCamera = static_cast<Vuforia::CameraDevice::CAMERA_DIRECTION> (camera);
 
@@ -626,9 +626,9 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_startCamera(JNIEnv *,
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_stopCamera(JNIEnv *, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_stopCamera(JNIEnv *, jobject)
 {
-    LOG("Java_com_vuforia_samples_ImageTargets_ImageTargets_stopCamera");
+    LOG("Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_stopCamera");
 
     // Stop the tracker:
     Vuforia::TrackerManager& trackerManager = Vuforia::TrackerManager::getInstance();
@@ -653,20 +653,20 @@ Java_com_vuforia_samples_ImageTargets_ImageTargetsRenderer_updateRenderingPrimit
 // Activates Camera Flash
 // ----------------------------------------------------------------------------
 JNIEXPORT jboolean JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_activateFlash(JNIEnv*, jobject, jboolean flash)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_activateFlash(JNIEnv*, jobject, jboolean flash)
 {
     return Vuforia::CameraDevice::getInstance().setFlashTorchMode((flash==JNI_TRUE)) ? JNI_TRUE : JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_autofocus(JNIEnv*, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_autofocus(JNIEnv*, jobject)
 {
     return Vuforia::CameraDevice::getInstance().setFocusMode(Vuforia::CameraDevice::FOCUS_MODE_TRIGGERAUTO) ? JNI_TRUE : JNI_FALSE;
 }
 
 
 JNIEXPORT jboolean JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_setFocusMode(JNIEnv*, jobject, jint mode)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_setFocusMode(JNIEnv*, jobject, jint mode)
 {
     int focusMode;
 
@@ -697,7 +697,7 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_setFocusMode(JNIEnv*, jobject
 
 
 JNIEXPORT jboolean JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_startExtendedTracking(JNIEnv*, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_startExtendedTracking(JNIEnv*, jobject)
 {
     Vuforia::TrackerManager& trackerManager = Vuforia::TrackerManager::getInstance();
     Vuforia::ObjectTracker* objectTracker = static_cast<Vuforia::ObjectTracker*>(
@@ -720,7 +720,7 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_startExtendedTracking(JNIEnv*
 
 
 JNIEXPORT jboolean JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargets_stopExtendedTracking(JNIEnv*, jobject)
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_stopExtendedTracking(JNIEnv*, jobject)
 {
     Vuforia::TrackerManager& trackerManager = Vuforia::TrackerManager::getInstance();
     Vuforia::ObjectTracker* objectTracker = static_cast<Vuforia::ObjectTracker*>(
@@ -743,7 +743,7 @@ Java_com_vuforia_samples_ImageTargets_ImageTargets_stopExtendedTracking(JNIEnv*,
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargetsRenderer_initRendering(
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_initRendering(
                                                     JNIEnv* env, jobject obj)
 {
     LOG("Java_com_vuforia_samples_ImageTargets_ImageTargetsRenderer_initRendering");
@@ -779,7 +779,7 @@ Java_com_vuforia_samples_ImageTargets_ImageTargetsRenderer_initRendering(
 
 
 JNIEXPORT void JNICALL
-Java_com_vuforia_samples_ImageTargets_ImageTargetsRenderer_updateRendering(
+Java_org_fhs_robotics_ftcteam10771_lepamplemousse_actions_maneuvers_CameraClass_updateRendering(
                         JNIEnv* env, jobject obj, jint width, jint height)
 {
     LOG("Java_com_vuforia_samples_ImageTargets_ImageTargetsRenderer_updateRendering");

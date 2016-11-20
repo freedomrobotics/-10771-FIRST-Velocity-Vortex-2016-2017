@@ -18,11 +18,29 @@ public class CameraClass extends LinearOpMode {
         System.loadLibrary(library);
     }
 
-    public native void setup();
+    public native void startCamera();
+    public native void stopCamera();
+    public native void updateRendering();
+    public native void initRendering();
+    public native void initTracker();
+    public native void deinitTracker();
+    public native void loadTrackerData();
+    public native void onVuforiaInitializedNative();
+    public native void renderFrame();
+    public native void initApplicationNative();
+    public native void deinitApplicationNative();
+
 
     @Override
     public void runOpMode() throws InterruptedException {
-        setup();
+        initApplicationNative();
+        startCamera();
+        initRendering();
+        while (opModeIsActive()){
+            updateRendering();
+        }
+        stopCamera();
+        deinitApplicationNative();
     }
 }
 

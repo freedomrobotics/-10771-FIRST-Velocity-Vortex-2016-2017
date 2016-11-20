@@ -10,15 +10,14 @@
 
 #ifndef VORTEXVELOCITY_NATIVECAMERACODE_H
 #define VORTEXVELOCITY_NATIVECAMERACODE_H
+
 #include <Vuforia/CameraDevice.h>
 extern "C"
 {
-void setup();
-/*
-class NativeCameraCode : public CameraDevice{
-    CameraDevice camera;
-    void setup();
-}*/
+
+class NativeCameraCode : public Vuforia::CameraDevice{
+};
+
 
 }
 
