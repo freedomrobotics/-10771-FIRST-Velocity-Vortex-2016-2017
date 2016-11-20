@@ -26,5 +26,6 @@ build/
 
 *ASUS_PC_01*
 
-# generated libs folder
+# generated folders
 /TeamCode/src/main/libs
+/TeamCode/src/main/obj

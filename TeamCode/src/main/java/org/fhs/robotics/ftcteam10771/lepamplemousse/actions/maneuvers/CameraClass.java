@@ -64,9 +64,15 @@ public class CameraClass extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        mTextures = new Vector<Texture>();
+        loadTextures();
+
         initApplicationNative();
         startCamera();
         initRendering();
+
+        waitForStart();
+
         while (opModeIsActive()){
             updateRendering();
         }
