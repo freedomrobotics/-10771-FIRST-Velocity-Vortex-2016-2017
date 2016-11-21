@@ -1,5 +1,7 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers;
 
+import android.util.DisplayMetrics;
+
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.CameraVision;
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
@@ -23,16 +25,16 @@ public class CameraClass extends LinearOpMode {
         System.loadLibrary(library);
     }
 
-    public native void startCamera();
+    public native void startCamera(int camera);
     public native void stopCamera();
-    public native void updateRendering();
+    public native void updateRendering(int width, int height);
     public native void initRendering();
     public native void initTracker();
     public native void deinitTracker();
     public native void loadTrackerData();
     public native void onVuforiaInitializedNative();
     public native void renderFrame();
-    public native void initApplicationNative();
+    public native void initApplicationNative(int width, int height);
     public native void deinitApplicationNative();
 
     // The textures we will use for rendering:
@@ -54,7 +56,9 @@ public class CameraClass extends LinearOpMode {
     {
         return mTextures.size();
     }
-
+    DisplayMetrics metrics = new DisplayMetrics();
+    private int mScreenWidth = 0;
+    private int mScreenHeight = 0;
 
     /** Returns the texture object at the specified index. */
     public Texture getTexture(int i)
@@ -66,15 +70,16 @@ public class CameraClass extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         mTextures = new Vector<Texture>();
         loadTextures();
-
-        initApplicationNative();
-        startCamera();
+        mScreenWidth = metrics.widthPixels;
+        mScreenHeight = metrics.heightPixels;
+        initApplicationNative(mScreenWidth, mScreenHeight);
+        startCamera(0);
         initRendering();
 
         waitForStart();
 
         while (opModeIsActive()){
-            updateRendering();
+            updateRendering(mScreenWidth, mScreenHeight);
         }
         stopCamera();
         deinitApplicationNative();
