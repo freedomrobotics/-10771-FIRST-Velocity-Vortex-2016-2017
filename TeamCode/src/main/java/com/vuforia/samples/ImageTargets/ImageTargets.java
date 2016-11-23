@@ -38,9 +38,7 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.vuforia.samples.ImageTargets.ui.SampleAppMenu.SampleAppMenu;
-import com.vuforia.samples.ImageTargets.ui.SampleAppMenu.SampleAppMenuGroup;
 import com.vuforia.samples.ImageTargets.ui.SampleAppMenu.SampleAppMenuInterface;
 import com.vuforia.Vuforia;
 
@@ -50,7 +48,7 @@ public class ImageTargets extends Activity implements SampleAppMenuInterface
     // Focus mode constants:
     private static final int FOCUS_MODE_NORMAL = 0;
     private static final int FOCUS_MODE_CONTINUOUS_AUTO = 1;
-    
+
     // Application status constants:
     private static final int APPSTATUS_UNINITED = -1;
     private static final int APPSTATUS_INIT_APP = 0;
@@ -226,7 +224,7 @@ public class ImageTargets extends Activity implements SampleAppMenuInterface
             {
                 DebugLog.LOGD("InitVuforiaTask::onPostExecute: Vuforia "
                     + "initialization successful");
-                
+
                 updateApplicationStatus(APPSTATUS_INIT_TRACKER);
             } else
             {
@@ -307,7 +305,7 @@ public class ImageTargets extends Activity implements SampleAppMenuInterface
         {
             DebugLog.LOGD("LoadTrackerTask::onPostExecute: execution "
                 + (result ? "successful" : "failed"));
-            
+
             if (result)
             {
                 // Done loading the tracker, update application status:
@@ -355,7 +353,7 @@ public class ImageTargets extends Activity implements SampleAppMenuInterface
     {
         DebugLog.LOGD("onCreate");
         super.onCreate(savedInstanceState);
-        
+
         // Load any sample specific textures:
         mTextures = new Vector<Texture>();
         loadTextures();
