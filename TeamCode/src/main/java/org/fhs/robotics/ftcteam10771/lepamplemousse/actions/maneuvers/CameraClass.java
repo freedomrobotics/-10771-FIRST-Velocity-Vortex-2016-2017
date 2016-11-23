@@ -50,10 +50,11 @@ import java.util.Vector;
  * Created by joelv on 11/19/2016.
  */
 
-public class CameraClass extends Activity {
+public class CameraClass {
 
     //Added own code
     SampleAppMenuInterface sampleAppMenuInterface;
+    private FtcRobotControllerActivity FTC = new FtcRobotControllerActivity();
 
     // Focus mode constants:
     private static final int FOCUS_MODE_NORMAL = 0;
@@ -185,7 +186,7 @@ public class CameraClass extends Activity {
             synchronized (mShutdownLock)
             {
                 //IMPORTANT
-                Vuforia.setInitParameters(CameraClass.this, mVuforiaFlags, "AVj2kiX/////AAAAGV0J5W5oOkUTvP1+IKxrWdIpD63oQV8zSY/+qSNDxkt5zj8tW0N9AK7/3yUJRBlnJx80gStuZcHF7JoiKUNj4JmO6gcyIQn2LWZ/0hL9gFM+PmwM6lvzJu9U/gmvf++GngzR74ft0gjlNPle9qDHEaAgMHYcbEDpc4msHDVn6ZjCcxDem2tQyW4gEY334fwAU9E0ySkw1KwC/Mo6gaE7bW1Mh9xLbXYTe2+sRclEA6YbrKeH8LHmJBDXQxTdcL4HyS26oPYAGRXfFLoi7QkBdkPDYKiPQUsCoHhNz1uhPh5duEdwOD9Sm6YUPZYet7Mo9QP3sxaDlaqY5l2pHYn/tH31Xu9eqLKe2RmNRzgMNaJ9\n");
+                Vuforia.setInitParameters(FTC, mVuforiaFlags, "AVj2kiX/////AAAAGV0J5W5oOkUTvP1+IKxrWdIpD63oQV8zSY/+qSNDxkt5zj8tW0N9AK7/3yUJRBlnJx80gStuZcHF7JoiKUNj4JmO6gcyIQn2LWZ/0hL9gFM+PmwM6lvzJu9U/gmvf++GngzR74ft0gjlNPle9qDHEaAgMHYcbEDpc4msHDVn6ZjCcxDem2tQyW4gEY334fwAU9E0ySkw1KwC/Mo6gaE7bW1Mh9xLbXYTe2+sRclEA6YbrKeH8LHmJBDXQxTdcL4HyS26oPYAGRXfFLoi7QkBdkPDYKiPQUsCoHhNz1uhPh5duEdwOD9Sm6YUPZYet7Mo9QP3sxaDlaqY5l2pHYn/tH31Xu9eqLKe2RmNRzgMNaJ9\n");
 
                 do
                 {
@@ -230,7 +231,7 @@ public class CameraClass extends Activity {
             {
                 // Create dialog box for display error:
                 AlertDialog dialogError = new AlertDialog.Builder(
-                        CameraClass.this).create();
+                        FTC).create();
 
                 dialogError.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
                         new DialogInterface.OnClickListener()
@@ -279,7 +280,7 @@ public class CameraClass extends Activity {
             {
                 // Create dialog box for display error:
                 AlertDialog dialogError = new AlertDialog.Builder(
-                        CameraClass.this).create();
+                        FTC).create();
 
                 dialogError.setButton(DialogInterface.BUTTON_POSITIVE, "Close",
                         new DialogInterface.OnClickListener()
@@ -303,7 +304,7 @@ public class CameraClass extends Activity {
     {
         // Query display dimensions:
         DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        FTC.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mScreenWidth = mUILayout.getWidth();
         mScreenHeight = mUILayout.getHeight();
     }
@@ -312,10 +313,9 @@ public class CameraClass extends Activity {
      * Called when the activity first starts or the user navigates back to an
      * activity.
      */
-    protected void onCreate(Bundle savedInstanceState)
+    public void onCreate(Bundle savedInstanceState)
     {
         DebugLog.LOGD("onCreate");
-        super.onCreate(savedInstanceState);
 
         // Load any sample specific textures:
         mTextures = new Vector<Texture>();
@@ -325,7 +325,7 @@ public class CameraClass extends Activity {
         mVuforiaFlags = Vuforia.GL_20;
 
         // Creates the GestureDetector listener for processing double tap
-        mGestureDetector = new GestureDetector(this, new GestureListener());
+        mGestureDetector = new GestureDetector(FTC, new GestureListener());
 
         // Update the application status to start initializing application:
         updateApplicationStatus(APPSTATUS_INIT_APP);
@@ -362,7 +362,6 @@ public class CameraClass extends Activity {
     protected void onResume()
     {
         DebugLog.LOGD("onResume");
-        super.onResume();
 
         // This is needed for some Droid devices to force portrait
         if (mIsDroidDevice)
@@ -422,7 +421,6 @@ public class CameraClass extends Activity {
     public void onConfigurationChanged(Configuration config)
     {
         DebugLog.LOGD("onConfigurationChanged");
-        super.onConfigurationChanged(config);
 
         storeScreenDimensions();
 
@@ -434,7 +432,6 @@ public class CameraClass extends Activity {
     protected void onPause()
     {
         DebugLog.LOGD("onPause");
-        super.onPause();
 
         if (mGlView != null)
         {
@@ -470,7 +467,6 @@ public class CameraClass extends Activity {
     protected void onDestroy()
     {
         DebugLog.LOGD("onDestroy");
-        super.onDestroy();
 
         // Cancel potentially running tasks
         if (mInitVuforiaTask != null
@@ -605,7 +601,7 @@ public class CameraClass extends Activity {
                 // that the OpenGL ES surface view gets added
                 // BEFORE the camera is started and video
                 // background is configured.
-                addContentView(mGlView, new ViewGroup.LayoutParams(
+                FTC.addContentView(mGlView, new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
                 // Sets the UILayout to be drawn in front of the camera
@@ -649,7 +645,7 @@ public class CameraClass extends Activity {
                 if( mSampleAppMenu == null)
                 {
                     mSampleAppMenu = new SampleAppMenu(sampleAppMenuInterface, this, "Image Targets",
-                            mGlView, (RelativeLayout)mUILayout, null);
+                            mGlView, (RelativeLayout) mUILayout, null);
                     setSampleAppMenuSettings();
                 }
 
@@ -673,7 +669,7 @@ public class CameraClass extends Activity {
 
         // As long as this window is visible to the user, keep the device's
         // screen turned on and bright:
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+        FTC.getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -698,7 +694,7 @@ public class CameraClass extends Activity {
         mRenderer.mActivity = this;
         mGlView.setRenderer(mRenderer);
 
-        LayoutInflater inflater = LayoutInflater.from(this);
+        LayoutInflater inflater = LayoutInflater.from(FTC);
         /* mUILayout = (RelativeLayout) inflater.inflate(R.layout.camera_overlay,
             null, false); */
         mUILayout = (LinearLayout) rootView.findViewById(com.qualcomm.ftcrobotcontroller.R.id.cameraMonitorViewId);
@@ -710,7 +706,7 @@ public class CameraClass extends Activity {
         loadingDialogHandler.sendEmptyMessage(SHOW_LOADING_DIALOG);
 
         // Adds the inflated layout to the view
-        addContentView(mUILayout, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        FTC.addContentView(mUILayout, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
     }
@@ -796,7 +792,7 @@ public class CameraClass extends Activity {
         switch (command)
         {
             case CMD_BACK:
-                finish();
+                FTC.finish();
                 break;
 
             case CMD_FLASH:
@@ -917,7 +913,7 @@ public class CameraClass extends Activity {
 
     private void showToast(String text)
     {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+        Toast.makeText(FTC, text, Toast.LENGTH_SHORT).show();
     }
 
 }
