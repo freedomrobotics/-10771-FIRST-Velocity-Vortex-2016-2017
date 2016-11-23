@@ -52,7 +52,6 @@ public class Adafruit extends LinearOpMode {
 
                 // button is transitioning to a pressed state. Toggle the LED.
                 bLedOn = !bLedOn;
-                cdim.setDigitalChannelState(LED_CHANNEL, bLedOn);
             }
 
             // update previous state variable.
