@@ -90,7 +90,7 @@ public class ImageTargets extends Activity implements SampleAppMenuInterface
     
     // Keeps track of the current camera
     int mCurrentCamera = CAMERA_DIRECTION_DEFAULT;
-    
+
     // The current application status:
     private int mAppStatus = APPSTATUS_UNINITED;
     
@@ -667,13 +667,13 @@ public class ImageTargets extends Activity implements SampleAppMenuInterface
                 // NOTE: This is only a hint. There is no guarantee that the
                 // garbage collector will actually be run.
                 System.gc();
-                
+
                 // Native post initialization:
                 onVuforiaInitializedNative();
-                
+
                 // Activate the renderer:
                 mRenderer.mIsActive = true;
-                
+
                 // Now add the GL surface view. It is important
                 // that the OpenGL ES surface view gets added
                 // BEFORE the camera is started and video
@@ -773,7 +773,7 @@ public class ImageTargets extends Activity implements SampleAppMenuInterface
         mGlView.init(translucent, depthSize, stencilSize);
         
         mRenderer = new ImageTargetsRenderer();
-        mRenderer.mActivity = this;
+        //mRenderer.mActivity = this;
         mGlView.setRenderer(mRenderer);
         
         LayoutInflater inflater = LayoutInflater.from(this);

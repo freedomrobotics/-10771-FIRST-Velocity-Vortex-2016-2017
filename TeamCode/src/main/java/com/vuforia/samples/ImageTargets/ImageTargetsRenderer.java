@@ -12,9 +12,12 @@ package com.vuforia.samples.ImageTargets;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.app.Activity;
 import android.opengl.GLSurfaceView;
 
 import com.vuforia.Vuforia;
+
+import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.CameraClass;
 
 
 /** The renderer class for the ImageTargets sample. */
@@ -23,7 +26,7 @@ public class ImageTargetsRenderer implements GLSurfaceView.Renderer
     public boolean mIsActive = false;
     
     /** Reference to main activity **/
-    public ImageTargets mActivity;
+    public CameraClass mActivity;
     
     
     /** Native function for initializing the renderer. */
