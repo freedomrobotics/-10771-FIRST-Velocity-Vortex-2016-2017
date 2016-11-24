@@ -58,8 +58,8 @@ public class CameraVision extends LinearOpMode {
                 }
 
             }
-            telemetry.addData("Hint",test);
-            telemetry.addData("Hint2",test2);
+            telemetry.addData("Hint3",test);
+            telemetry.addData("Hint3",test2);
             telemetry.update();
         }
     }

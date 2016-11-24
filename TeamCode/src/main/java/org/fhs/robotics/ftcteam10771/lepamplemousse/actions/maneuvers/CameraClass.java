@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
@@ -49,12 +50,11 @@ import java.util.Vector;
 /**
  * Created by joelv on 11/19/2016.
  */
-
-public class CameraClass {
+@Autonomous (name = "Lala", group = "10771")
+public class CameraClass extends LinearOpMode implements SampleAppMenuInterface {
 
     //Added own code
-    SampleAppMenuInterface sampleAppMenuInterface;
-    private FtcRobotControllerActivity FTC = new FtcRobotControllerActivity();
+    private Activity FTC = ((Activity)hardwareMap.appContext);
 
     // Focus mode constants:
     private static final int FOCUS_MODE_NORMAL = 0;
@@ -72,7 +72,7 @@ public class CameraClass {
     private static final int APPSTATUS_CAMERA_RUNNING = 7;
 
     //Name for library sample
-    public static final String library = "CameraClassNative";
+    public static final String library = "ImageTargetsNative";
     
     // Constants for Hiding/Showing Loading dialog
     static final int HIDE_LOADING_DIALOG = 0;
@@ -131,7 +131,7 @@ public class CameraClass {
 
     private View mFlashOptionView;
 
-    private LinearLayout mUILayout;
+    private RelativeLayout mUILayout;
 
     boolean mIsDroidDevice = false;
     
@@ -140,40 +140,45 @@ public class CameraClass {
         System.loadLibrary(library);
     }
 
+
+    /**
+     * Creates a handler to update the status of the Loading Dialog from an UI
+     * Thread
+     */
     static class LoadingDialogHandler extends Handler
     {
-        private final WeakReference<CameraClass> mCameraClass;
+        private final WeakReference<CameraClass> mImageTargets;
 
 
-        LoadingDialogHandler(CameraClass cameraClass)
+        LoadingDialogHandler(CameraClass imageTargets)
         {
-            mCameraClass = new WeakReference<CameraClass>(cameraClass);
+            mImageTargets = new WeakReference<CameraClass>(imageTargets);
         }
 
 
         public void handleMessage(Message msg)
         {
-            CameraClass cameraClass = mCameraClass.get();
-            if (cameraClass == null)
+            CameraClass imageTargets = mImageTargets.get();
+            if (imageTargets == null)
             {
                 return;
             }
 
             if (msg.what == SHOW_LOADING_DIALOG)
             {
-                cameraClass.mLoadingDialogContainer
+                imageTargets.mLoadingDialogContainer
                         .setVisibility(View.VISIBLE);
 
             } else if (msg.what == HIDE_LOADING_DIALOG)
             {
-                cameraClass.mLoadingDialogContainer.setVisibility(View.GONE);
+                imageTargets.mLoadingDialogContainer.setVisibility(View.GONE);
             }
         }
     }
 
     private Handler loadingDialogHandler = new CameraClass.LoadingDialogHandler(this);
-
     /** An async task to initialize Vuforia asynchronously. */
+
     private class InitVuforiaTask extends AsyncTask<Void, Integer, Boolean>
     {
         // Initialize with invalid value:
@@ -366,8 +371,8 @@ public class CameraClass {
         // This is needed for some Droid devices to force portrait
         if (mIsDroidDevice)
         {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            FTC.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            FTC.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
 
         // Vuforia-specific resume operation
@@ -395,7 +400,7 @@ public class CameraClass {
      */
     public void updateRenderView()
     {
-        int currentScreenRotation = getWindowManager().getDefaultDisplay()
+        int currentScreenRotation = FTC.getWindowManager().getDefaultDisplay()
                 .getRotation();
         if (currentScreenRotation != mLastScreenRotation)
         {
@@ -644,8 +649,8 @@ public class CameraClass {
 
                 if( mSampleAppMenu == null)
                 {
-                    mSampleAppMenu = new SampleAppMenu(sampleAppMenuInterface, this, "Image Targets",
-                            mGlView, (RelativeLayout) mUILayout, null);
+                    mSampleAppMenu = new SampleAppMenu(this, FTC, "Image Targets",
+                            mGlView, mUILayout, null);
                     setSampleAppMenuSettings();
                 }
 
@@ -687,7 +692,7 @@ public class CameraClass {
         int stencilSize = 0;
         boolean translucent = Vuforia.requiresAlpha();
 
-        mGlView = new VuforiaSampleGLView(hardwareMap.appContext);
+        mGlView = new VuforiaSampleGLView(FTC);
         mGlView.init(translucent, depthSize, stencilSize);
 
         mRenderer = new ImageTargetsRenderer();
@@ -697,7 +702,7 @@ public class CameraClass {
         LayoutInflater inflater = LayoutInflater.from(FTC);
         /* mUILayout = (RelativeLayout) inflater.inflate(R.layout.camera_overlay,
             null, false); */
-        mUILayout = (LinearLayout) rootView.findViewById(com.qualcomm.ftcrobotcontroller.R.id.cameraMonitorViewId);
+        mUILayout = (RelativeLayout) rootView.findViewById(com.qualcomm.ftcrobotcontroller.R.id.RelativeLayout);
 
         mUILayout.setVisibility(View.VISIBLE);
         mUILayout.setBackgroundColor(Color.BLACK);
@@ -916,5 +921,15 @@ public class CameraClass {
         Toast.makeText(FTC, text, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void runOpMode() throws InterruptedException{
+        onCreate(Bundle.EMPTY);
+        waitForStart();
+        onResume();
+        while(opModeIsActive()){
+
+        }
+        onDestroy();
+    }
 }
 
