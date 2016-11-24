@@ -1,50 +1,28 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.DisplayMetrics;
 import android.view.GestureDetector;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.CheckBox;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.Switch;
-import android.widget.Toast;
 
-import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.CameraVision;
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.vuforia.HINT;
 import com.vuforia.Vuforia;
 import com.vuforia.samples.ImageTargets.DebugLog;
-import com.vuforia.samples.ImageTargets.ImageTargets;
 import com.vuforia.samples.ImageTargets.ImageTargetsRenderer;
 import com.vuforia.samples.ImageTargets.Texture;
 import com.vuforia.samples.ImageTargets.VuforiaSampleGLView;
-import com.vuforia.samples.ImageTargets.ui.SampleAppMenu.SampleAppMenu;
-import com.vuforia.samples.ImageTargets.DebugLog;
-import com.vuforia.samples.ImageTargets.ImageTargets;
 import com.vuforia.samples.ImageTargets.ui.SampleAppMenu.SampleAppMenuInterface;
 
-import java.lang.ref.WeakReference;
 import java.util.Vector;
 
 /**
@@ -54,13 +32,14 @@ import java.util.Vector;
 public class CameraClass extends LinearOpMode implements SampleAppMenuInterface {
 
     //Added own code
-    private Activity FTC = ((Activity)hardwareMap.appContext);
+    private Activity FTC;
 
-    // Focus mode constants:
+    //region Focus mode constants:
     private static final int FOCUS_MODE_NORMAL = 0;
     private static final int FOCUS_MODE_CONTINUOUS_AUTO = 1;
+    //endregion
 
-    // Application status constants:
+    //region Application status constants:
     private static final int APPSTATUS_UNINITED = -1;
     private static final int APPSTATUS_INIT_APP = 0;
     private static final int APPSTATUS_INIT_VUFORIA = 1;
@@ -70,16 +49,15 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     private static final int APPSTATUS_INITED = 5;
     private static final int APPSTATUS_CAMERA_STOPPED = 6;
     private static final int APPSTATUS_CAMERA_RUNNING = 7;
+    //endregion
 
     //Name for library sample
     public static final String library = "ImageTargetsNative";
-    
-    // Constants for Hiding/Showing Loading dialog
-    static final int HIDE_LOADING_DIALOG = 0;
-    static final int SHOW_LOADING_DIALOG = 1;
 
-    private View mLoadingDialogContainer;
-    
+    // Constant representing invalid screen orientation to trigger a query:
+    private static final int INVALID_SCREEN_ROTATION = -1;
+
+    //region UI stuff
     // Our OpenGL view:
     private VuforiaSampleGLView mGlView;
     
@@ -93,11 +71,13 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     private int mScreenWidth = 0;
     private int mScreenHeight = 0;
 
-    // Constant representing invalid screen orientation to trigger a query:
-    private static final int INVALID_SCREEN_ROTATION = -1;
-
     // Last detected screen rotation:
     private int mLastScreenRotation = INVALID_SCREEN_ROTATION;
+
+    private LinearLayout mUILayout;
+
+    boolean mIsDroidDevice = false;
+    //endregion
 
     // Keeps track of the current camera
     //int mCurrentCamera = CAMERA_DIRECTION_DEFAULT;
@@ -121,64 +101,49 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     
     // Detects the double tap gesture for launching the Camera menu
     private GestureDetector mGestureDetector;
-    
-    private SampleAppMenu mSampleAppMenu;
 
     // Contextual Menu Options for Camera Flash - Autofocus
-    private boolean mFlash = false;
     private boolean mContAutofocus = false;
     private boolean mExtendedTracking = false;
-
-    private View mFlashOptionView;
-
-    private RelativeLayout mUILayout;
-
-    boolean mIsDroidDevice = false;
     
     static{
         System.loadLibrary("Vuforia");
         System.loadLibrary(library);
     }
 
-
-    /**
-     * Creates a handler to update the status of the Loading Dialog from an UI
-     * Thread
-     */
-    static class LoadingDialogHandler extends Handler
-    {
-        private final WeakReference<CameraClass> mImageTargets;
-
-
-        LoadingDialogHandler(CameraClass imageTargets)
-        {
-            mImageTargets = new WeakReference<CameraClass>(imageTargets);
-        }
-
-
-        public void handleMessage(Message msg)
-        {
-            CameraClass imageTargets = mImageTargets.get();
-            if (imageTargets == null)
-            {
-                return;
-            }
-
-            if (msg.what == SHOW_LOADING_DIALOG)
-            {
-                imageTargets.mLoadingDialogContainer
-                        .setVisibility(View.VISIBLE);
-
-            } else if (msg.what == HIDE_LOADING_DIALOG)
-            {
-                imageTargets.mLoadingDialogContainer.setVisibility(View.GONE);
-            }
-        }
+    //Properly assign the activity
+    CameraClass(){
+        super();
+        FTC = ((Activity)hardwareMap.appContext);
     }
 
-    private Handler loadingDialogHandler = new CameraClass.LoadingDialogHandler(this);
-    /** An async task to initialize Vuforia asynchronously. */
+    //region native functions
+    public native int initTracker();
+    public native void deinitTracker();
+    public native int loadTrackerData();
+    public native void destroyTrackerData();
+    /** Native sample initialization. */
+    public native void onVuforiaInitializedNative();
+    public native void startCamera(int camera);
+    public native void stopCamera();
+    /** Native method for starting / stopping off target tracking */
+    private native boolean startExtendedTracking();
+    private native boolean stopExtendedTracking();
 
+    public native void deinitApplicationNative();
+
+    /** Tells native code whether we are in portait or landscape mode */
+    private native void setActivityPortraitMode(boolean isPortrait);
+
+    /** Tells native code to switch dataset as soon as possible */
+    private native void switchDatasetAsap(int datasetId);
+    private native boolean autofocus();
+    private native boolean setFocusMode(int mode);
+
+    public native void initApplicationNative(int width, int height);
+    //endregion
+
+    /** An async task to initialize Vuforia asynchronously. */
     private class InitVuforiaTask extends AsyncTask<Void, Integer, Boolean>
     {
         // Initialize with invalid value:
@@ -187,7 +152,7 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
 
         protected Boolean doInBackground(Void... params)
         {
-            // Prevent the onDestroy() method to overlap with initialization:
+            // Prevent the cameraStop() method to overlap with initialization:
             synchronized (mShutdownLock)
             {
                 //IMPORTANT
@@ -263,7 +228,7 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     {
         protected Boolean doInBackground(Void... params)
         {
-            // Prevent the onDestroy() method to overlap:
+            // Prevent the cameraStop() method to overlap:
             synchronized (mShutdownLock)
             {
                 // Load the tracker data set:
@@ -307,20 +272,18 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     /** Stores screen dimensions */
     private void storeScreenDimensions()
     {
-        // Query display dimensions:
-        DisplayMetrics metrics = new DisplayMetrics();
-        FTC.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mScreenWidth = mUILayout.getWidth();
         mScreenHeight = mUILayout.getHeight();
     }
 
+//region init, start, pause, stop
     /**
      * Called when the activity first starts or the user navigates back to an
      * activity.
      */
-    public void onCreate(Bundle savedInstanceState)
+    public void initCamera()
     {
-        DebugLog.LOGD("onCreate");
+        DebugLog.LOGD("initCamera");
 
         // Load any sample specific textures:
         mTextures = new Vector<Texture>();
@@ -328,9 +291,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
 
         // Configure Vuforia to use OpenGL ES 2.0
         mVuforiaFlags = Vuforia.GL_20;
-
-        // Creates the GestureDetector listener for processing double tap
-        mGestureDetector = new GestureDetector(FTC, new GestureListener());
 
         // Update the application status to start initializing application:
         updateApplicationStatus(APPSTATUS_INIT_APP);
@@ -340,33 +300,10 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
 
     }
 
-    private void loadTextures()
-    {
-        mTextures.add(Texture.loadTextureFromApk("TextureTeapotBrass.png",
-                FtcRobotControllerActivity.getGlobalAssets()));
-        mTextures.add(Texture.loadTextureFromApk("TextureTeapotBlue.png",
-                FtcRobotControllerActivity.getGlobalAssets()));
-        mTextures.add(Texture.loadTextureFromApk("TextureTeapotRed.png",
-                FtcRobotControllerActivity.getGlobalAssets()));
-        mTextures
-                .add(Texture.loadTextureFromApk("Buildings.jpeg", FtcRobotControllerActivity.getGlobalAssets()));
-    }
-    public native int initTracker();
-    public native void deinitTracker();
-    public native int loadTrackerData();
-    public native void destroyTrackerData();
-    /** Native sample initialization. */
-    public native void onVuforiaInitializedNative();
-    public native void startCamera(int camera);
-    public native void stopCamera();
-    /** Native method for starting / stopping off target tracking */
-    private native boolean startExtendedTracking();
-    private native boolean stopExtendedTracking();
-
     /** Called when the activity will start interacting with the user. */
-    protected void onResume()
+    protected void startCamera()
     {
-        DebugLog.LOGD("onResume");
+        DebugLog.LOGD("startCamera");
 
         // This is needed for some Droid devices to force portrait
         if (mIsDroidDevice)
@@ -394,71 +331,16 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
 
     }
 
-    /**
-     * Updates projection matrix and viewport after a screen rotation change was
-     * detected.
-     */
-    public void updateRenderView()
-    {
-        int currentScreenRotation = FTC.getWindowManager().getDefaultDisplay()
-                .getRotation();
-        if (currentScreenRotation != mLastScreenRotation)
-        {
-            // Set projection matrix if there is already a valid one:
-            if (Vuforia.isInitialized()
-                    && (mAppStatus == APPSTATUS_CAMERA_RUNNING))
-            {
-                DebugLog.LOGD("updateRenderView");
-
-                // Query display dimensions:
-                storeScreenDimensions();
-
-                // Update viewport via renderer:
-                mRenderer.updateRendering(mScreenWidth, mScreenHeight);
-
-                // Cache last rotation used for setting projection matrix:
-                mLastScreenRotation = currentScreenRotation;
-            }
-        }
-    }
-
-    /** Callback for configuration changes the activity handles itself */
-    public void onConfigurationChanged(Configuration config)
-    {
-        DebugLog.LOGD("onConfigurationChanged");
-
-        storeScreenDimensions();
-
-        // Invalidate screen rotation to trigger query upon next render call:
-        mLastScreenRotation = INVALID_SCREEN_ROTATION;
-    }
-
     /** Called when the system is about to start resuming a previous activity. */
-    protected void onPause()
-    {
-        DebugLog.LOGD("onPause");
+    protected void pauseCamera() {
+        DebugLog.LOGD("pauseCamera");
 
-        if (mGlView != null)
-        {
+        if (mGlView != null) {
             mGlView.setVisibility(View.INVISIBLE);
             mGlView.onPause();
         }
 
-        // Turn off the flash
-        if (mFlashOptionView != null && mFlash)
-        {
-            // OnCheckedChangeListener is called upon changing the checked state
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-            {
-                ((Switch) mFlashOptionView).setChecked(false);
-            } else
-            {
-                ((CheckBox) mFlashOptionView).setChecked(false);
-            }
-        }
-
-        if (mAppStatus == APPSTATUS_CAMERA_RUNNING)
-        {
+        if (mAppStatus == APPSTATUS_CAMERA_RUNNING) {
             updateApplicationStatus(APPSTATUS_CAMERA_STOPPED);
         }
 
@@ -466,12 +348,10 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
         Vuforia.onPause();
     }
 
-    public native void deinitApplicationNative();
-
-    /** The final call you receive before your activity is destroyed. */
-    protected void onDestroy()
+    /** stop vuforia */
+    protected void cameraStop()
     {
-        DebugLog.LOGD("onDestroy");
+        DebugLog.LOGD("cameraStop");
 
         // Cancel potentially running tasks
         if (mInitVuforiaTask != null
@@ -511,6 +391,47 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
         }
 
         System.gc();
+    }
+//endregion
+
+    private void loadTextures()
+    {
+        mTextures.add(Texture.loadTextureFromApk("TextureTeapotBrass.png",
+                FtcRobotControllerActivity.getGlobalAssets()));
+        mTextures.add(Texture.loadTextureFromApk("TextureTeapotBlue.png",
+                FtcRobotControllerActivity.getGlobalAssets()));
+        mTextures.add(Texture.loadTextureFromApk("TextureTeapotRed.png",
+                FtcRobotControllerActivity.getGlobalAssets()));
+        mTextures
+                .add(Texture.loadTextureFromApk("Buildings.jpeg", FtcRobotControllerActivity.getGlobalAssets()));
+    }
+
+        /**
+         * Updates projection matrix and viewport after a screen rotation change was
+         * detected.
+         */
+    public void updateRenderView()
+    {
+        int currentScreenRotation = FTC.getWindowManager().getDefaultDisplay()
+                .getRotation();
+        if (currentScreenRotation != mLastScreenRotation)
+        {
+            // Set projection matrix if there is already a valid one:
+            if (Vuforia.isInitialized()
+                    && (mAppStatus == APPSTATUS_CAMERA_RUNNING))
+            {
+                DebugLog.LOGD("updateRenderView");
+
+                // Query display dimensions:
+                storeScreenDimensions();
+
+                // Update viewport via renderer:
+                mRenderer.updateRendering(mScreenWidth, mScreenHeight);
+
+                // Cache last rotation used for setting projection matrix:
+                mLastScreenRotation = currentScreenRotation;
+            }
+        }
     }
 
     /**
@@ -626,9 +547,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
                 // Call the native function to start the camera:
                 startCamera(mCurrentCamera);
 
-                // Hides the Loading Dialog
-                loadingDialogHandler.sendEmptyMessage(HIDE_LOADING_DIALOG);
-
                 // Sets the layout background to transparent
                 mUILayout.setBackgroundColor(Color.TRANSPARENT);
 
@@ -647,22 +565,12 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
                     mContAutofocus = true;
                 }
 
-                if( mSampleAppMenu == null)
-                {
-                    mSampleAppMenu = new SampleAppMenu(this, FTC, "Image Targets",
-                            mGlView, mUILayout, null);
-                    setSampleAppMenuSettings();
-                }
-
                 break;
 
             default:
                 throw new RuntimeException("Invalid application state");
         }
     }
-
-    /** Tells native code whether we are in portait or landscape mode */
-    private native void setActivityPortraitMode(boolean isPortrait);
 
     /** Initialize application GUI elements that are not related to AR. */
     private void initApplication()
@@ -677,8 +585,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
         FTC.getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
-
-    public native void initApplicationNative(int width, int height);
 
     /** Initializes AR application components. */
     private void initApplicationAR()
@@ -699,29 +605,11 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
         mRenderer.mActivity = this;
         mGlView.setRenderer(mRenderer);
 
-        LayoutInflater inflater = LayoutInflater.from(FTC);
-        /* mUILayout = (RelativeLayout) inflater.inflate(R.layout.camera_overlay,
-            null, false); */
-        mUILayout = (RelativeLayout) rootView.findViewById(com.qualcomm.ftcrobotcontroller.R.id.RelativeLayout);
+        mUILayout = (LinearLayout) rootView.findViewById(com.qualcomm.ftcrobotcontroller.R.id.cameraMonitorViewId);
 
         mUILayout.setVisibility(View.VISIBLE);
         mUILayout.setBackgroundColor(Color.BLACK);
-
-        // Shows the loading indicator at start
-        loadingDialogHandler.sendEmptyMessage(SHOW_LOADING_DIALOG);
-
-        // Adds the inflated layout to the view
-        FTC.addContentView(mUILayout, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-
     }
-
-    /** Tells native code to switch dataset as soon as possible */
-    private native void switchDatasetAsap(int datasetId);
-    private native boolean autofocus();
-    private native boolean setFocusMode(int mode);
-    /** Activates the Flash */
-    private native boolean activateFlash(boolean flash);
 
 
     /** Returns the number of registered textures. */
@@ -735,37 +623,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
         return mTextures.elementAt(i);
     }
 
-    public boolean onTouchEvent(MotionEvent event)
-    {
-        // Process the Gestures
-        if (mSampleAppMenu != null && mSampleAppMenu.processEvent(event))
-            return true;
-
-        return mGestureDetector.onTouchEvent(event);
-    }
-
-    private class GestureListener extends
-            GestureDetector.SimpleOnGestureListener
-    {
-        public boolean onDown(MotionEvent e)
-        {
-            return true;
-        }
-
-
-        public boolean onSingleTapUp(MotionEvent e)
-        {
-            // Calls the Autofocus Native Method
-            autofocus();
-
-            // Triggering manual auto focus disables continuous
-            // autofocus
-            mContAutofocus = false;
-
-            return true;
-        }
-
-    }
 
     final static int CMD_BACK = -1;
     final static int CMD_EXTENDED_TRACKING = 1;
@@ -783,12 +640,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     final static int CAMERA_DIRECTION_BACK = 1;
     final static int CAMERA_DIRECTION_FRONT = 2;
 
-    // This method sets the menu's settings
-    private void setSampleAppMenuSettings()
-    {
-        /* See ImageTargets.java for full code*/
-    }
-
     public boolean menuProcess(int command)
     {
 
@@ -796,26 +647,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
 
         switch (command)
         {
-            case CMD_BACK:
-                FTC.finish();
-                break;
-
-            case CMD_FLASH:
-                result = activateFlash(!mFlash);
-
-                if (result)
-                {
-                    mFlash = !mFlash;
-                } else
-                {
-                    /* showToast(getString(mFlash ? R.string.menu_flash_error_off
-                        : R.string.menu_flash_error_on));
-                    DebugLog
-                        .LOGE(getString(mFlash ? R.string.menu_flash_error_off
-                            : R.string.menu_flash_error_on)); */
-                }
-                break;
-
             case CMD_AUTOFOCUS:
 
                 if (mContAutofocus)
@@ -851,19 +682,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
             case CMD_CAMERA_FRONT:
             case CMD_CAMERA_REAR:
 
-                // Turn off the flash
-                if (mFlashOptionView != null && mFlash)
-                {
-                    // OnCheckedChangeListener is called upon changing the checked state
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-                    {
-                        ((Switch) mFlashOptionView).setChecked(false);
-                    } else
-                    {
-                        ((CheckBox) mFlashOptionView).setChecked(false);
-                    }
-                }
-
                 if (command == CMD_CAMERA_FRONT)
                     mCurrentCamera = CAMERA_DIRECTION_FRONT;
                 else
@@ -883,7 +701,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
                     result = stopExtendedTracking();
                     if (!result)
                     {
-                        showToast("Failed to stop extended tracking target");
                         DebugLog
                                 .LOGE("Failed to stop extended tracking target");
                     }
@@ -892,7 +709,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
                     result = startExtendedTracking();
                     if (!result)
                     {
-                        showToast("Failed to start extended tracking target");
                         DebugLog
                                 .LOGE("Failed to start extended tracking target");
                     }
@@ -916,20 +732,15 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
         return result;
     }
 
-    private void showToast(String text)
-    {
-        Toast.makeText(FTC, text, Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     public void runOpMode() throws InterruptedException{
-        onCreate(Bundle.EMPTY);
+        initCamera();
         waitForStart();
-        onResume();
+        startCamera();
         while(opModeIsActive()){
 
         }
-        onDestroy();
+        cameraStop();
     }
 }
 
