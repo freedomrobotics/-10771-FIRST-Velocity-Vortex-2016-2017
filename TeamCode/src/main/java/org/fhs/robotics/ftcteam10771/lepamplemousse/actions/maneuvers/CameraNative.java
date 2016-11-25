@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.Vuforia;
 import com.vuforia.samples.ImageTargets.DebugLog;
@@ -34,6 +35,7 @@ import java.util.Vector;
 
 
 @Autonomous (name = "CameraNative", group = "10771")
+@Disabled
 public class CameraNative extends LinearOpMode{
 
     //Added own code

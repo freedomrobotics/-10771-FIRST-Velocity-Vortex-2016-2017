@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.view.GestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -21,15 +20,14 @@ import com.vuforia.samples.ImageTargets.DebugLog;
 import com.vuforia.samples.ImageTargets.ImageTargetsRenderer;
 import com.vuforia.samples.ImageTargets.Texture;
 import com.vuforia.samples.ImageTargets.VuforiaSampleGLView;
-import com.vuforia.samples.ImageTargets.ui.SampleAppMenu.SampleAppMenuInterface;
 
 import java.util.Vector;
 
 /**
  * Created by joelv on 11/19/2016.
  */
-@Autonomous (name = "Lala", group = "10771")
-public class CameraClass extends LinearOpMode implements SampleAppMenuInterface {
+@Autonomous (name = "CameraClass_mod", group = "10771")
+public class CameraClass extends LinearOpMode {
 
     //Added own code
     private Activity FTC;
@@ -63,7 +61,7 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     
     // Our renderer:
     private ImageTargetsRenderer mRenderer;
-    
+
     //The root view of the activity
     private View rootView;
 
@@ -74,7 +72,7 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     // Last detected screen rotation:
     private int mLastScreenRotation = INVALID_SCREEN_ROTATION;
 
-    private LinearLayout mUILayout;
+    private LinearLayout container;
 
     boolean mIsDroidDevice = false;
     //endregion
@@ -98,9 +96,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
 
     // The textures we will use for rendering:
     private Vector<Texture> mTextures;
-    
-    // Detects the double tap gesture for launching the Camera menu
-    private GestureDetector mGestureDetector;
 
     // Contextual Menu Options for Camera Flash - Autofocus
     private boolean mContAutofocus = false;
@@ -109,12 +104,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     static{
         System.loadLibrary("Vuforia");
         System.loadLibrary(library);
-    }
-
-    //Properly assign the activity
-    CameraClass(){
-        super();
-        FTC = ((Activity)hardwareMap.appContext);
     }
 
     //region native functions
@@ -157,6 +146,8 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
             {
                 //IMPORTANT
                 Vuforia.setInitParameters(FTC, mVuforiaFlags, "AVj2kiX/////AAAAGV0J5W5oOkUTvP1+IKxrWdIpD63oQV8zSY/+qSNDxkt5zj8tW0N9AK7/3yUJRBlnJx80gStuZcHF7JoiKUNj4JmO6gcyIQn2LWZ/0hL9gFM+PmwM6lvzJu9U/gmvf++GngzR74ft0gjlNPle9qDHEaAgMHYcbEDpc4msHDVn6ZjCcxDem2tQyW4gEY334fwAU9E0ySkw1KwC/Mo6gaE7bW1Mh9xLbXYTe2+sRclEA6YbrKeH8LHmJBDXQxTdcL4HyS26oPYAGRXfFLoi7QkBdkPDYKiPQUsCoHhNz1uhPh5duEdwOD9Sm6YUPZYet7Mo9QP3sxaDlaqY5l2pHYn/tH31Xu9eqLKe2RmNRzgMNaJ9\n");
+                //Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_OBJECT_TARGETS, 4);
+                //Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
 
                 do
                 {
@@ -272,8 +263,12 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
     /** Stores screen dimensions */
     private void storeScreenDimensions()
     {
-        mScreenWidth = mUILayout.getWidth();
-        mScreenHeight = mUILayout.getHeight();
+        if (container != null) {
+            mScreenWidth = container.getWidth();
+            mScreenHeight = container.getHeight();
+        } else {
+            mScreenHeight = mScreenWidth = 0;
+        }
     }
 
 //region init, start, pause, stop
@@ -527,11 +522,11 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
                 // that the OpenGL ES surface view gets added
                 // BEFORE the camera is started and video
                 // background is configured.
-                FTC.addContentView(mGlView, new ViewGroup.LayoutParams(
+                container.addView(mGlView, new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
                 // Sets the UILayout to be drawn in front of the camera
-                mUILayout.bringToFront();
+                container.bringToFront();
 
                 // Start the camera:
                 updateApplicationStatus(APPSTATUS_CAMERA_RUNNING);
@@ -548,7 +543,7 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
                 startCamera(mCurrentCamera);
 
                 // Sets the layout background to transparent
-                mUILayout.setBackgroundColor(Color.TRANSPARENT);
+                container.setBackgroundColor(Color.TRANSPARENT);
 
                 // Set continuous auto-focus if supported by the device,
                 // otherwise default back to regular auto-focus mode.
@@ -579,11 +574,6 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
 
         // Query display dimensions:
         storeScreenDimensions();
-
-        // As long as this window is visible to the user, keep the device's
-        // screen turned on and bright:
-        FTC.getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     /** Initializes AR application components. */
@@ -605,12 +595,11 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
         mRenderer.mActivity = this;
         mGlView.setRenderer(mRenderer);
 
-        mUILayout = (LinearLayout) rootView.findViewById(com.qualcomm.ftcrobotcontroller.R.id.cameraMonitorViewId);
+        container = (LinearLayout) rootView.findViewById(com.qualcomm.ftcrobotcontroller.R.id.cameraMonitorViewId);
 
-        mUILayout.setVisibility(View.VISIBLE);
-        mUILayout.setBackgroundColor(Color.BLACK);
+        container.setVisibility(View.VISIBLE);
+        container.setBackgroundColor(Color.BLACK);
     }
-
 
     /** Returns the number of registered textures. */
     public int getTextureCount()
@@ -623,123 +612,21 @@ public class CameraClass extends LinearOpMode implements SampleAppMenuInterface 
         return mTextures.elementAt(i);
     }
 
-
-    final static int CMD_BACK = -1;
-    final static int CMD_EXTENDED_TRACKING = 1;
-    final static int CMD_AUTOFOCUS = 2;
-    final static int CMD_FLASH = 3;
-    final static int CMD_CAMERA_FRONT = 4;
-    final static int CMD_CAMERA_REAR = 5;
-    final static int CMD_DATASET_STONES_AND_CHIPS_DATASET = 6;
-    final static int CMD_DATASET_TARMAC_DATASET = 7;
-
-    final static int STONES_AND_CHIPS_DATASET_ID = 0;
-    final static int TARMAC_DATASET_ID = 1;
-
-    final static int CAMERA_DIRECTION_DEFAULT = 0;
-    final static int CAMERA_DIRECTION_BACK = 1;
-    final static int CAMERA_DIRECTION_FRONT = 2;
-
-    public boolean menuProcess(int command)
-    {
-
-        boolean result = true;
-
-        switch (command)
-        {
-            case CMD_AUTOFOCUS:
-
-                if (mContAutofocus)
-                {
-                    result = setFocusMode(FOCUS_MODE_NORMAL);
-
-                    if (result)
-                    {
-                        mContAutofocus = false;
-                    } else
-                    {
-                        /* showToast(getString(R.string.menu_contAutofocus_error_off));
-                        DebugLog
-                            .LOGE(getString(R.string.menu_contAutofocus_error_off)); */
-                    }
-                } else
-                {
-                    result = setFocusMode(FOCUS_MODE_CONTINUOUS_AUTO);
-
-                    if (result)
-                    {
-                        mContAutofocus = true;
-                    } else
-                    {
-                        /* showToast(getString(R.string.menu_contAutofocus_error_on));
-                        DebugLog
-                            .LOGE(getString(R.string.menu_contAutofocus_error_on));*/
-                    }
-                }
-
-                break;
-
-            case CMD_CAMERA_FRONT:
-            case CMD_CAMERA_REAR:
-
-                if (command == CMD_CAMERA_FRONT)
-                    mCurrentCamera = CAMERA_DIRECTION_FRONT;
-                else
-                    mCurrentCamera = CAMERA_DIRECTION_BACK;
-
-                stopCamera();
-                startCamera(mCurrentCamera);
-
-                // Update rendering primitives
-                mRenderer.updateRenderingPrimitives();
-
-                break;
-
-            case CMD_EXTENDED_TRACKING:
-                if (mExtendedTracking)
-                {
-                    result = stopExtendedTracking();
-                    if (!result)
-                    {
-                        DebugLog
-                                .LOGE("Failed to stop extended tracking target");
-                    }
-                } else
-                {
-                    result = startExtendedTracking();
-                    if (!result)
-                    {
-                        DebugLog
-                                .LOGE("Failed to start extended tracking target");
-                    }
-                }
-
-                if (result)
-                    mExtendedTracking = !mExtendedTracking;
-
-                break;
-
-            case CMD_DATASET_STONES_AND_CHIPS_DATASET:
-                switchDatasetAsap(STONES_AND_CHIPS_DATASET_ID);
-                break;
-
-            case CMD_DATASET_TARMAC_DATASET:
-                switchDatasetAsap(TARMAC_DATASET_ID);
-                break;
-
-        }
-
-        return result;
-    }
-
     @Override
     public void runOpMode() throws InterruptedException{
+        //properly assign the activity
+        FTC = ((Activity)hardwareMap.appContext);
+        rootView = FTC.getWindow().getDecorView().findViewById(android.R.id.content);
+        mTextures = new Vector<>();
+        loadTextures();
+
         initCamera();
         waitForStart();
         startCamera();
         while(opModeIsActive()){
 
         }
+        pauseCamera();
         cameraStop();
     }
 }
