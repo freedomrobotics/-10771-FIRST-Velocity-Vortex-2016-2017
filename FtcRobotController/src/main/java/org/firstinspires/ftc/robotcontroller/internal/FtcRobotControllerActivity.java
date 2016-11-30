@@ -134,6 +134,8 @@ public class FtcRobotControllerActivity extends Activity {
   protected FtcEventLoop eventLoop;
   protected Queue<UsbDevice> receivedUsbAttachmentNotifications;
 
+  protected static FTCVuforia vuforia;
+
   protected class RobotRestarter implements Restarter {
 
     public void requestRestart() {
@@ -175,14 +177,13 @@ public class FtcRobotControllerActivity extends Activity {
 
   protected void passReceivedUsbAttachmentsToEventLoop() {
     if (this.eventLoop != null) {
-      for (;;) {
+      for (; ; ) {
         UsbDevice usbDevice = receivedUsbAttachmentNotifications.poll();
         if (usbDevice == null)
           break;
         this.eventLoop.onUsbDeviceAttached(usbDevice);
       }
-    }
-    else {
+    } else {
       // Paranoia: we don't want the pending list to grow without bound when we don't
       // (yet) have an event loop
       while (receivedUsbAttachmentNotifications.size() > 100) {
@@ -239,10 +240,12 @@ public class FtcRobotControllerActivity extends Activity {
     dimmer.longBright();
 
     programmingModeController = new ProgrammingModeControllerImpl(
-        this, (TextView) findViewById(R.id.textRemoteProgrammingMode));
+            this, (TextView) findViewById(R.id.textRemoteProgrammingMode));
 
     updateUI = createUpdateUI();
     callback = createUICallback(updateUI);
+
+    vuforia = new FTCVuforia(this);
 
     PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
@@ -251,7 +254,9 @@ public class FtcRobotControllerActivity extends Activity {
 
     hittingMenuButtonBrightensScreen();
 
-    if (USE_DEVICE_EMULATION) { HardwareFactory.enableDeviceEmulation(); }
+    if (USE_DEVICE_EMULATION) {
+      HardwareFactory.enableDeviceEmulation();
+    }
 
     wifiLock.acquire();
     callback.networkConnectionUpdate(WifiDirectAssistant.Event.DISCONNECTED);
@@ -295,13 +300,16 @@ public class FtcRobotControllerActivity extends Activity {
   protected void onResume() {
     super.onResume();
     RobotLog.vv(TAG, "onResume()");
+    vuforia.resumeVuforia();
     readNetworkType(NETWORK_TYPE_FILENAME);
+
   }
 
   @Override
   public void onPause() {
     super.onPause();
     RobotLog.vv(TAG, "onPause()");
+    vuforia.pauseVuforia();
     if (programmingModeController.isActive()) {
       programmingModeController.stopProgrammingMode();
     }
@@ -341,7 +349,7 @@ public class FtcRobotControllerActivity extends Activity {
     }
   }
 
-  public void writeNetworkTypeFile(String fileName, String fileContents){
+  public void writeNetworkTypeFile(String fileName, String fileContents) {
     ReadWriteFile.writeFile(AppUtil.FIRST_FOLDER, fileName, fileContents);
   }
 
@@ -368,13 +376,13 @@ public class FtcRobotControllerActivity extends Activity {
   }
 
   @Override
-  public void onWindowFocusChanged(boolean hasFocus){
+  public void onWindowFocusChanged(boolean hasFocus) {
     super.onWindowFocusChanged(hasFocus);
     // When the window loses focus (e.g., the action overflow is shown),
     // cancel any pending hide action. When the window gains focus,
     // hide the system UI.
     if (hasFocus) {
-      if (ImmersiveMode.apiOver19()){
+      if (ImmersiveMode.apiOver19()) {
         // Immersive flag only works on API 19 and above.
         immersion.hideSystemUI();
       }
@@ -398,11 +406,11 @@ public class FtcRobotControllerActivity extends Activity {
       if (cfgFileMgr.getActiveConfig().isNoConfig()) {
         // Tell the user they must configure the robot before starting programming mode.
         AppUtil.getInstance().showToast(
-            context, context.getString(R.string.toastConfigureRobotBeforeProgrammingMode));
+                context, context.getString(R.string.toastConfigureRobotBeforeProgrammingMode));
       } else {
         Intent programmingModeIntent = new Intent(ProgrammingModeActivity.launchIntent);
         programmingModeIntent.putExtra(
-            LaunchActivityConstantsList.PROGRAMMING_MODE_ACTIVITY_NETWORK_TYPE, networkType);
+                LaunchActivityConstantsList.PROGRAMMING_MODE_ACTIVITY_NETWORK_TYPE, networkType);
         startActivity(programmingModeIntent);
       }
       return true;
@@ -410,41 +418,35 @@ public class FtcRobotControllerActivity extends Activity {
       Intent inspectionModeIntent = new Intent(RcInspectionActivity.rcLaunchIntent);
       startActivity(inspectionModeIntent);
       return true;
-    }
-    else if (id == R.id.action_blocks) {
+    } else if (id == R.id.action_blocks) {
       Intent blocksIntent = new Intent(BlocksActivity.launchIntent);
       startActivity(blocksIntent);
       return true;
-    }
-    else if (id == R.id.action_restart_robot) {
+    } else if (id == R.id.action_restart_robot) {
       dimmer.handleDimTimer();
       AppUtil.getInstance().showToast(context, context.getString(R.string.toastRestartingRobot));
       requestRobotRestart();
       return true;
-    }
-    else if (id == R.id.action_configure_robot) {
+    } else if (id == R.id.action_configure_robot) {
       EditParameters parameters = new EditParameters();
       Intent intentConfigure = new Intent(FtcLoadFileActivity.launchIntent);
       parameters.putIntent(intentConfigure);
       startActivityForResult(intentConfigure, LaunchActivityConstantsList.FTC_CONFIGURE_REQUEST_CODE_ROBOT_CONTROLLER);
-    }
-    else if (id == R.id.action_settings) {
+    } else if (id == R.id.action_settings) {
       Intent settingsIntent = new Intent(FtcRobotControllerSettingsActivity.launchIntent);
       startActivityForResult(settingsIntent, LaunchActivityConstantsList.FTC_CONFIGURE_REQUEST_CODE_ROBOT_CONTROLLER);
       return true;
-    }
-    else if (id == R.id.action_about) {
+    } else if (id == R.id.action_about) {
       Intent intent = new Intent(AboutActivity.launchIntent);
       intent.putExtra(LaunchActivityConstantsList.ABOUT_ACTIVITY_CONNECTION_TYPE, networkType);
       startActivity(intent);
       return true;
-    }
-    else if (id == R.id.action_exit_app) {
+    } else if (id == R.id.action_exit_app) {
       finish();
       return true;
     }
 
-   return super.onOptionsItemSelected(item);
+    return super.onOptionsItemSelected(item);
   }
 
   @Override
@@ -526,5 +528,8 @@ public class FtcRobotControllerActivity extends Activity {
         }
       });
     }
+  }
+  public static FTCVuforia getVuforia() {
+    return vuforia;
   }
 }
