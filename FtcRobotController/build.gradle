@@ -23,7 +23,3 @@ repositories {
     }
 }
 apply from: 'build.release.gradle'
-
-dependencies {
-    compile files('libs/Vuforia.jar')
-}

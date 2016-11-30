@@ -1,5 +1,6 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcontroller.internal.FTCVuforia;
@@ -11,6 +12,7 @@ import java.util.HashMap;
  * Created by Shabi on 11/19/2016.
  */
 
+@Autonomous(name="VuforiaOp")
 public class VuforiaOp extends OpMode {
     FTCVuforia vuforia;
 
@@ -20,11 +22,12 @@ public class VuforiaOp extends OpMode {
         vuforia.addTrackables("Ball_OT.xml");
         vuforia.initVuforia();
     }
+
     @Override
     public void loop() {
         HashMap<String, double[]> data = vuforia.getVuforiaData();
 
-        if(data.containsKey("Ball")) {
+        if (data.containsKey("Ball")) {
             telemetry.addData("Ball", data.get("Ball")[0]);
 
 
@@ -33,10 +36,11 @@ public class VuforiaOp extends OpMode {
     }
 
     public void stop() {
-        super.stop();
-        vuforia.destroy();
-    } catch (Exception e) {
-        e.printStackTrace();
+        try {
+            super.stop();
+            vuforia.destroy();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
 }
