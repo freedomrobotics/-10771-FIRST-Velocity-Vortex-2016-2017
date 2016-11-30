@@ -3,14 +3,13 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 /**
  * Created by Matthew on 11/14/2016.
  */
 
-@TeleOp(name = "TestDrive")
-public class TestDrive extends LinearOpMode{
+@TeleOp(name = "TestDrive2")
+public class TestDrive2 extends LinearOpMode{
 
     //initializes motors in order of standard graph quadrants
     private DcMotor motorA;
@@ -47,8 +46,11 @@ public class TestDrive extends LinearOpMode{
 
             double ACShaftPower = ((Math.sin(joystickTheta-(Math.PI/4)))*joystickRadius); //sets the power of the shaft containing motors A and C using the radius to scale the sin value of the joystickTheta
             double BDShaftPower = ((Math.cos(joystickTheta-(Math.PI/4)))*joystickRadius); //sets the power of the shaft containing motors B and D using the radius to scale the cos value of the joystickTheta
+
             // Halved rotationPower value to allow for simultaneous translation and rotation when fully depressed - Adam Li
-            double rotationalPower = (gamepad1.right_trigger - gamepad1.left_trigger) / 2; //sets the power of rotation by finding the difference between the left and right triggers
+            double rotationalPower = gamepad1.right_trigger - gamepad1.left_trigger; //sets the power of rotation by finding the difference between the left and right triggers
+            double ACRotationalPower = (rotationalPower*Math.abs(rotationalPower))/(Math.abs(rotationalPower)+Math.abs(ACShaftPower));
+            double BDRotationalPower = (rotationalPower*Math.abs(rotationalPower))/(Math.abs(rotationalPower)+Math.abs(BDShaftPower));
 
             //sets the motor power where the ratio of input from translational motion is dictated by the magnitude of the rotational motion
             /*
@@ -57,10 +59,10 @@ public class TestDrive extends LinearOpMode{
              involves positive motor values for all when rotation is disregarded, so motors C
              and D have signage on shaft power changed to positive again.
              */
-            motorA.setPower((-rotationalPower) + ((ACShaftPower)*(1.0 - (Math.abs(rotationalPower)))));
-            motorB.setPower((rotationalPower) + ((BDShaftPower)*(1.0 - (Math.abs(rotationalPower)))));
-            motorC.setPower((rotationalPower) + ((ACShaftPower)*(1.0 - (Math.abs(rotationalPower)))));
-            motorD.setPower((-rotationalPower) + ((BDShaftPower)*(1.0 - (Math.abs(rotationalPower)))));
+            motorA.setPower((-ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower))));
+            motorB.setPower((BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower))));
+            motorC.setPower((ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower))));
+            motorD.setPower((-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower))));
 
             idle();
 
