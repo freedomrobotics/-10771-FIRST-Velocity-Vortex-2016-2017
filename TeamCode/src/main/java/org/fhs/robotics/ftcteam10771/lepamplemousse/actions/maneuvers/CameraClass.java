@@ -619,15 +619,94 @@ public class CameraClass extends LinearOpMode {
         rootView = FTC.getWindow().getDecorView().findViewById(android.R.id.content);
         mTextures = new Vector<>();
         loadTextures();
+        mVuforiaFlags = Vuforia.GL_20;
 
-        initCamera();
+        // Update the application status to start initializing application:
+        initApplication();
+        try
+        {
+            mInitVuforiaTask = new CameraClass.InitVuforiaTask();
+            mInitVuforiaTask.execute();
+        } catch (Exception e)
+        {
+            DebugLog.LOGE("Initializing Vuforia SDK failed");
+        }
+        mIsDroidDevice = android.os.Build.MODEL.toLowerCase().startsWith(
+                "droid");
         waitForStart();
-        startCamera();
+        DebugLog.LOGD("startCamera");
+
+        // This is needed for some Droid devices to force portrait
+        if (mIsDroidDevice)
+        {
+            FTC.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            FTC.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+
+        // Vuforia-specific resume operation
+        Vuforia.onResume();
+
+        // We may start the camera only if the Vuforia SDK has already been
+        // initialized
+        startCamera(mCurrentCamera);
+
+        // Sets the layout background to transparent
+        container.setBackgroundColor(Color.TRANSPARENT);
+
+        // Set continuous auto-focus if supported by the device,
+        // otherwise default back to regular auto-focus mode.
+        // This will be activated by a tap to the screen in this
+        // application.
+        boolean result = setFocusMode(FOCUS_MODE_CONTINUOUS_AUTO);
+        if (!result)
+        {
+            DebugLog.LOGE("Unable to enable continuous autofocus");
+            mContAutofocus = false;
+            setFocusMode(FOCUS_MODE_NORMAL);
+        } else
+        {
+            mContAutofocus = true;
+        }
+
+        // Resume the GL view:
+        if (mGlView != null)
+        {
+            mGlView.setVisibility(View.VISIBLE);
+            mGlView.onResume();
+        }
         while(opModeIsActive()){
 
         }
-        pauseCamera();
-        cameraStop();
+        DebugLog.LOGD("pauseCamera");
+
+        if (mGlView != null) {
+            mGlView.setVisibility(View.INVISIBLE);
+            mGlView.onPause();
+        }
+        stopCamera();
+        // Vuforia-specific pause operation
+        Vuforia.onPause();
+        if (mInitVuforiaTask != null
+                && mInitVuforiaTask.getStatus() != CameraClass.InitVuforiaTask.Status.FINISHED)
+        {
+            mInitVuforiaTask.cancel(true);
+            mInitVuforiaTask = null;
+        }
+        if (mLoadTrackerTask != null
+                && mLoadTrackerTask.getStatus() != CameraClass.LoadTrackerTask.Status.FINISHED)
+        {
+            mLoadTrackerTask.cancel(true);
+            mLoadTrackerTask = null;
+        }
+        mTextures.clear();
+        mTextures = null;
+        // Destroy the tracking data set:
+        destroyTrackerData();
+        // Deinit the tracker:
+        deinitTracker();
+        // Deinitialize Vuforia SDK:
+        Vuforia.deinit();
+        System.gc();
     }
 }
 
