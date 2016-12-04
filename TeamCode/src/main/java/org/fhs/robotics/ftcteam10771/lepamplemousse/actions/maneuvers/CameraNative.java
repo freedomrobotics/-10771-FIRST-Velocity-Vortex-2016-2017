@@ -66,8 +66,15 @@ public class CameraNative extends LinearOpMode{
         while(opModeIsActive()){
 
         }
-        camera.stopPreview();
-        camera.release();
+        h.post(new Runnable(){
+            @Override
+            public void run() {
+                camera.stopPreview();
+                camera.release();
+                //camera = null;
+            }
+        });
+
     }
 
     public static android.hardware.Camera getCameraInstance(){
