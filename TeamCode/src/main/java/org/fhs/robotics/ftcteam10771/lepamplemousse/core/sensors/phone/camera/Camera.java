@@ -13,7 +13,7 @@ public class Camera{
     protected static final int cameraFullX = 1280;
     protected static final int cameraFullY = 960;
 
-    protected static CameraObject cameraObject = null;
+    public static CameraObject cameraObject = null;
     private static int counterCamera = 0;
 
     /**
