@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -104,6 +105,7 @@ public class CameraClass extends LinearOpMode {
     static{
         System.loadLibrary("Vuforia");
         System.loadLibrary(library);
+        System.loadLibrary("opencv_java3");
     }
 
     //region native functions

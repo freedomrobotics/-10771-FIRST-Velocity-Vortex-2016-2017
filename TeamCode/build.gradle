@@ -78,4 +78,5 @@ repositories {
 
 dependencies {
     compile 'com.github.bmoliveira:snake-yaml:v1.18-android'
+    compile project(':openCVLibrary310')
 }
