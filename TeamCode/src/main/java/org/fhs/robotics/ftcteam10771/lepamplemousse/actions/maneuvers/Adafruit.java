@@ -14,70 +14,74 @@ import com.qualcomm.robotcore.hardware.DigitalChannelController;
 
 import org.firstinspires.ftc.teamcode.R;
 
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.direction.BOTH;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.direction.LEFT;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.direction.NEITHER;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.direction.RIGHT;
+
 /**
  * Created by User on 11/23/2016.
  */
 @Autonomous(name = "ColorSensorClass", group = "10771")
-public class Adafruit extends LinearOpMode {
+public class Adafruit {
 
-    private ColorSensor colorSensor;
+    private ColorSensor colorSensor1 = null;
+    private ColorSensor colorSensor2 = null;
 
-    @Override
-    public void runOpMode() throws InterruptedException {
-        //Initialize color sensor
-        colorSensor = hardwareMap.colorSensor.get("color_sensor");
-        float hsvValues[] = {0F, 0F, 0F};
-        final float values[] = hsvValues;
-        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(R.id.RelativeLayout);
+    public Adafruit(){
 
-        // bPrevState and bCurrState represent the previous and current state of the button.
-        boolean bPrevState = false;
-        boolean bCurrState = false;
+    }
 
-        // bLedOn represents the state of the LED.
-        boolean bLedOn = true;
+    public Adafruit(ColorSensor sensor1, ColorSensor sensor2){
+        colorSensor1 = sensor1;
+        colorSensor2 = sensor2;
+    }
 
-        // wait for the start button to be pressed.
-        waitForStart();
-
-        // loop and read the RGB data.
-        // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
-        while (opModeIsActive()) {
-
-            // check the status of the x button on gamepad.
-            bCurrState = gamepad1.x;
-
-            // check for button-press state transitions.
-            if ((bCurrState == true) && (bCurrState != bPrevState)) {
-
-                // button is transitioning to a pressed state. Toggle the LED.
-                bLedOn = !bLedOn;
-            }
-
-            // update previous state variable.
-            bPrevState = bCurrState;
+    float hsvValues1[] = {0F, 0F, 0F};
+    float hsvValues2[] = {0F, 0F, 0F};
 
             // convert the RGB values to HSV values.
-            Color.RGBToHSV((colorSensor.red() * 255) / 800, (colorSensor.green() * 255) / 800, (colorSensor.blue() * 255) / 800, hsvValues);
+    public void convertToHSV(){
+        Color.RGBToHSV((colorSensor1.red() * 255) / 800, (colorSensor1.green() * 255) / 800, (colorSensor1.blue() * 255) / 800, hsvValues1);
+        Color.RGBToHSV((colorSensor2.red()) * 255 / 800, (colorSensor2.green() * 255) / 800, (colorSensor2.blue() * 255) / 800, hsvValues2);
+    }
 
-            // send the info back to driver station using telemetry function.
-            telemetry.addData("LED", bLedOn ? "On" : "Off");
-            telemetry.addData("Clear", colorSensor.alpha());
-            telemetry.addData("Red  ", colorSensor.red());
-            telemetry.addData("Green", colorSensor.green());
-            telemetry.addData("Blue ", colorSensor.blue());
-            telemetry.addData("Hue", hsvValues[0]);
+    public enum direction{
+        LEFT,
+        RIGHT,
+        NEITHER,
+        BOTH
+    };
+
+    public direction chooseBeaconSide(String color){
+        if (color=="red"){
+            if (colorSensor1.red() > colorSensor2.red()){
+                return LEFT;
+            }
+            else if (colorSensor1.red() < colorSensor2.red()){
+                return RIGHT;
+            }
+            else if (colorSensor1.red()==colorSensor2.red()){
+                return BOTH;
+            }
+            else return NEITHER;
+        }
+        else if(color=="blue"){
+            if (colorSensor1.blue() > colorSensor2.blue()){
+                return LEFT;
+            }
+            else if (colorSensor1.blue() < colorSensor2.blue()){
+                return RIGHT;
+            }
+            else if (colorSensor1.blue()==colorSensor2.blue()){
+                return BOTH;
+            }
+            else return NEITHER;
+        }
+        return NEITHER;
+    }
 
             // change the background color to match the color detected by the RGB sensor.
             // pass a reference to the hue, saturation, and value array as an argument
             // to the HSVToColor method.
-            relativeLayout.post(new Runnable() {
-                public void run() {
-                    relativeLayout.setBackgroundColor(Color.HSVToColor(0xff, values));
-                }
-            });
-
-            telemetry.update();
-        }
-    }
 }
