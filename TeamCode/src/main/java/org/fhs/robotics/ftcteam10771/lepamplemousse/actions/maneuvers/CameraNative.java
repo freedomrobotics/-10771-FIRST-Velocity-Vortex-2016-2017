@@ -119,7 +119,7 @@ public class CameraNative extends LinearOpMode implements CameraBridgeViewBase.C
         mSpectrum = new Mat();
         filetered = new Mat();
         result = new Mat();
-        mBlobColorRgba = new Scalar(43,93,13);
+        mBlobColorRgba = new Scalar(200,50,50);
         mBlobColorHsv = new Scalar(255);
         SPECTRUM_SIZE = new Size(200, 64);
         mHsvFrame = new Mat();
