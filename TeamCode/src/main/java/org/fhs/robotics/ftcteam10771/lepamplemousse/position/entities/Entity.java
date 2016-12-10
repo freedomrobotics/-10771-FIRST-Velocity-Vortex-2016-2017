@@ -2,6 +2,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
 /**
  * Created by Adam Li on 1/13/2016.
@@ -18,6 +19,7 @@ public interface Entity {
     Position getPosition();
     Size getSize();
     Offset getOffset();
+    VectorR getVectorR();
 
     class Position extends Coordinate {
         public void moveX(float x){

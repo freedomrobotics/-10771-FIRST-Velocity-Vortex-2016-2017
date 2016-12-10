@@ -2,6 +2,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities;
 
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
 /**
  * Created by Adam Li on 1/13/2016.
@@ -47,5 +48,10 @@ public class Robot implements Entity{
     @Override
     public Offset getOffset() {
         return offset;
+    }
+
+    @Override
+    public VectorR getVectorR() {
+        return new VectorR();
     }
 }
