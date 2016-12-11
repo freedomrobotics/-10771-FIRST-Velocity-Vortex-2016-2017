@@ -40,6 +40,8 @@ public class CameraVision {
         OpenGLMatrix matrix;
         OpenGLMatrix rotatedMatrix;
         VectorF translation;
+        float perpendicularness;
+        float degreesToTurn;
     }
 
     public void vuforiaInit() {
@@ -62,24 +64,26 @@ public class CameraVision {
         vuforiaRunning = true;
     }
 
-    public void runImageTracking(VisionTargetTracker opMode) {
+    public void runImageTracking(LinearOpMode opMode) {
         for (int i=0; i < beacons.size(); i++) {
+            String objectName = beacons.get(i).getName();
             imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
             if (imageData[i].matrix != null) {
                 imageData[i].translation = imageData[i].matrix.getTranslation();
-                opMode.telemetry.addData(beacons.get(i).getName() + "-translation", imageData[i].translation);
-                opMode.telemetry.addData(beacons.get(i).getName() + "-matrix", imageData[i].matrix);
-                opMode.telemetry.addData(beacons.get(i).getName() + "-perpendicularness", imageData[i].matrix.getData()[0]);
-                opMode.telemetry.addData(beacons.get(i).getName() + "-degreesToturn", imageData[i].matrix.getData()[8]);
+                imageData[i].perpendicularness = imageData[i].matrix.getData()[0];
+                imageData[i].degreesToTurn = imageData[i].matrix.getData()[8];
+                opMode.telemetry.addData(objectName + "-translation", imageData[i].translation);
+                opMode.telemetry.addData(objectName + "-perpendicularness", imageData[i].perpendicularness);
+                opMode.telemetry.addData(objectName + "-degreesToturn", imageData[i].degreesToTurn);
+                //matrix.getData()[0] returns a float from 0 to 1; 0 = camera view is parallel to image, 1 = camera view is perpendicular to image
+                //matrix.getDate()[8] returns a float from -1 to 1; if < 0, camera is looking at image from the left, if > 0, camera is looking at image from the right
                 //translation.get(0) returns x-component of vector: positive numbers towards left
                 //translation.get(1) returns y-component of vector: positive numbers downwards
                 //translation.get(2) returns z-component of vector: distance = abs(negative number)
             }
-            else opMode.telemetry.addData("Null" + i, "null");
+            else opMode.telemetry.addData(objectName, "null");
         }
         opMode.telemetry.addData("Number of Images", countTrackedImages());
-        opMode.telemetry.addData("Iterations", opMode.iteration);
-        opMode.telemetry.update();
     }
 
     public int countTrackedImages(){

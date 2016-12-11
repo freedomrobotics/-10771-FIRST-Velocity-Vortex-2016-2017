@@ -39,6 +39,8 @@ public class VisionTargetTracker extends LinearOpMode {
             public void run() {
                 while(cameraVision.vuforiaRunning) {
                     cameraVision.runImageTracking(VisionTargetTracker.this);
+                    telemetry.addData("Iterations", iteration);
+                    telemetry.update();
                 }
             }
         };
