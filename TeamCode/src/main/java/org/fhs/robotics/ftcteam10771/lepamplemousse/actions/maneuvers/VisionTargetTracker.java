@@ -26,6 +26,7 @@ public class VisionTargetTracker extends LinearOpMode {
     AutoDrive autoDrive;
     private boolean opModeFinished = false;
     public Integer iteration = 0;
+    private int designatedImage;
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -49,6 +50,14 @@ public class VisionTargetTracker extends LinearOpMode {
         do {
             if (!opModeFinished){
                 //Do things!!!!
+                while(cameraVision.countTrackedImages()!=1){
+                    search();
+                }
+                setDesignatedImage();
+                //TODO: Find acceptable margins for parameters of each function
+                faceImage(0.1);
+                center(5);
+                approach(20);
                 iteration++;
             }
             opModeFinished = true;
@@ -72,8 +81,54 @@ public class VisionTargetTracker extends LinearOpMode {
     }
 
     private void search(){
-        while(cameraVision.countTrackedImages()!=1){
-            //Use autodrive to configure some sort of drive pattern
+        //Use autodrive to configure some sort of drive pattern
+    }
+
+    /**
+     * Move the robot left or right to center the image in the camera view
+     */
+    private void center(double valueMargin){
+        //TODO: Find which direction to drive for each condition
+        double margin = Math.abs(valueMargin);
+        while(cameraVision.imageData[designatedImage].translation.get(0)>margin){
+            autoDrive.drive(AutoDrive.Direction.LEFT, AutoDrive.Speed.SLOW);
+        }
+        while(cameraVision.imageData[designatedImage].translation.get(0)<-1 * margin){
+            autoDrive.drive(AutoDrive.Direction.RIGHT, AutoDrive.Speed.SLOW);
+        }
+        stop();
+    }
+
+    /**
+     * Rotate the robot so that it is perpendicular to the image
+     */
+    private void faceImage(double valueMargin){
+        double margin = Math.abs(valueMargin);
+        while (cameraVision.imageData[designatedImage].degreesToTurn> margin){
+            autoDrive.rotate(AutoDrive.Direction.CLOCKWISE, AutoDrive.Speed.SLOW);
+        }
+        while (cameraVision.imageData[designatedImage].degreesToTurn< margin * -1){
+            autoDrive.rotate(AutoDrive.Direction.COUNTERCLOCKWISE, AutoDrive.Speed.SLOW);
+        }
+        autoDrive.stop();
+    }
+
+    /**
+     * Drive straight to approach the image
+     */
+    private void approach(double designatedDistance){
+        double distanceToStop = Math.abs(designatedDistance);
+        while(Math.abs(cameraVision.imageData[designatedImage].translation.get(2))>distanceToStop) {
+            autoDrive.drive(AutoDrive.Direction.FORWARDS, AutoDrive.Speed.SLOW);
+        }
+        autoDrive.stop();
+    }
+
+    private void setDesignatedImage(){
+        for (int i=0; i < cameraVision.beacons.size(); i++){
+            if (cameraVision.imageData[i].matrix != null){
+                designatedImage = i;
+            }
         }
     }
 }
