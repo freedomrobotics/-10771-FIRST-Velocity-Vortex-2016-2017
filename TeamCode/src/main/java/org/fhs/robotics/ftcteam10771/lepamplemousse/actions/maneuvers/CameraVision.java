@@ -9,6 +9,7 @@ import com.vuforia.Vuforia;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.Camera;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -58,7 +59,7 @@ public class CameraVision {
         beacons.activate();
     }
 
-    public void runImageTracking(VisionTargetTracker opMode) {
+    public void runImageTracking(LinearOpMode opMode) {
         for (int i=0; i < beacons.size(); i++) {
             imageData[i] = new ImageData();
             imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
