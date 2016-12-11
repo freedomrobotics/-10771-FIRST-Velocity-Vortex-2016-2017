@@ -29,11 +29,11 @@ public class CameraVision {
 
     }
 
+    public boolean vuforiaRunning = false;
     double degreesToTurn = 0;
     VuforiaLocalizer.Parameters params = null;
     VuforiaLocalizer vuforia = null;
     VuforiaTrackables beacons = null;
-    OpenGLMatrix[] matrices = null;
     ImageData[] imageData = null;
 
     public class ImageData{
@@ -55,42 +55,38 @@ public class CameraVision {
         beacons.get(2).setName("Legos");
         beacons.get(3).setName("Gears");
         imageData = new ImageData[beacons.size()];
-        matrices = new OpenGLMatrix[beacons.size()];
         beacons.activate();
+        vuforiaRunning = true;
     }
 
-    public void runImageTracking(LinearOpMode opMode) {
+    public void runImageTracking(VisionTargetTracker opMode) {
         for (int i=0; i < beacons.size(); i++) {
             imageData[i] = new ImageData();
             imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
             if (imageData[i].matrix != null) {
                 imageData[i].translation = imageData[i].matrix.getTranslation();
                 opMode.telemetry.addData(beacons.get(i).getName() + "-translation", imageData[i].translation);
-                opMode.telemetry.addData(beacons.get(i).getName() + "-matrix", imageData[i].matrix);
-                opMode.telemetry.addData(beacons.get(i).getName() + "-orientation", imageData[i].matrix.getData()[0]);
-                opMode.telemetry.addData(beacons.get(i).getName() + "-matrix", imageData[i].matrix.getData()[8]);
-                //use imageData[i].data[0][0] and data[0][2]
+                //telemetry.addData(cameraVision.beacons.get(i).getName() + "-matrix", cameraVision.imageData[i].matrix);
+                //telemetry.addData(cameraVision.beacons.get(i).getName() + "-perpendicularness", cameraVision.imageData[i].matrix.getData()[0]);
+                //telemetry.addData(cameraVision.beacons.get(i).getName() + "-degreesToturn", cameraVision.imageData[i].matrix.getData()[8]);
                 //translation.get(0) returns x-component of vector: positive numbers towards left
                 //translation.get(1) returns y-component of vector: positive numbers downwards
                 //translation.get(2) returns z-component of vector: distance = abs(negative number)
-                //Math.atan2(float y, float x)inputs inputs z-component as x-vector and y-component as y-vector
-                //Then calculates the angle in radians of resulting vector
-                //.toDegrees() converts from radian to degrees
-                double degreesToTurn = Math.toDegrees(Math.atan2(imageData[i].translation.get(1), imageData[i].translation.get(2)));
-                opMode.telemetry.addData(beacons.get(i).getName() + "-Degrees To Turn", degreesToTurn);
             }
-            else {
-                matrices[i] = null;
-                opMode.telemetry.addData(beacons.get(i).getName(), "None");
-            }
+            else opMode.telemetry.addData("Null" + i, "null");
         }
+        opMode.telemetry.addData("Number of Images", countTrackedImages());
+        opMode.telemetry.addData("Iterations", opMode.iteration);
+        opMode.telemetry.update();
     }
 
     public int countTrackedImages(){
         int images = 0;
         for (int i=0; i < beacons.size(); i++){
-            if (matrices[i] != null){
-                images++;
+            if (imageData[i]!=null) {
+                if (imageData[i].matrix != null) {
+                    images++;
+                }
             }
         }
         return images;

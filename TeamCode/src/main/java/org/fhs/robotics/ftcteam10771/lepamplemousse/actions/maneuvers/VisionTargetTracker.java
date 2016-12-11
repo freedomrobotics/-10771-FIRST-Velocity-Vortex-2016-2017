@@ -1,5 +1,8 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -21,6 +24,8 @@ public class VisionTargetTracker extends LinearOpMode {
     private DcMotor motorD;
     CameraVision cameraVision;
     AutoDrive autoDrive;
+    private boolean opModeFinished = false;
+    public Integer iteration = 0;
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -29,17 +34,31 @@ public class VisionTargetTracker extends LinearOpMode {
         cameraVision = new CameraVision();
         cameraVision.vuforiaInit();
         waitForStart();
-        while(opModeIsActive()){
-            cameraVision.runImageTracking(this);
-            telemetry.addData("Number of Images", cameraVision.countTrackedImages());
-            telemetry.update();
-        }
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                while(cameraVision.vuforiaRunning) {
+                    cameraVision.runImageTracking(VisionTargetTracker.this);
+                }
+            }
+        };
+        Thread thread = new Thread(r);
+        thread.start();
+        do {
+            if (!opModeFinished){
+                //Do things!!!!
+                iteration++;
+            }
+            opModeFinished = true;
+        } while (opModeIsActive());
+        cameraVision.vuforiaRunning = false;
+        thread.interrupt();
     }
 
     /**
      * Initializes the motors
      */
-    public void motorsInit(){
+    private void motorsInit(){
         motorA = hardwareMap.dcMotor.get("motorFrontRight"); //sets variable motorA to front right motor
         motorB = hardwareMap.dcMotor.get("motorFrontLeft"); //sets variable motorB to front left motor
         motorC = hardwareMap.dcMotor.get("motorBackLeft"); //sets variable motorC to back left motor
@@ -48,5 +67,11 @@ public class VisionTargetTracker extends LinearOpMode {
         motorB.setDirection(DcMotor.Direction.FORWARD);
         motorC.setDirection(DcMotor.Direction.REVERSE);
         motorD.setDirection(DcMotor.Direction.FORWARD);
+    }
+
+    private void search(){
+        while(cameraVision.countTrackedImages()!=1){
+            //Use autodrive to configure some sort of drive pattern
+        }
     }
 }
