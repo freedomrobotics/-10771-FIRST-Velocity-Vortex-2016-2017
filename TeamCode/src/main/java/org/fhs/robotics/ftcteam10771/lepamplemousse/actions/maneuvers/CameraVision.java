@@ -55,20 +55,22 @@ public class CameraVision {
         beacons.get(2).setName("Legos");
         beacons.get(3).setName("Gears");
         imageData = new ImageData[beacons.size()];
+        for (int i=0; i < beacons.size(); i++){
+            imageData[i] = new ImageData();
+        }
         beacons.activate();
         vuforiaRunning = true;
     }
 
     public void runImageTracking(VisionTargetTracker opMode) {
         for (int i=0; i < beacons.size(); i++) {
-            imageData[i] = new ImageData();
             imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
             if (imageData[i].matrix != null) {
                 imageData[i].translation = imageData[i].matrix.getTranslation();
                 opMode.telemetry.addData(beacons.get(i).getName() + "-translation", imageData[i].translation);
-                //telemetry.addData(cameraVision.beacons.get(i).getName() + "-matrix", cameraVision.imageData[i].matrix);
-                //telemetry.addData(cameraVision.beacons.get(i).getName() + "-perpendicularness", cameraVision.imageData[i].matrix.getData()[0]);
-                //telemetry.addData(cameraVision.beacons.get(i).getName() + "-degreesToturn", cameraVision.imageData[i].matrix.getData()[8]);
+                opMode.telemetry.addData(beacons.get(i).getName() + "-matrix", imageData[i].matrix);
+                opMode.telemetry.addData(beacons.get(i).getName() + "-perpendicularness", imageData[i].matrix.getData()[0]);
+                opMode.telemetry.addData(beacons.get(i).getName() + "-degreesToturn", imageData[i].matrix.getData()[8]);
                 //translation.get(0) returns x-component of vector: positive numbers towards left
                 //translation.get(1) returns y-component of vector: positive numbers downwards
                 //translation.get(2) returns z-component of vector: distance = abs(negative number)
