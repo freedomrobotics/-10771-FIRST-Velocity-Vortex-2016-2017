@@ -17,6 +17,7 @@ public class VisionTargetTracker extends LinearOpMode {
     public void runOpMode() throws InterruptedException{
         CameraVision cameraVision = new CameraVision();
         cameraVision.vuforiaInit();
+        waitForStart();
         while(opModeIsActive()){
             cameraVision.runImageTracking(this);
             telemetry.addData("Number of Images", cameraVision.countTrackedImages());

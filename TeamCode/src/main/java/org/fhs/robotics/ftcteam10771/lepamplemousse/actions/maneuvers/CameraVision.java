@@ -1,5 +1,7 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers;
 
+import android.graphics.Path;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.HINT;
@@ -9,6 +11,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.Ca
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
@@ -30,6 +33,13 @@ public class CameraVision {
     VuforiaLocalizer vuforia = null;
     VuforiaTrackables beacons = null;
     OpenGLMatrix[] matrices = null;
+    ImageData[] imageData = null;
+
+    public class ImageData{
+        OpenGLMatrix matrix;
+        OpenGLMatrix rotatedMatrix;
+        VectorF translation;
+    }
 
     public void vuforiaInit() {
         params = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
@@ -43,28 +53,34 @@ public class CameraVision {
         beacons.get(1).setName("Tools");
         beacons.get(2).setName("Legos");
         beacons.get(3).setName("Gears");
+        imageData = new ImageData[beacons.size()];
         matrices = new OpenGLMatrix[beacons.size()];
         beacons.activate();
     }
 
     public void runImageTracking(VisionTargetTracker opMode) {
         for (int i=0; i < beacons.size(); i++) {
-            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
-            matrices[i] = pose;
-
-            if (pose != null) {
-                VectorF translation = pose.getTranslation();
-                opMode.telemetry.addData(beacons.get(i).getName() + "-Translation", translation);
+            imageData[i] = new ImageData();
+            imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
+            if (imageData[i].matrix != null) {
+                imageData[i].translation = imageData[i].matrix.getTranslation();
+                opMode.telemetry.addData(beacons.get(i).getName() + "-translation", imageData[i].translation);
+                opMode.telemetry.addData(beacons.get(i).getName() + "-matrix", imageData[i].matrix);
+                opMode.telemetry.addData(beacons.get(i).getName() + "-orientation", imageData[i].matrix.getData()[0]);
+                opMode.telemetry.addData(beacons.get(i).getName() + "-matrix", imageData[i].matrix.getData()[8]);
+                //use imageData[i].data[0][0] and data[0][2]
                 //translation.get(0) returns x-component of vector: positive numbers towards left
                 //translation.get(1) returns y-component of vector: positive numbers downwards
                 //translation.get(2) returns z-component of vector: distance = abs(negative number)
-                //Not sure how the below code actually calculates the value, so we will not use this for now
-                //double degreesToTurn = Math.toDegrees(Math.atan2(translation.get(1), translation.get(2)));
-                //opMode.telemetry.addData(beac.getName() + "-Degrees To Turn", degreesToTurn);
+                //Math.atan2(float y, float x)inputs inputs z-component as x-vector and y-component as y-vector
+                //Then calculates the angle in radians of resulting vector
+                //.toDegrees() converts from radian to degrees
+                double degreesToTurn = Math.toDegrees(Math.atan2(imageData[i].translation.get(1), imageData[i].translation.get(2)));
+                opMode.telemetry.addData(beacons.get(i).getName() + "-Degrees To Turn", degreesToTurn);
             }
             else {
                 matrices[i] = null;
-                opMode.telemetry.addData("Object:", "None");
+                opMode.telemetry.addData(beacons.get(i).getName(), "None");
             }
         }
     }

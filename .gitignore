@@ -26,3 +26,6 @@ build/
 
 *ASUS_PC_01*
 
+TeamCode/src/main/libs/
+TeamCode/src/main/obj/
+openCVLibrary310/
