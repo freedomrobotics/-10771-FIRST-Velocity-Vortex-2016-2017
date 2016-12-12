@@ -102,10 +102,10 @@ public class AutoDrive {
         rotationalPower = rotatePower;
         switch (rotationDirection){
             case CLOCKWISE:
-                rotationalPower = Math.abs(rotationalPower);
+                rotationalPower = -Math.abs(rotationalPower);
                 break;
             case COUNTERCLOCKWISE:
-                rotationalPower = -Math.abs(rotationalPower);
+                rotationalPower = Math.abs(rotationalPower);
                 break;
             default:
                 rotationalPower = Math.abs(rotationalPower);

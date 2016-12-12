@@ -30,8 +30,8 @@ public class VisionTargetTracker extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException{
-        //motorsInit();
-        //autoDrive = new AutoDrive(motorA, motorB, motorC, motorD);
+        motorsInit();
+        autoDrive = new AutoDrive(motorA, motorB, motorC, motorD);
         cameraVision = new CameraVision();
         cameraVision.vuforiaInit();
         waitForStart();
@@ -47,7 +47,7 @@ public class VisionTargetTracker extends LinearOpMode {
         };
         Thread thread = new Thread(r);
         thread.start();
-        do {
+        while (opModeIsActive()) {
             if (!opModeFinished){
                 //Do things!!!!
                 while(cameraVision.countTrackedImages()!=1){
@@ -55,13 +55,13 @@ public class VisionTargetTracker extends LinearOpMode {
                 }
                 setDesignatedImage();
                 //TODO: Find acceptable margins for parameters of each function
-                faceImage(0.1);
-                center(5);
-                approach(20);
+                faceImage(0.2);
+                center(10);
+                approach(650);
                 iteration++;
             }
             opModeFinished = true;
-        } while (opModeIsActive());
+        }
         cameraVision.vuforiaRunning = false;
         thread.interrupt();
     }
@@ -90,11 +90,13 @@ public class VisionTargetTracker extends LinearOpMode {
     private void center(double valueMargin){
         //TODO: Find which direction to drive for each condition
         double margin = Math.abs(valueMargin);
-        while(cameraVision.imageData[designatedImage].translation.get(0)>margin){
-            autoDrive.drive(AutoDrive.Direction.LEFT, AutoDrive.Speed.SLOW);
-        }
-        while(cameraVision.imageData[designatedImage].translation.get(0)<-1 * margin){
-            autoDrive.drive(AutoDrive.Direction.RIGHT, AutoDrive.Speed.SLOW);
+        while (Math.abs(cameraVision.imageData[designatedImage].translation.get(0))>margin && opModeIsActive()){
+            if (cameraVision.imageData[designatedImage].translation.get(0)>margin){
+                autoDrive.drive(AutoDrive.Direction.LEFT, AutoDrive.Speed.SLOW);
+            }
+            if (cameraVision.imageData[designatedImage].translation.get(0)<-1 * margin){
+                autoDrive.drive(AutoDrive.Direction.RIGHT, AutoDrive.Speed.SLOW);
+            }
         }
         stop();
     }
@@ -104,11 +106,13 @@ public class VisionTargetTracker extends LinearOpMode {
      */
     private void faceImage(double valueMargin){
         double margin = Math.abs(valueMargin);
-        while (cameraVision.imageData[designatedImage].degreesToTurn> margin){
-            autoDrive.rotate(AutoDrive.Direction.CLOCKWISE, AutoDrive.Speed.SLOW);
-        }
-        while (cameraVision.imageData[designatedImage].degreesToTurn< margin * -1){
-            autoDrive.rotate(AutoDrive.Direction.COUNTERCLOCKWISE, AutoDrive.Speed.SLOW);
+        while (Math.abs(cameraVision.imageData[designatedImage].translation.get(0))>margin && opModeIsActive()){
+            if (cameraVision.imageData[designatedImage].degreesToTurn> margin){
+                autoDrive.rotate(AutoDrive.Direction.CLOCKWISE, AutoDrive.Speed.SLOW);
+            }
+            if (cameraVision.imageData[designatedImage].degreesToTurn< margin * -1){
+                autoDrive.rotate(AutoDrive.Direction.COUNTERCLOCKWISE, AutoDrive.Speed.SLOW);
+            }
         }
         autoDrive.stop();
     }
@@ -118,7 +122,7 @@ public class VisionTargetTracker extends LinearOpMode {
      */
     private void approach(double designatedDistance){
         double distanceToStop = Math.abs(designatedDistance);
-        while(Math.abs(cameraVision.imageData[designatedImage].translation.get(2))>distanceToStop) {
+        while(Math.abs(cameraVision.imageData[designatedImage].translation.get(2))>distanceToStop && opModeIsActive()) {
             autoDrive.drive(AutoDrive.Direction.FORWARDS, AutoDrive.Speed.SLOW);
         }
         autoDrive.stop();
