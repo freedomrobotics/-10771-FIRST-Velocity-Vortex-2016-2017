@@ -24,8 +24,10 @@ drivetrain:
     map_name: drive_right
     encodered: true
     reversed: false
-  wheel:
+  wheel: 6.0
     diameter: 101.6 # 4 inches
+  lr_motor:
+    reversed: true
 
 # Winch settings
 winch:

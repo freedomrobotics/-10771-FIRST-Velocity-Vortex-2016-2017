@@ -16,6 +16,7 @@
 # all_clear_down        = all clear servo down                  - digital         - boolean
 # all_clear_up          = all clear servo up                    - digital         - boolean
 # log_cat               = enable logging; checked on init       - digital         - boolean
+# led_toggle            = allows toggling of led                - digital         - boolean
 gamepad1:
   left_stick_x:
     function: null
@@ -38,9 +39,9 @@ gamepad1:
     digital: false
 
   dpad_up:
-    function: null
-    inverted: false
-    digital: true
+    function: led_toggle
+    inverted: true
+    digital: false
 
   dpad_down:
     function: null
