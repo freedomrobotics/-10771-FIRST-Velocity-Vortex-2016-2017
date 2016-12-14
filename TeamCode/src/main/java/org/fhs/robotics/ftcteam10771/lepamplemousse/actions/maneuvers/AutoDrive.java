@@ -111,9 +111,10 @@ public class AutoDrive {
                 rotationalPower = Math.abs(rotationalPower);
                 break;
         }
+        ACShaftPower = BDShaftPower = 0;
         ACRotationalPower = (rotationalPower*Math.abs(rotationalPower))/(Math.abs(rotationalPower)+Math.abs(ACShaftPower));
         BDRotationalPower = (rotationalPower*Math.abs(rotationalPower))/(Math.abs(rotationalPower)+Math.abs(BDShaftPower));
-        ACShaftPower = BDShaftPower = 0;
+        
         if (!simultaneous) setPower();
     }
 
