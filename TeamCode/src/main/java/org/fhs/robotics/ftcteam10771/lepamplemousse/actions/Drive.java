@@ -33,9 +33,6 @@ public class Drive {
         this.flMotor = flMotor;
         this.brMotor = brMotor;
         this.blMotor = blMotor;
-
-        settings.getFloat("wheel");
-        settings.subData("lr_motor").getBool("reversed");
     }
 
     public void init(){
@@ -46,9 +43,7 @@ public class Drive {
 
     }
 
-    public void setDirection(MOTORS motor, DcMotorSimple.Direction direction){
-        if(motor == MOTORS.FRMOTOR){
-            frMotor.setDirection(direction);
-        }
+    public void setDirection(double theta, double translationalSpeed, double rotationSpeed){
+        
     }
 }
