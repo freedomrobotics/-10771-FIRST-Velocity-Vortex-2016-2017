@@ -24,12 +24,12 @@ public class VectorDrive {
         public void run() {
 
             while (!Thread.interrupted()) {
-                double joystickTheta = vectorR.getTheta();
-                double joystickRadius = vectorR.getRadius();
-                double rotationalPower = vectorR.getRadius();
+                float joystickTheta = vectorR.getTheta();
+                float joystickRadius = vectorR.getRadius();
+                float rotationalPower = vectorR.getRad();
 
-                double ACShaftPower = ((Math.sin(joystickTheta - (Math.PI / 4))) * joystickRadius);
-                double BDShaftPower = ((Math.cos(joystickTheta - (Math.PI / 4))) * joystickRadius);
+                float ACShaftPower = (float) ((Math.sin(joystickTheta - (Math.PI/ 4))) * joystickRadius);
+                float BDShaftPower = (float) ((Math.cos(joystickTheta - (Math.PI / 4))) * joystickRadius);
 
                 frMotor.setPower((-joystickRadius) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
                 flMotor.setPower((joystickRadius) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
