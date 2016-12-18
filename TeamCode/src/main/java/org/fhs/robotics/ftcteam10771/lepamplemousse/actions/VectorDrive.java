@@ -23,27 +23,28 @@ public class VectorDrive {
         @Override
         public void run() {
 
-            while (!Thread.interrupted()) {
-                float joystickTheta = vectorR.getTheta();
-                float joystickRadius = vectorR.getRadius();
-                float rotationalPower = vectorR.getRad();
+        while (!Thread.interrupted()) {
+            float joystickTheta = vectorR.getTheta();
+            float joystickRadius = vectorR.getRadius();
+            float rotationalPower = vectorR.getRad();
 
-                float ACShaftPower = (float) ((Math.sin(joystickTheta - (Math.PI/ 4))) * joystickRadius);
-                float BDShaftPower = (float) ((Math.cos(joystickTheta - (Math.PI / 4))) * joystickRadius);
+            float ACShaftPower = (float) ((Math.sin(joystickTheta - (Math.PI/ 4))) * joystickRadius);
+            float BDShaftPower = (float) ((Math.cos(joystickTheta - (Math.PI / 4))) * joystickRadius);
 
-                frMotor.setPower((-joystickRadius) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-                flMotor.setPower((joystickRadius) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-                blMotor.setPower((joystickRadius) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-                brMotor.setPower((-joystickRadius) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-            }
+            frMotor.setPower((-joystickRadius) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+            flMotor.setPower((joystickRadius) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+            blMotor.setPower((joystickRadius) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+            brMotor.setPower((-joystickRadius) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+        }
 
         }
     };
+
     Thread driveThread = new Thread(driveRunnable);
 
     public VectorDrive(VectorR vectorR, Robot robot, DcMotor frMotor,
                        DcMotor flMotor, DcMotor brMotor, DcMotor blMotor,
-                       Config.ParsedData settings){
+                       Config.ParsedData settings, DcMotor.RunMode runMode){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -53,6 +54,11 @@ public class VectorDrive {
         this.blMotor = blMotor;
         this.settings = settings;
         this.vectorDriveActive = false;
+
+        frMotor.setMode(runMode);
+        flMotor.setMode(runMode);
+        brMotor.setMode(runMode);
+        blMotor.setMode(runMode);
 
     }
 
