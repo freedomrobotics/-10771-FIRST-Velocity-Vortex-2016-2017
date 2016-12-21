@@ -10,23 +10,28 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannelController;
 
 import org.firstinspires.ftc.teamcode.R;
 
-import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.direction.BOTH;
-import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.direction.LEFT;
-import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.direction.NEITHER;
-import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.direction.RIGHT;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.Direction.BOTH;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.Direction.LEFT;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.Direction.NEITHER;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Adafruit.Direction.RIGHT;
 
 /**
  * Created by User on 11/23/2016.
  */
-@Autonomous(name = "ColorSensorClass", group = "10771")
 public class Adafruit {
 
     private ColorSensor colorSensor1 = null;
     private ColorSensor colorSensor2 = null;
+
+    public Adafruit(ColorSensor sensor){
+        colorSensor1 = sensor;
+        colorSensor2 = null;
+    }
 
     public Adafruit(){
 
@@ -46,14 +51,14 @@ public class Adafruit {
         Color.RGBToHSV((colorSensor2.red()) * 255 / 800, (colorSensor2.green() * 255) / 800, (colorSensor2.blue() * 255) / 800, hsvValues2);
     }
 
-    public enum direction{
+    public enum Direction{
         LEFT,
         RIGHT,
         NEITHER,
         BOTH
     };
 
-    public direction chooseBeaconSide(String color){
+    public Direction chooseBeaconSide(String color){
         if (color=="red"){
             if (colorSensor1.red() > colorSensor2.red()){
                 return LEFT;
@@ -79,6 +84,28 @@ public class Adafruit {
             else return NEITHER;
         }
         return NEITHER;
+    }
+
+    public int test(Direction direction){
+        if (direction==LEFT){
+            return 1;
+        }
+        else if (direction==RIGHT){
+            return 2;
+        }
+        else return 0;
+    }
+
+    public int red(){
+        return colorSensor1.red();
+    }
+
+    public int blue(){
+        return colorSensor1.blue();
+    }
+
+    public int green(){
+        return colorSensor1.green();
     }
 
             // change the background color to match the color detected by the RGB sensor.
