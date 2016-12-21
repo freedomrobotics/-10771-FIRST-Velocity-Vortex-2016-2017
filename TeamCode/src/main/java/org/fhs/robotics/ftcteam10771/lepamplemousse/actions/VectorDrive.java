@@ -18,25 +18,55 @@ public class VectorDrive {
     DcMotor blMotor;
     Config.ParsedData settings;
     boolean vectorDriveActive;
+    boolean blueTeam;
+    boolean relativeDrive;
 
     Runnable driveRunnable = new Runnable() {
         @Override
         public void run() {
 
-        while (!Thread.interrupted()) {
-            float joystickTheta = vectorR.getTheta();
-            float joystickRadius = vectorR.getRadius();
-            float rotationalPower = vectorR.getRad();
+            while (!Thread.interrupted()) {
+                float joystickTheta = vectorR.getTheta();
+                float absoluteTheta;
+                float fieldTheta;
+                float joystickRadius = vectorR.getRadius();
+                float rotationalPower = vectorR.getRad();
+                float robotRotation = robot.getVectorR().getRad();
 
-            float ACShaftPower = (float) ((Math.sin(joystickTheta - (Math.PI/ 4))) * joystickRadius);
-            float BDShaftPower = (float) ((Math.cos(joystickTheta - (Math.PI / 4))) * joystickRadius);
+                if(blueTeam){
+                    if(joystickTheta <= (3*(Math.PI))/2){
+                        absoluteTheta = (float) (joystickTheta + (Math.PI)/2);
+                    }else{
+                        absoluteTheta = (float) (joystickTheta - (3*(Math.PI))/2);
+                    }
+                }else{
+                    absoluteTheta = joystickTheta;
+                }
 
-            frMotor.setPower((-joystickRadius) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-            flMotor.setPower((joystickRadius) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-            blMotor.setPower((joystickRadius) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-            brMotor.setPower((-joystickRadius) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-        }
+                if(relativeDrive){
+                    if(absoluteTheta <= robotRotation){
+                        fieldTheta = (float) (absoluteTheta + robotRotation);
+                    }else{
+                        fieldTheta = (float) (absoluteTheta + robotRotation - 2*(Math.PI));
+                    }
+                }else{
+                    fieldTheta = absoluteTheta;
+                }
 
+                float ACShaftPower = (float) ((Math.sin(absoluteTheta - (Math.PI/ 4))) * joystickRadius);
+                float BDShaftPower = (float) ((Math.cos(absoluteTheta - (Math.PI / 4))) * joystickRadius);
+
+                frMotor.setPower((-fieldTheta) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+                flMotor.setPower((fieldTheta) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+                blMotor.setPower((fieldTheta) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+                brMotor.setPower((-fieldTheta) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     };
 
@@ -44,7 +74,7 @@ public class VectorDrive {
 
     public VectorDrive(VectorR vectorR, Robot robot, DcMotor frMotor,
                        DcMotor flMotor, DcMotor brMotor, DcMotor blMotor,
-                       Config.ParsedData settings, DcMotor.RunMode runMode){
+                       Config.ParsedData settings, boolean blueTeam, boolean relativeDrive){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -54,7 +84,10 @@ public class VectorDrive {
         this.blMotor = blMotor;
         this.settings = settings;
         this.vectorDriveActive = false;
+        this.blueTeam = blueTeam;
+        this.relativeDrive = relativeDrive;
 
+        DcMotor.RunMode runMode = DcMotor.RunMode.RUN_USING_ENCODER;
         frMotor.setMode(runMode);
         flMotor.setMode(runMode);
         brMotor.setMode(runMode);
