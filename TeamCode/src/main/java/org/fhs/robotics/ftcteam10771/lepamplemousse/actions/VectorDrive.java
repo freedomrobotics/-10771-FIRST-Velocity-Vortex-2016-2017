@@ -74,7 +74,7 @@ public class VectorDrive {
 
     public VectorDrive(VectorR vectorR, Robot robot, DcMotor frMotor,
                        DcMotor flMotor, DcMotor brMotor, DcMotor blMotor,
-                       Config.ParsedData settings, boolean blueTeam, boolean relativeDrive){
+                       Config.ParsedData settings){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -84,8 +84,9 @@ public class VectorDrive {
         this.blMotor = blMotor;
         this.settings = settings;
         this.vectorDriveActive = false;
-        this.blueTeam = blueTeam;
-        this.relativeDrive = relativeDrive;
+
+        this.blueTeam = settings.getBool("blue_team");
+        this.relativeDrive = settings.getBool("relative_drive");
 
         DcMotor.RunMode runMode = DcMotor.RunMode.RUN_USING_ENCODER;
         frMotor.setMode(runMode);
@@ -95,13 +96,29 @@ public class VectorDrive {
 
     }
 
-    public void startDriveThread(){
+    /**
+     * This creates the drive thread for velocity drive.
+     */
+    public void initiateVelocity(){
+
+        driveThread.start();
+        vectorDriveActive = true;
+    }
+
+    public void initiatePosition(){
+
+
         driveThread.start();
         vectorDriveActive = true;
     }
 
     public void endDriveThread(){
-        driveThread.interrupt();
+        this.relativeDrive = true;
         vectorDriveActive = false;
+        driveThread.interrupt();
+    }
+
+    public void setRelative(boolean isRelative){
+        relativeDrive = isRelative;
     }
 }
