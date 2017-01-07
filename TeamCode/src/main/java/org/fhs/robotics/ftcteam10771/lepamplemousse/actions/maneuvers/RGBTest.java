@@ -30,7 +30,7 @@ public class RGBTest extends LinearOpMode {
         leftLED = hardwareMap.led.get("leftLED");
         //rightSensor = hardwareMap.colorSensor.get("rightRGB");
         colorHandler = new Adafruit(leftSensor);
-        leftLED.enable(true);
+        leftLED.enable(false);
         waitForStart();
         leftLED.enable(false);
         while (opModeIsActive()){
