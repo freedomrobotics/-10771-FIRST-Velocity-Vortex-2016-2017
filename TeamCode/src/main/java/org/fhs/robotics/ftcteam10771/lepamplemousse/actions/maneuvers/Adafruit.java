@@ -42,21 +42,22 @@ public class Adafruit {
         colorSensor2 = sensor2;
     }
 
-    float hsvValues1[] = {0F, 0F, 0F};
-    float hsvValues2[] = {0F, 0F, 0F};
-
-            // convert the RGB values to HSV values.
-    public void convertToHSV(){
-        Color.RGBToHSV((colorSensor1.red() * 255) / 800, (colorSensor1.green() * 255) / 800, (colorSensor1.blue() * 255) / 800, hsvValues1);
-        Color.RGBToHSV((colorSensor2.red()) * 255 / 800, (colorSensor2.green() * 255) / 800, (colorSensor2.blue() * 255) / 800, hsvValues2);
-    }
-
     public enum Direction{
         LEFT,
         RIGHT,
         NEITHER,
         BOTH
     };
+
+    public boolean isCorrectSide(String teamColor){
+        if (teamColor == "red"){
+            return (red() > blue());
+        }
+        else if (teamColor == "blue"){
+            return (blue() > red());
+        }
+        else return false;
+    }
 
     public Direction chooseBeaconSide(String color){
         if (color=="red"){
@@ -96,18 +97,67 @@ public class Adafruit {
         else return 0;
     }
 
-    public int red(){
-        return colorSensor1.red();
+    public int red(Direction direction){
+        if (direction==LEFT){
+            if (colorSensor1 != null) {
+                return colorSensor1.red();
+            }
+        }
+        else if (direction==RIGHT){
+            if (colorSensor2 != null) {
+                return colorSensor2.red();
+            }
+        }
+        else {
+            return 404;
+        }
+        return 0;
     }
 
-    public int blue(){
-        return colorSensor1.blue();
+    public int green(Direction direction){
+        if (direction==LEFT){
+            if (colorSensor1 != null) {
+                return colorSensor1.green();
+            }
+        }
+        else if (direction==RIGHT){
+            if (colorSensor2 != null) {
+                return colorSensor2.green();
+            }
+        }
+        else {
+            return 404;
+        }
+        return 0;
+    }
+
+    public int blue(Direction direction){
+        if (direction==LEFT){
+            if (colorSensor1 != null) {
+                return colorSensor1.blue();
+            }
+        }
+        else if (direction==RIGHT){
+            if (colorSensor2 != null) {
+                return colorSensor2.blue();
+            }
+        }
+        else {
+            return 404;
+        }
+        return 0;
+    }
+    public int red(){
+        return red(LEFT);
     }
 
     public int green(){
-        return colorSensor1.green();
+        return green(LEFT);
     }
 
+    public int blue(){
+        return blue(LEFT);
+    }
             // change the background color to match the color detected by the RGB sensor.
             // pass a reference to the hue, saturation, and value array as an argument
             // to the HSVToColor method.
