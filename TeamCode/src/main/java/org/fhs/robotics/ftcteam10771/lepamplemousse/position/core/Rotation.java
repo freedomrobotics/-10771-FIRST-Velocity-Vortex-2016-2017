@@ -6,7 +6,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.position.core;
 
 public class Rotation {
 
-    public float rot = 0.0f;
+    protected float rot = 0.0f;
 
     public void setDegrees(float rotDegrees){
         rot = degreesToRadians(rotDegrees);
