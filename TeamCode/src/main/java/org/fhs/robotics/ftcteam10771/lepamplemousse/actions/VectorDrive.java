@@ -111,12 +111,10 @@ public class VectorDrive {
 
     public void initiateAutonomouse(){
         vectorDriveActive = true;
-        autonomousThread.start();
     }
 
     public void endDriveThread(){
         if(driveThread.isAlive()){driveThread.interrupt();}
-        if(autonomousThread.isAlive()){autonomousThread.interrupt();}
 
         this.relativeDrive = true;
         vectorDriveActive = false;
