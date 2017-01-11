@@ -1,5 +1,12 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Created by Adam Li on 1/11/2017.
  * todo write and fix
@@ -7,6 +14,95 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig;
  */
 
 public class ScriptLoader {
+    Config.ParsedData scriptedAutonomousData;
+
+    ScriptLoader(Config.ParsedData scriptedAutonomousData){
+        this.scriptedAutonomousData = scriptedAutonomousData
+    }
+
+    public static class CommandParser{
+        String command;
+        List<Object> arguments = new ArrayList<Object>();
+
+        public CommandParser(String command){
+            this.command = command;
+            if (command.contains(" ")) {
+                this.command = command.split(" ", 2)[0];
+                String argumentList = command.split(" ", 2)[1];
+                argumentList = argumentList.replaceAll("\\s", "");
+                for (String arg : argumentList.split(",")) {
+                    if (arg.length() != 0)
+                        arguments.add(arg);
+                }
+            }
+        }
+
+        public String command(){
+            return command;
+        }
+
+        public int getArgsSize(){
+            return arguments.size();
+        }
+
+        public Object getArgObject(int loc) {
+            if (loc <= arguments.size()) {
+                return arguments.get(loc);
+            }
+            return null;
+        }
+
+        public boolean getArgBool(int loc) {
+            if (loc <= arguments.size()) {
+                if (arguments.get(loc) != null)
+                    return arguments.get(loc).toString().equals("true");
+            }
+            return false;
+        }
+
+        public String getArgString(int loc) {
+            if (loc <= arguments.size()) {
+                if (arguments.get(loc) != null)
+                    return arguments.get(loc).toString();
+            }
+            return null;
+        }
+
+        public int getArgInt(int loc) {
+            if (loc <= arguments.size()) {
+                if (arguments.get(loc) != null) {
+                    Pattern p = Pattern.compile("[a-zA-Z]");
+                    Matcher m = p.matcher(arguments.get(loc).toString());
+                    if (m.find()) {
+                        return 0;
+                    }
+                    if (arguments.get(loc).toString().contains(".")) {
+                        return ((Double) Double.parseDouble(arguments.get(loc).toString())).intValue();
+                    }
+                    return Integer.parseInt(arguments.get(loc).toString());
+                }
+            }
+            return 0;
+        }
+
+        public float getArgFloat(int loc) {
+            if (loc <= arguments.size()) {
+                if (arguments.get(loc) != null) {
+                    Pattern p = Pattern.compile("[a-zA-Z]");
+                    Matcher m = p.matcher(arguments.get(loc).toString());
+                    if (m.find()) {
+                        return 0;
+                    }
+                    if (!arguments.get(loc).toString().contains(".")) {
+                        return ((Integer) Integer.parseInt(arguments.get(loc).toString())).floatValue();
+                    }
+                    return ((Double) Double.parseDouble(arguments.get(loc).toString())).floatValue();
+                }
+            }
+            return 0;
+        }
+    }
+
 
 }
 
