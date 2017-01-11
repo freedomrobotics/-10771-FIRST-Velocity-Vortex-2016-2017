@@ -20,22 +20,61 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.R;
 
 /**
+ * Class that handles camera vision targeting
+ * for the four images under the beacons
+ *
  * Created by Freedom Robotics on 11/12/2016.
  */
-
 public class CameraVision {
 
+    /*
+        Constructor that allows user to choose which camera to use
+     */
+    public CameraVision(VuforiaLocalizer.CameraDirection cameraDirection){
+        this.cameraDirection = cameraDirection;
+    }
+
+    /*
+        Default constructor
+     */
     public CameraVision(){
 
     }
 
-    public boolean vuforiaRunning = false;
-    double degreesToTurn = 0;
-    VuforiaLocalizer.Parameters params = null;
-    VuforiaLocalizer vuforia = null;
+    //Flag for whether Vuforia should be running or not
+    boolean vuforiaRunning = false;
+
+    //Paramters for Vuforia initializtion to be used
+    private VuforiaLocalizer.Parameters params = null;
+    private VuforiaLocalizer.CameraDirection cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+    private VuforiaLocalizer vuforia = null;
+
+    //Variables that will handle a series of images to be tracked
     VuforiaTrackables beacons = null;
     ImageData[] imageData = null;
 
+    /**
+     * A subclass that handles data from an image including its name, produced matrix,
+     * translation vector, and specific matrix values that determines image orientation
+     *
+     * X-component of VectorF = translation.get(0)
+     *  - Positive numbers toward the left
+     * Y-component of VectorF = translation.get(1)
+     *  - Positive numbers downwards
+     * Z-component of VectorF = translation.get(2)
+     *  - Distance = abs(negative number)
+     *
+     * perpendiularness = matrix.getData()[0]
+     *  - Range: 0 to 1
+     *  - 0: camera view is parallel to image
+     *  - 1: camera view is perpendicular to image
+     *
+     * degreesToTurn = matrix.getData()[8]
+     *  - Range: -1 to 1
+     *  - If < 0, camera is looking at image from left
+     *  - If > 0, camera is looking at image from right
+     *
+     */
     public class ImageData{
         String imageName;
         OpenGLMatrix matrix;
@@ -44,9 +83,12 @@ public class CameraVision {
         float degreesToTurn;
     }
 
+    /**
+     * Vuforia is initialized with pre-created parameters
+     */
     public void vuforiaInit() {
         params = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
-        params.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        params.cameraDirection = cameraDirection;
         params.vuforiaLicenseKey = "AVj2kiX/////AAAAGV0J5W5oOkUTvP1+IKxrWdIpD63oQV8zSY/+qSNDxkt5zj8tW0N9AK7/3yUJRBlnJx80gStuZcHF7JoiKUNj4JmO6gcyIQn2LWZ/0hL9gFM+PmwM6lvzJu9U/gmvf++GngzR74ft0gjlNPle9qDHEaAgMHYcbEDpc4msHDVn6ZjCcxDem2tQyW4gEY334fwAU9E0ySkw1KwC/Mo6gaE7bW1Mh9xLbXYTe2+sRclEA6YbrKeH8LHmJBDXQxTdcL4HyS26oPYAGRXfFLoi7QkBdkPDYKiPQUsCoHhNz1uhPh5duEdwOD9Sm6YUPZYet7Mo9QP3sxaDlaqY5l2pHYn/tH31Xu9eqLKe2RmNRzgMNaJ9\n";
         params.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
         vuforia = ClassFactory.createVuforiaLocalizer(params);
@@ -64,6 +106,10 @@ public class CameraVision {
         vuforiaRunning = true;
     }
 
+    /**
+     * Function that runs the image tracking during opMode
+     * @param opMode TODO: take this parameter out after TESTING!
+     */
     public void runImageTracking(LinearOpMode opMode) {
         for (int i=0; i < beacons.size(); i++) {
             imageData[i].imageName = beacons.get(i).getName();
@@ -75,17 +121,17 @@ public class CameraVision {
                 opMode.telemetry.addData(imageData[i].imageName + "-translation", imageData[i].translation);
                 opMode.telemetry.addData(imageData[i].imageName + "-perpendicularness", imageData[i].perpendicularness);
                 opMode.telemetry.addData(imageData[i].imageName + "-degreesToturn", imageData[i].degreesToTurn);
-                //matrix.getData()[0] returns a float from 0 to 1; 0 = camera view is parallel to image, 1 = camera view is perpendicular to image
-                //matrix.getDate()[8] returns a float from -1 to 1; if < 0, camera is looking at image from the left, if > 0, camera is looking at image from the right
-                //translation.get(0) returns x-component of vector: positive numbers towards left
-                //translation.get(1) returns y-component of vector: positive numbers downwards
-                //translation.get(2) returns z-component of vector: distance = abs(negative number)
             }
             else opMode.telemetry.addData(imageData[i].imageName, "null");
         }
         opMode.telemetry.addData("Number of Images", countTrackedImages());
     }
 
+    /**
+     * Counts how many images Vuforia has tracked
+     *
+     * @return the number of images in view and tracked by Vuforia at the moment
+     */
     public int countTrackedImages(){
         int images = 0;
         for (int i=0; i < beacons.size(); i++){
@@ -98,6 +144,11 @@ public class CameraVision {
         return images;
     }
 
+    /**
+     * Getter for beacon name
+     * @param index of the beacon image array
+     * @return the name that it is associated with
+     */
     public String getBeaconName(int index){
         return beacons.get(index).getName();
     }
