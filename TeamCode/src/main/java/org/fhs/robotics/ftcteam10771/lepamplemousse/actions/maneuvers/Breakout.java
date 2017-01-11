@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.LED;
-import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 /**
  * Created by joelv on 1/11/2017.
@@ -20,11 +18,15 @@ public class Breakout extends LinearOpMode {
         DigitalChannel rangeon = hardwareMap.digitalChannel.get("rangeon");
         UltrasonicRange testSensor = new UltrasonicRange(range, rangeon);
         waitForStart();
-        testSensor.enable(true);
+        int x = 0;
         while (opModeIsActive()) {
-            double in = testSensor.distance();
-            telemetry.addData("in", in);
-            telemetry.update();
+            testSensor.enable(x%2 == 0);
+            for (int i = 0; i<100; i++) {
+                double in = testSensor.distance();
+                telemetry.addData("in", in);
+                telemetry.update();
+            }
+            x++;
         }
     }
 }

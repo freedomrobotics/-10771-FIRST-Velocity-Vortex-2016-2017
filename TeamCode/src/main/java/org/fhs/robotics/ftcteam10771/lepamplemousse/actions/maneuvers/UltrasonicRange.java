@@ -2,6 +2,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DigitalChannelController;
 
 /**
  * Class that handles the Adafruit
@@ -31,6 +32,8 @@ public class UltrasonicRange {
     UltrasonicRange(AnalogInput analogInput, DigitalChannel digitalChannel) {
         rangeSensor = analogInput;
         toggler = digitalChannel;
+        //todo test to see if it works
+        toggler.setMode(DigitalChannelController.Mode.OUTPUT);
     }
 
     /**
@@ -51,8 +54,15 @@ public class UltrasonicRange {
             if (toggler.getState()) {
                 return rangeSensor.getVoltage() / scaleFactor;
             }
-            return 1;
+            return 404;
         }
         return 0;
+    }
+
+    /**
+     * Getter for range sensor state
+     */
+    public boolean ultrasonicState(){
+        return toggler.getState();
     }
 }
