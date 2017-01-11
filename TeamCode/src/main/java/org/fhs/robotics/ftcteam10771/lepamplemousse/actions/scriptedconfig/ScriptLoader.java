@@ -17,7 +17,7 @@ public class ScriptLoader {
     Config.ParsedData scriptedAutonomousData;
 
     ScriptLoader(Config.ParsedData scriptedAutonomousData){
-        this.scriptedAutonomousData = scriptedAutonomousData
+        this.scriptedAutonomousData = scriptedAutonomousData;
     }
 
     public static class CommandParser{
