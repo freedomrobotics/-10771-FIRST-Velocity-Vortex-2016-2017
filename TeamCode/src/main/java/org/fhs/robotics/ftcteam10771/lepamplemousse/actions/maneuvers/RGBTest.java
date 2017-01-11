@@ -4,13 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
-import com.qualcomm.robotcore.hardware.DigitalChannelController;
 import com.qualcomm.robotcore.hardware.LED;
 
 /**
  * Created by 84ven on 12/21/2016.
  *
- * Op Mode testing the Adafruit color sensor
+ * Op Mode testing the RGB color sensor
  *
  * Turns on the LED if it is pointing to the correct
  * side of the beacon
@@ -22,14 +21,14 @@ public class RGBTest extends LinearOpMode {
     LED leftLED;
     ColorSensor leftSensor;
     ColorSensor rightSensor;
-    Adafruit colorHandler;
+    RGB colorHandler;
     Integer[] test = new Integer[3];
     @Override
     public void runOpMode() throws InterruptedException {
         leftSensor = hardwareMap.colorSensor.get("leftRGB");
         leftLED = hardwareMap.led.get("leftLED");
         //rightSensor = hardwareMap.colorSensor.get("rightRGB");
-        colorHandler = new Adafruit(leftSensor);
+        colorHandler = new RGB(leftSensor);
         leftLED.enable(false);
         waitForStart();
         leftLED.enable(false);
@@ -41,11 +40,11 @@ public class RGBTest extends LinearOpMode {
                 telemetry.addData("RedStatus", test[0]);
                 telemetry.addData("BlueStatus", test[1]);
                 telemetry.addData("GreenStatus", test[2]);
-                telemetry.addData("Red", colorHandler.isCorrectSide("red"));
+                telemetry.addData("Red", colorHandler.isSide(RGB.Color.RED));
             }
             else telemetry.addData("Color Sensor", "null");
             if (leftLED!=null){
-                leftLED.enable(colorHandler.isCorrectSide("red"));
+                leftLED.enable(colorHandler.isSide(RGB.Color.RED));
             }
             else telemetry.addData("LED", "null");
             telemetry.update();
