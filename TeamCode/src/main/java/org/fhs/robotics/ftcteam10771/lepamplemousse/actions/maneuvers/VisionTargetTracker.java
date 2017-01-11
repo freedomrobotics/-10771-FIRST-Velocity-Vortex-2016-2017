@@ -92,10 +92,10 @@ public class VisionTargetTracker extends LinearOpMode {
         double margin = Math.abs(valueMargin);
         while (Math.abs(cameraVision.imageData[designatedImage].translation.get(0))>margin && opModeIsActive()){
             if (cameraVision.imageData[designatedImage].translation.get(0)>margin){
-                autoDrive.drive(AutoDrive.Direction.LEFT, AutoDrive.Speed.SLOW);
+                autoDrive.drive(AutoDrive.Direction.RIGHT, AutoDrive.Speed.SLOW);
             }
             if (cameraVision.imageData[designatedImage].translation.get(0)<-1 * margin){
-                autoDrive.drive(AutoDrive.Direction.RIGHT, AutoDrive.Speed.SLOW);
+                autoDrive.drive(AutoDrive.Direction.LEFT, AutoDrive.Speed.SLOW);
             }
         }
         stop();
@@ -123,7 +123,7 @@ public class VisionTargetTracker extends LinearOpMode {
     private void approach(double designatedDistance){
         double distanceToStop = Math.abs(designatedDistance);
         while(Math.abs(cameraVision.imageData[designatedImage].translation.get(2))>distanceToStop && opModeIsActive()) {
-            autoDrive.drive(AutoDrive.Direction.FORWARDS, AutoDrive.Speed.SLOW);
+            autoDrive.drive(AutoDrive.Direction.BACKWARDS, AutoDrive.Speed.SLOW);
         }
         autoDrive.stop();
     }

@@ -168,10 +168,8 @@ public class AutoDrive {
     }
 
     private void setPower(){
-        if (!swingClockwise) frontRight.setPower((-ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower))));
-        else frontRight.setPower(0);
-        if (!swingCounterClockwise) fronLeft.setPower((BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower))));
-        else fronLeft.setPower(0);
+        frontRight.setPower((-ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower))));
+        fronLeft.setPower((BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower))));
         backLeft.setPower((ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower))));
         backRight.setPower((-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower))));
     }
