@@ -20,53 +20,63 @@ public class VectorDrive {
     boolean vectorDriveActive;
     boolean blueTeam;
     boolean relativeDrive;
+    boolean joystickControl;
 
     Runnable driveRunnable = new Runnable() {
         @Override
         public void run() {
 
-        while (!Thread.interrupted()) {
-            float joystickTheta = vectorR.getTheta();
-            float absoluteTheta;
-            float fieldTheta;
-            float joystickRadius = vectorR.getRadius();
-            float rotationalPower = vectorR.getRad();
-            float robotRotation = robot.getVectorR().getRad();
+            VectorR currentVectorR;
 
-            if(blueTeam){
-                if(joystickTheta <= (3*(Math.PI))/2){
-                    absoluteTheta = (float) (joystickTheta + (Math.PI)/2);
+            while (!Thread.interrupted()) {
+
+                if(joystickControl){
+                    currentVectorR = vectorR;
                 }else{
-                    absoluteTheta = (float) (joystickTheta - (3*(Math.PI))/2);
+                    currentVectorR = null; //autonomous vector R
                 }
-            }else{
-                absoluteTheta = joystickTheta;
-            }
 
-            if(relativeDrive){
-                if(absoluteTheta <= robotRotation){
-                    fieldTheta = (float) (absoluteTheta + robotRotation);
+                float joystickTheta = currentVectorR.getTheta();
+                float absoluteTheta;
+                float fieldTheta;
+                float joystickRadius = currentVectorR.getRadius();
+                float rotationalPower = currentVectorR.getRad();
+                float robotRotation = robot.getVectorR().getRad();
+
+                if(blueTeam){
+                    if(joystickTheta > ((Math.PI))/2){
+                        absoluteTheta = (float) (joystickTheta - (Math.PI)/2);
+                    }else{
+                        absoluteTheta = (float) (joystickTheta + (3*(Math.PI))/2);
+                    }
                 }else{
-                    fieldTheta = (float) (absoluteTheta + robotRotation - 2*(Math.PI));
+                    absoluteTheta = joystickTheta;
                 }
-            }else{
-                fieldTheta = absoluteTheta;
+
+                if(relativeDrive){
+                    if(absoluteTheta <= robotRotation){
+                        fieldTheta = (float) (absoluteTheta + robotRotation);
+                    }else{
+                        fieldTheta = (float) (absoluteTheta + robotRotation - 2*(Math.PI));
+                    }
+                }else{
+                    fieldTheta = absoluteTheta;
+                }
+
+                float ACShaftPower = (float) ((Math.sin(absoluteTheta - (Math.PI/ 4))) * joystickRadius);
+                float BDShaftPower = (float) ((Math.cos(absoluteTheta - (Math.PI / 4))) * joystickRadius);
+
+                frMotor.setPower((-fieldTheta) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+                flMotor.setPower((fieldTheta) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+                blMotor.setPower((fieldTheta) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+                brMotor.setPower((-fieldTheta) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-
-            float ACShaftPower = (float) ((Math.sin(absoluteTheta - (Math.PI/ 4))) * joystickRadius);
-            float BDShaftPower = (float) ((Math.cos(absoluteTheta - (Math.PI / 4))) * joystickRadius);
-
-            frMotor.setPower((-fieldTheta) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-            flMotor.setPower((fieldTheta) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-            blMotor.setPower((fieldTheta) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-            brMotor.setPower((-fieldTheta) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
         }
     };
 
@@ -107,10 +117,12 @@ public class VectorDrive {
     public void initiatePosition(){
         vectorDriveActive = true;
         driveThread.start();
+
     }
 
     public void initiateAutonomouse(){
         vectorDriveActive = true;
+        driveThread.start();
     }
 
     public void endDriveThread(){
@@ -129,5 +141,9 @@ public class VectorDrive {
         flMotor.setMode(runMode);
         brMotor.setMode(runMode);
         blMotor.setMode(runMode);
+    }
+
+    public void setJoystickControl(boolean setJoystickControl){
+        joystickControl = setJoystickControl;
     }
 }
