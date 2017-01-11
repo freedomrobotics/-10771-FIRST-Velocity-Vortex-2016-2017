@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 /**
@@ -17,13 +18,13 @@ public class Breakout extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         AnalogInput range = hardwareMap.analogInput.get("range");
         DigitalChannel rangeon = hardwareMap.digitalChannel.get("rangeon");
-        
-        double voltperin = 9.765625e-3;
+        UltrasonicRange testSensor = new UltrasonicRange(range, rangeon);
         waitForStart();
-        rangeon.setState(true);
+        testSensor.enable(true);
         while (opModeIsActive()) {
-            double in = range.getVoltage() / voltperin;
+            double in = testSensor.distance();
             telemetry.addData("in", in);
+            telemetry.update();
         }
     }
 }
