@@ -1,6 +1,5 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,26 +7,33 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.VectorDrive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
-
 /**
- * Example
+ * Created by Adam Li on 1/12/2017.
  */
-@TeleOp(name = "Framework Example", group = "Example")
-@Disabled
-public class ExampleUsingFramework extends OpMode {
+
+@TeleOp(name="Basic Drive", group="Not So Basic Stuff")
+public class BasicNotBasicDrive extends OpMode {
     Controllers controls;
-    Telemetry telemetry;
     private long lastTime;      // The time at the last time check (using System.currentTimeMillis())
     private Config rawSettings;
     private Config.ParsedData settings;
     private Components components;
     private VectorDrive drive;
+    private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
 
-
+    /**
+     * User defined init method
+     * <p>
+     * This method will be called once when the INIT button is pressed.
+     */
     @Override
     public void init() {
         Config keymapping = new Config(Static.configPath, Static.configControlFileName + Static.configFileSufffix, telemetry, "keymapping");
@@ -47,70 +53,53 @@ public class ExampleUsingFramework extends OpMode {
                 components.read(true);
         }
 
-        rawSettings = new Config(Static.configPath, Static.configVarFileName + Static.configFileSufffix, telemetry, "settings");
+        this.rawSettings = new Config(Static.configPath, Static.configVarFileName + Static.configFileSufffix, telemetry, "settings");
         if (rawSettings.read() == Config.State.DEFAULT_EXISTS) {
             rawSettings.create(true);
             if (rawSettings.read() == Config.State.DEFAULT_EXISTS)
                 rawSettings.read(true);
         }
 
-        settings = rawSettings.getParsedData();
+        this.settings = rawSettings.getParsedData();
 
 
         this.components = new Components(hardwareMap, telemetry, components);
         this.components.initialize();
-        controls = new Controllers(gamepad1, gamepad2, keymapping);
+        this.controls = new Controllers(gamepad1, gamepad2, keymapping);
+        this.controls.initialize();
 
-        /*
-        drive = new Drive(new VectorR(), new Robot(), Aliases.motorMap.get("left_drive"),
+        drive = new VectorDrive(driveVector, new Robot(), Aliases.motorMap.get("left_drive"),
                 Aliases.motorMap.get("left_drive"), Aliases.motorMap.get("left_drive"),
                 Aliases.motorMap.get("left_drive"), rawSettings.getParsedData().subData("drivetrain"));
-        */
 
-        lastTime = System.currentTimeMillis();
-    }
-
-    @Override
-    public void init_loop() {
-
+        this.lastTime = System.currentTimeMillis();
     }
 
     public void start() {
-        //this is where we send the begin drive code
-        //drive.start() or something
-
-        //and field tracking
+        drive.initiateVelocity();
+        //should be true for driving relative to itself, so please fix that
+        drive.setRelative(false);
+        //There's a problem with this: null pointer error if false, and there shouldn't
+        // be a reason in using this to begin with
+        drive.setJoystickControl(true);
     }
 
     /**
-     * The loop of the controlled class. Does not contain a loop, since it's expected to be within a loop.
-     * It lets the drivers drive.
+     * User defined loop method
+     * <p>
+     * This method will be called repeatedly in a loop while this op mode is running
      */
+    @Override
     public void loop() {
-        // code here
-
-        //access settings (config.yml)
-        settings.subData("something").getInt("int_name");
-
-        //get gamepad function (controls.yml)
-        //functions are programmer defined
-        controls.getAnalog("function_name");
-
-        //get components (components.yml)
-        //*still needs improvement -- will do for next year*
-        Aliases.motorMap.get("left_drive");
-
+        driveVector.setX(controls.getAnalog("drive_x"));
+        driveVector.setY(controls.getAnalog("drive_y"));
+        driveVector.setRawR(controls.getAnalog("drive_rotation"));
     }
 
     @Override
     public void stop(){
-        cleanup();
-
-    }
-
-    public void cleanup(){
         //cleanup code
         Aliases.clearAll();
-        //drive.stop() or something
+        drive.endDriveThread();
     }
 }
