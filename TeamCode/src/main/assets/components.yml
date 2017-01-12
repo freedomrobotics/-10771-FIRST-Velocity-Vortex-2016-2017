@@ -1,22 +1,22 @@
 # Component Configuration File
 
+# Future Goals
+#dc_motors:
+#  dc_motor1:
+#    enabled: true
+#    extern_name: drive_left
+#    intern_name: driveLeft
+
+
 # Motors
 dc_motors:
   dc_motor1:
     enabled: true
-    extern_name: drive_left
-    intern_name: driveLeft
-
-  dc_motor2:
-    enabled: true
-    extern_name: drive_right
-    intern_name: driveRight
-
-  dc_motor3:
-    enabled: false
-    extern_name:
-    intern_name:
-
+    map_name: winch_left
+    alias:
+      - servo_motor1
+      - tape_measure_winch1
+      - main_winch
 
 # Servos
 servos:

@@ -606,6 +606,11 @@ public class Config {
         if (parsedData != null) {
             return parsedData;
         }
+        //parse if not parsed
+        if ((parsedData = parse()) != null){
+            return parsedData;
+        }
+        //return blank
         return new ParsedData();
     }
 

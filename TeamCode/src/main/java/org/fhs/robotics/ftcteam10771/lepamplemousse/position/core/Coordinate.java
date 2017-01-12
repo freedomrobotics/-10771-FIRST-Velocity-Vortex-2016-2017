@@ -14,8 +14,8 @@ public class Coordinate {
 
     }
 
-    public float x = 0.0f;
-    public float y = 0.0f;
+    protected float x = 0.0f;
+    protected float y = 0.0f;
 
     public void setX(float x){
         this.x = x;
@@ -31,6 +31,12 @@ public class Coordinate {
         return y;
     }
 
+    /**
+     * Conversion function from the robot's units to any given unit or vice versa.
+     * @param x The value to convert from
+     * @param convert The {@link UNIT} that determines what to convert from and to (e.g. CN_TO_UNIT)
+     * @return The converted value
+     */
     public static float convertTo(float x, UNIT convert){
         return x * getConversionFactor(convert);
     }
