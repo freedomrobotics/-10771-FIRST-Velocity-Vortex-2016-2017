@@ -52,6 +52,6 @@ public class Robot implements Entity{
 
     @Override
     public VectorR getVectorR() {
-        return new VectorR();
+        return new VectorR(position, rotation);
     }
 }
