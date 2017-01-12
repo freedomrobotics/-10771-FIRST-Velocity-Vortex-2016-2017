@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.R;
 /**
  * Class that handles camera vision targeting
  * for the four images under the beacons
+ * TODO: Test the class to validate that it works
  *
  * Created by Freedom Robotics on 11/12/2016.
  */
@@ -50,8 +51,8 @@ public class CameraVision {
     private VuforiaLocalizer vuforia = null;
 
     //Variables that will handle a series of images to be tracked
-    VuforiaTrackables beacons = null;
-    ImageData[] imageData = null;
+    private VuforiaTrackables beacons = null;
+    private ImageData[] imageData = null;
 
     /**
      * A subclass that handles data from an image including its name, produced matrix,
@@ -75,13 +76,24 @@ public class CameraVision {
      *  - If > 0, camera is looking at image from right
      *
      */
-    public class ImageData{
+    private class ImageData{
         String imageName;
         OpenGLMatrix matrix;
         VectorF translation;
         float perpendicularness;
         float degreesToTurn;
     }
+
+    Runnable cameraThread = new Runnable() {
+        @Override
+        public void run() {
+            while(!Thread.interrupted()) {
+                if (vuforiaRunning){
+                    runImageTracking();
+                }
+            }
+        }
+    };
 
     /**
      * Vuforia is initialized with pre-created parameters
@@ -103,14 +115,12 @@ public class CameraVision {
             imageData[i] = new ImageData();
         }
         beacons.activate();
-        vuforiaRunning = true;
     }
 
     /**
      * Function that runs the image tracking during opMode
-     * @param opMode TODO: take this parameter out after TESTING!
      */
-    public void runImageTracking(LinearOpMode opMode) {
+    private void runImageTracking() {
         for (int i=0; i < beacons.size(); i++) {
             imageData[i].imageName = beacons.get(i).getName();
             imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
@@ -118,13 +128,17 @@ public class CameraVision {
                 imageData[i].translation = imageData[i].matrix.getTranslation();
                 imageData[i].perpendicularness = imageData[i].matrix.getData()[0];
                 imageData[i].degreesToTurn = imageData[i].matrix.getData()[8];
-                opMode.telemetry.addData(imageData[i].imageName + "-translation", imageData[i].translation);
-                opMode.telemetry.addData(imageData[i].imageName + "-perpendicularness", imageData[i].perpendicularness);
-                opMode.telemetry.addData(imageData[i].imageName + "-degreesToturn", imageData[i].degreesToTurn);
             }
-            else opMode.telemetry.addData(imageData[i].imageName, "null");
         }
-        opMode.telemetry.addData("Number of Images", countTrackedImages());
+    }
+
+    /**
+     * Switches vuforia tracking on and off
+     *
+     * @param state true for on and false for off
+     */
+    public void toggleVuforia(boolean state){
+        vuforiaRunning = state;
     }
 
     /**
@@ -145,11 +159,116 @@ public class CameraVision {
     }
 
     /**
+     * Getter for the image data object
+     *
+     * @param index of the image data class array
+     * @return the image data object
+     */
+    public ImageData getImage(int index){
+        return imageData[index];
+    }
+
+    /**
+     * Getter for the image's matrix
+     *
+     * @param index of the image data class array
+     * @return the image's matrix
+     */
+    public OpenGLMatrix getMatrix(int index){
+        return getImage(index).matrix;
+    }
+
+    /**
+     * Getter for the image's translation
+     *
+     * @param index of the image data class array
+     * @return the image's translation
+     */
+    public VectorF getTranslation(int index){
+        return imageData[index].translation;
+    }
+
+    /**
+     * Gets X clip coordinate of image
+     *
+     * @param index of the image data class array
+     * @return the image's X clip coordinate
+     */
+    public float getX(int index){
+        return getTranslation(index).get(0);
+    }
+
+    /**
+     * Gets Y clip coordinate of image
+     *
+     * @param index of the image's Y clip coordinate
+     * @return the image's Y clip coordinate
+     */
+    public float getY(int index){
+        return getTranslation(index).get(1);
+    }
+
+    /**
+     * Get Z axis of the image's translational position
+     *
+     * @param index of the image
+     * @return the Z clip coordinate
+     */
+    public float getZ(int index){
+        return getTranslation(index).get(2);
+    }
+
+    /**
+     * Getter for the image's perpendicularness to image
+     *
+     * @param index of the image data class array
+     * @return the image's translation
+     */
+    public float getPerpendicularness(int index){
+        return imageData[index].perpendicularness;
+    }
+
+    /**
+     * Getter for the image's degrees to turn
+     *
+     * @param index of the image data class array
+     * @return the image's degrees to turn
+     */
+    public float getDegreesToTurn(int index){
+        return imageData[index].degreesToTurn;
+    }
+
+    /**
+     * Gets the image's data object array index given its name
+     *
+     * @param imageName The name of target image
+     * @return the index of the data object of image
+     */
+    public int getIndex(String imageName){
+        int result = -1;
+        for (int i=0; i<beacons.size(); i++){
+            if (imageData[i].imageName.equals(imageName)){
+                result = i;
+            }
+        }
+        return result;
+    }
+
+    /**
      * Getter for beacon name
      * @param index of the beacon image array
      * @return the name that it is associated with
      */
-    public String getBeaconName(int index){
+    public String getImageName(int index){
         return beacons.get(index).getName();
+    }
+
+    /**
+     * Get number of trackable images
+     *
+     * @return the number of trackables
+     */
+    public int getTrackableSize(){
+        return beacons.size();
     }
 }

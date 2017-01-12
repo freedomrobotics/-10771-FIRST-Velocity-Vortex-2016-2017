@@ -22,11 +22,31 @@ public class VisionTargetTracker extends LinearOpMode {
     private DcMotor motorB;
     private DcMotor motorC;
     private DcMotor motorD;
-    CameraVision cameraVision;
-    AutoDrive autoDrive;
+    private CameraVision cameraVision;
+    private AutoDrive autoDrive;
     private boolean opModeFinished = false;
     public Integer iteration = 0;
     private int designatedImage;
+    Thread camerathread = new Thread(cameraVision.cameraThread);
+
+    //Runnable thread of code for the telemetry
+    Thread telemetryThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (!Thread.interrupted()){
+                cameraVision.toggleVuforia(opModeIsActive());
+                if (opModeIsActive()){
+                    for (int i=0; i<cameraVision.getTrackableSize(); i++){
+                        if (cameraVision.getMatrix(i) != null){
+                            telemetry.addData(cameraVision.getImageName(i), cameraVision.getTranslation(i));
+                        }
+                        else telemetry.addData(cameraVision.getImageName(i), "null");
+                    }
+                    telemetry.update();
+                }
+            }
+        }
+    });
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -34,36 +54,21 @@ public class VisionTargetTracker extends LinearOpMode {
         autoDrive = new AutoDrive(motorA, motorB, motorC, motorD);
         cameraVision = new CameraVision();
         cameraVision.vuforiaInit();
+        camerathread.start();
         waitForStart();
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                while(cameraVision.vuforiaRunning) {
-                    cameraVision.runImageTracking(VisionTargetTracker.this);
-                    telemetry.addData("Iterations", iteration);
-                    telemetry.update();
-                }
-            }
-        };
-        Thread thread = new Thread(r);
-        thread.start();
-        while (opModeIsActive()) {
-            if (!opModeFinished){
-                //Do things!!!!
-                while(cameraVision.countTrackedImages()!=1){
-                    search();
-                }
-                setDesignatedImage();
-                //TODO: Find acceptable margins for parameters of each function
-                faceImage(0.2);
-                center(10);
-                approach(650);
-                iteration++;
-            }
-            opModeFinished = true;
+        telemetryThread.start();
+        /*
+        while(cameraVision.countTrackedImages()!=1){
+            search();
         }
-        cameraVision.vuforiaRunning = false;
-        thread.interrupt();
+        */
+        setDesignatedImage();
+        //TODO: Find acceptable margins for parameters of each function
+        faceImage(0.2);
+        center(10);
+        approach(650);
+        opModeFinished = true;
+        camerathread.interrupt();
     }
 
     /**
@@ -90,11 +95,11 @@ public class VisionTargetTracker extends LinearOpMode {
     private void center(double valueMargin){
         //TODO: Find which direction to drive for each condition
         double margin = Math.abs(valueMargin);
-        while (Math.abs(cameraVision.imageData[designatedImage].translation.get(0))>margin && opModeIsActive()){
-            if (cameraVision.imageData[designatedImage].translation.get(0)>margin){
+        while ((Math.abs(cameraVision.getX(designatedImage))) > margin && opModeIsActive()){
+            if (cameraVision.getX(designatedImage) > margin){
                 autoDrive.drive(AutoDrive.Direction.RIGHT, AutoDrive.Speed.SLOW);
             }
-            if (cameraVision.imageData[designatedImage].translation.get(0)<-1 * margin){
+            if (cameraVision.getX(designatedImage)<-1 * margin){
                 autoDrive.drive(AutoDrive.Direction.LEFT, AutoDrive.Speed.SLOW);
             }
         }
@@ -106,11 +111,11 @@ public class VisionTargetTracker extends LinearOpMode {
      */
     private void faceImage(double valueMargin){
         double margin = Math.abs(valueMargin);
-        while (Math.abs(cameraVision.imageData[designatedImage].translation.get(0))>margin && opModeIsActive()){
-            if (cameraVision.imageData[designatedImage].degreesToTurn> margin){
+        while (Math.abs(cameraVision.getDegreesToTurn(designatedImage)) >margin && opModeIsActive()){
+            if (cameraVision.getDegreesToTurn(designatedImage) > margin){
                 autoDrive.rotate(AutoDrive.Direction.CLOCKWISE, AutoDrive.Speed.SLOW);
             }
-            if (cameraVision.imageData[designatedImage].degreesToTurn< margin * -1){
+            if (cameraVision.getDegreesToTurn(designatedImage) < margin * -1){
                 autoDrive.rotate(AutoDrive.Direction.COUNTERCLOCKWISE, AutoDrive.Speed.SLOW);
             }
         }
@@ -122,15 +127,15 @@ public class VisionTargetTracker extends LinearOpMode {
      */
     private void approach(double designatedDistance){
         double distanceToStop = Math.abs(designatedDistance);
-        while(Math.abs(cameraVision.imageData[designatedImage].translation.get(2))>distanceToStop && opModeIsActive()) {
+        while(Math.abs(cameraVision.getZ(designatedImage))>distanceToStop && opModeIsActive()) {
             autoDrive.drive(AutoDrive.Direction.BACKWARDS, AutoDrive.Speed.SLOW);
         }
         autoDrive.stop();
     }
 
     private void setDesignatedImage(){
-        for (int i=0; i < cameraVision.beacons.size(); i++){
-            if (cameraVision.imageData[i].matrix != null){
+        for (int i=0; i < cameraVision.getTrackableSize(); i++){
+            if (cameraVision.getMatrix(i) != null){
                 designatedImage = i;
             }
         }
