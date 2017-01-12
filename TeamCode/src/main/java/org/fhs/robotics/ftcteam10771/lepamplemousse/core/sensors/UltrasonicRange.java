@@ -36,6 +36,27 @@ public class UltrasonicRange {
         toggler.setMode(DigitalChannelController.Mode.OUTPUT);
     }
 
+    //The variable to be used during looping thread
+    public double distance;
+
+    /**
+     * A runnable thread that streams the distance
+     * every instant
+     */
+    public Runnable rangeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            while (!Thread.interrupted()){
+                if (toggler.getState()){
+                    distance = distance();
+                }
+            }
+        }
+    };
+
+    //The respective thread that runs the runnable
+    public Thread rangeThread = new Thread(rangeRunnable);
+
     /**
      * Enable or disable the range sensor
      * @param state true for on or false for off

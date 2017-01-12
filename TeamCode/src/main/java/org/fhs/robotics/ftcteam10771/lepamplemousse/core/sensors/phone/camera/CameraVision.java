@@ -25,13 +25,35 @@ public class CameraVision {
      */
     public CameraVision(VuforiaLocalizer.CameraDirection cameraDirection){
         this.cameraDirection = cameraDirection;
+        this.vuforiaInit();
     }
 
     /*
-        Default constructor
+        Constructor that allows user to choose whether or not
+     */
+    public CameraVision(boolean vuforiaInit){
+        if (vuforiaInit){
+            this.vuforiaInit();
+        }
+    }
+
+    /*
+        Constructor that allows user to choose camera side and
+        whether to initialize Vuforia instantly
+     */
+    public CameraVision(VuforiaLocalizer.CameraDirection cameraDirection, boolean vuforiaInit){
+        this.cameraDirection = cameraDirection;
+        if (vuforiaInit){
+            this.vuforiaInit();
+        }
+    }
+
+    /*
+        Default constructor with BACK as default camera
+        and initializes vuforia during construction by default
      */
     public CameraVision(){
-
+        this.vuforiaInit();
     }
 
     //Flag for whether Vuforia should be running or not
@@ -76,7 +98,8 @@ public class CameraVision {
         float degreesToTurn;
     }
 
-    Runnable cameraThread = new Runnable() {
+    //The thread loop code
+    public Runnable cameraRunnable = new Runnable() {
         @Override
         public void run() {
             while(!Thread.interrupted()) {
@@ -86,6 +109,9 @@ public class CameraVision {
             }
         }
     };
+
+    //The respective thread
+    public Thread cameraThread = new Thread(cameraRunnable);
 
     /**
      * Vuforia is initialized with pre-created parameters
@@ -112,7 +138,7 @@ public class CameraVision {
     /**
      * Function that runs the image tracking during opMode
      */
-    private void runImageTracking() {
+    public void runImageTracking() {
         for (int i=0; i < beacons.size(); i++) {
             imageData[i].imageName = beacons.get(i).getName();
             imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
