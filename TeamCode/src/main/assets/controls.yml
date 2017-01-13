@@ -1,21 +1,6 @@
 # Gamepad mappings
 # Function List:
 # drivetrain_left       = the left motor on the drivetrain      - analog(-1, 1)   - float
-# drivetrain_right      = the right motor on the drivetrain     - analog(-1, 1)   - float
-# winch_extend_retract  = the winch motor to extend and retract - analog(-1, 1)   - float
-# winch_angle           = the angle of the winch assembly       - analog(-1, 1)   - float
-# trigger_arm           = directly mapped to the trigger arm    - analog(0, 1)    - float
-# arm_vert              = The verticle part of the robot arm    - analog (-1, 1)  - float
-# arm_sweep             = The horizontal part of the robot arm  - analog (-1, 1)  - float
-# winch_preset          = sets the winch angle to the preset    - digital         - boolean
-# servos_off            = turns off the servos                  - digital         - boolean
-# arm_toggle            = toggles arm controls                  - digital         - boolean
-# arm_toggle_on         = Single toggle arm controls on         - digital         - boolean
-# arm_toggle_off        = Single toggle arm controls off        - digital         - boolean
-# all_clear             = toggle the all clear servo            - digital         - boolean
-# all_clear_down        = all clear servo down                  - digital         - boolean
-# all_clear_up          = all clear servo up                    - digital         - boolean
-# log_cat               = enable logging; checked on init       - digital         - boolean
 gamepad1:
   left_stick_x:
     function: null
