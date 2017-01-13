@@ -289,4 +289,23 @@ public class CameraVision {
     public int getTrackableSize(){
         return beacons.size();
     }
+
+    /**
+     * Determines if the camera can see a specific image
+     *
+     * @param image name to be detected
+     * @return whether the camera is detecting it
+     */
+    public boolean imageInSight(String image){
+        int match = -1;
+        for (int i=0; i<beacons.size(); i++){
+            if (imageData[i].imageName.equals(image)){
+                match = i;
+            }
+        }
+        if (!(match < 0)){
+            return (imageData[match].matrix!=null);
+        }
+        return false;
+    }
 }
