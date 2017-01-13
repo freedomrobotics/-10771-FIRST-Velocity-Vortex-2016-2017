@@ -37,13 +37,13 @@ public class UltrasonicRange {
     }
 
     //The variable to be used during looping thread
-    public double distance;
+    private double distance;
 
     /**
      * A runnable thread that streams the distance
      * every instant
      */
-    public Runnable rangeRunnable = new Runnable() {
+    public final Runnable rangeRunnable = new Runnable() {
         @Override
         public void run() {
             while (!Thread.interrupted()){
@@ -55,7 +55,7 @@ public class UltrasonicRange {
     };
 
     //The respective thread that runs the runnable
-    public Thread rangeThread = new Thread(rangeRunnable);
+    public final Thread rangeThread = new Thread(rangeRunnable);
 
     /**
      * Enable or disable the range sensor
@@ -81,9 +81,18 @@ public class UltrasonicRange {
     }
 
     /**
-     * Getter for range sensor state
+     * Is range sensor on?
+     * @return the state of the range sensor
      */
     public boolean ultrasonicState(){
         return toggler.getState();
+    }
+
+    /**
+     * Returns the distance provided by sensor
+     * @return distance provided by sensor
+     */
+    public double getDistance(){
+        return distance;
     }
 }

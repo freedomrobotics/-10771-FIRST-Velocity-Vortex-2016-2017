@@ -59,6 +59,10 @@ public class CameraVision {
     //Flag for whether Vuforia should be running or not
     boolean vuforiaRunning = false;
 
+    //Variables that indicate the targeted image
+    private int targetedImageIndex;
+    private String targetedImageName;
+
     //Paramters for Vuforia initializtion to be used
     private VuforiaLocalizer.Parameters params = null;
     private VuforiaLocalizer.CameraDirection cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
@@ -99,7 +103,7 @@ public class CameraVision {
     }
 
     //The thread loop code
-    public Runnable cameraRunnable = new Runnable() {
+    public final Runnable cameraRunnable = new Runnable() {
         @Override
         public void run() {
             while(!Thread.interrupted()) {
@@ -111,7 +115,7 @@ public class CameraVision {
     };
 
     //The respective thread
-    public Thread cameraThread = new Thread(cameraRunnable);
+    public final Thread cameraThread = new Thread(cameraRunnable);
 
     /**
      * Vuforia is initialized with pre-created parameters
@@ -146,6 +150,11 @@ public class CameraVision {
                 imageData[i].translation = imageData[i].matrix.getTranslation();
                 imageData[i].perpendicularness = imageData[i].matrix.getData()[0];
                 imageData[i].degreesToTurn = imageData[i].matrix.getData()[8];
+            }
+            else {
+                imageData[i].translation = new VectorF(0f, 0f, 0f);
+                imageData[i].perpendicularness = 0;
+                imageData[i].degreesToTurn = 0;
             }
         }
     }
@@ -291,6 +300,21 @@ public class CameraVision {
     }
 
     /**
+     * Determines whether the name exists in a trackable image
+     * @param image name
+     * @return the state of image name's existence
+     */
+    private boolean imageExists(String image){
+        int match = -1;
+        for (int i=0; i<beacons.size(); i++){
+            if (imageData[i].imageName.equals(image)){
+                match = i;
+            }
+        }
+        return (!(match<0));
+    }
+
+    /**
      * Determines if the camera can see a specific image
      *
      * @param image name to be detected
@@ -298,14 +322,83 @@ public class CameraVision {
      */
     public boolean imageInSight(String image){
         int match = -1;
-        for (int i=0; i<beacons.size(); i++){
-            if (imageData[i].imageName.equals(image)){
-                match = i;
+        if (imageExists(image)){
+            for (int i=0; i<beacons.size(); i++){
+                if (imageData[i].imageName.equals(image)){
+                    match = i;
+                }
             }
-        }
-        if (!(match < 0)){
             return (imageData[match].matrix!=null);
         }
         return false;
+    }
+
+    /**
+     * Sets the highest indexed detected image as a target by assigning its index
+     * and its string id to the public variables
+     */
+    public void setTargetImage(){
+        for (int i=0; i<beacons.size(); i++){
+            if (imageData[i].matrix!=null){
+                targetedImageIndex = i;
+                targetedImageName = imageData[i].imageName;
+            }
+        }
+    }
+
+    /**
+     * Sets the image as target
+     * if there is one image in sight
+     */
+    public void setSingleImageFoundAsTarget(){
+        if (countTrackedImages()==1){
+            setTargetImage();
+        }
+    }
+
+    /**
+     * Sets a target image by name and index
+     * @param image
+     * @param index
+     */
+    private void setTargetImage(String image, int index){
+        targetedImageName = image;
+        targetedImageIndex = index;
+    }
+
+    /**
+     * Sets the target image by name
+     * @param image
+     */
+    public void setTargetImage(String image){
+        if (imageExists(image)){
+            setTargetImage(image, getIndex(image));
+        }
+    }
+
+    /**
+     * Sets the target image by index
+     * @param index of the image on the array
+     */
+    public void setTargetImage(int index){
+        if (index < beacons.size() && index >= 0){
+            setTargetImage(getImageName(index), index);
+        }
+    }
+
+    /**
+     * Getter for image's string ID
+     * @return the targeted image's string id
+     */
+    public String getTargetImageName(){
+        return targetedImageName;
+    }
+
+    /**
+     * Getter for the image's index ID
+     * @return the targeted image's index id
+     */
+    public int getTargetedImageIndex(){
+        return targetedImageIndex;
     }
 }
