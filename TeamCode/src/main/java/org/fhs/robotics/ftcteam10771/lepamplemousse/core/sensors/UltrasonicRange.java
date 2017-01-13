@@ -1,5 +1,7 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DigitalChannelController;
@@ -94,5 +96,14 @@ public class UltrasonicRange {
      */
     public double getDistance(){
         return distance;
+    }
+
+    /**
+     * Tests a sensor in any test linear op mode
+     * @param opMode the linear op mode used to test
+     */
+    public void testRangeSensor(LinearOpMode opMode){
+        opMode.telemetry.addData("Inches", distance());
+        opMode.telemetry.update();
     }
 }

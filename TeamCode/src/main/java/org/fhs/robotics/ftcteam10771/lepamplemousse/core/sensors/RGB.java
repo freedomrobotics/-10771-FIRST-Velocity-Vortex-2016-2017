@@ -143,7 +143,7 @@ public class RGB {
         else return;
     }
 
-    //Chooses left LED by defaul
+    //Chooses left LED by default
     public void switchLED(boolean on){
         switchLED(LEFT, on);
     }
@@ -303,6 +303,5 @@ public class RGB {
                 }
             }
         }
-        else return;
     }
 }

@@ -1,5 +1,6 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
 
@@ -400,5 +401,19 @@ public class CameraVision {
      */
     public int getTargetedImageIndex(){
         return targetedImageIndex;
+    }
+
+    /**
+     * Tests Vuforia in an op mode
+     * @param linearOpMode
+     */
+    public void testVuforia(LinearOpMode linearOpMode){
+        toggleVuforia(true);
+        for (int i=0; i<beacons.size(); i++) {
+            if (imageData[i].matrix != null) {
+                linearOpMode.telemetry.addData(imageData[i].imageName, imageData[i].translation);
+            } else linearOpMode.telemetry.addData(imageData[i].imageName, "null");
+        }
+        //toggleVuforia(false) todo: see if this is necessary or not
     }
 }
