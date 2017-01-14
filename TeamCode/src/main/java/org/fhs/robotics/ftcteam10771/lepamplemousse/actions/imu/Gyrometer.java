@@ -209,9 +209,9 @@ public class Gyrometer extends IMU {
      * @param updateTelemetry whether to update the telemetry
      */
     public void testGyro(LinearOpMode opMode, boolean updateTelemetry){
-        opMode.telemetry.addData("X", getOrientation(Axis.X));
-        opMode.telemetry.addData("Y", getOrientation(Axis.Y));
-        opMode.telemetry.addData("Z", getOrientation(Axis.Z));
+        opMode.telemetry.addData("GyroX", getOrientation(Axis.X));
+        opMode.telemetry.addData("GyroY", getOrientation(Axis.Y));
+        opMode.telemetry.addData("GyroZ", getOrientation(Axis.Z));
         if (updateTelemetry) opMode.telemetry.update();
     }
 }

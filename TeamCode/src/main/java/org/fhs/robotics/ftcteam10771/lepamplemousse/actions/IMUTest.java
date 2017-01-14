@@ -17,14 +17,18 @@ public class IMUTest extends LinearOpMode{
     BNO055IMU imu;
     IMU imuHandler;
     Gyrometer gyrometer;
+    Accelerometer accelerometer;
 
     @Override
     public void runOpMode() throws InterruptedException {
         imu = hardwareMap.get(BNO055IMU.class, "BNO");
         imuHandler = new IMU(imu, false);
         gyrometer.setAngleUnit(BNO055IMU.AngleUnit.DEGREES);
+        accelerometer.setAccelerationUnit(BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC);
         imuHandler.imuInit();
         gyrometer = (Gyrometer)imuHandler;
-        gyrometer.testGyro(this, true);
+        accelerometer = (Accelerometer)imuHandler;
+        gyrometer.testGyro(this, false);
+        accelerometer.testGyro(this, true);
     }
 }
