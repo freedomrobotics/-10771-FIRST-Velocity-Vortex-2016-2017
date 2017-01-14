@@ -26,43 +26,34 @@ public class VectorDrive {
         @Override
         public void run() {
 
-            VectorR currentVectorR;
-
             while (!Thread.interrupted()) {
 
-                //chooses which vectorR to set currentVectorR to (determins whether the robot is controlled by autonomous or joystick)
-                if(joystickControl){
-                    currentVectorR = vectorR;
-                }else{
-                    currentVectorR = null; //autonomous vector R
-                }
-
                 //sets values from the vectorR needed for movement
-                float joystickTheta = currentVectorR.getTheta();
+                float joystickTheta = vectorR.getTheta();
                 float absoluteTheta = 0;
                 float robotTheta;
-                float joystickRadius = currentVectorR.getRadius();
-                float rotationalPower = currentVectorR.getRad();
+                float joystickRadius = vectorR.getRadius();
+                float rotationalPower = vectorR.getRad();
                 float robotRotation = robot.getVectorR().getRad();
 
-                if(relativeDrive){ //if the robot drives relative to the field
-                    if(blueTeam){ //if our team is on blue
-                        if(joystickTheta > ((Math.PI))/2){ //keeps the theta value positive while rotating the polar coordinates pi/2 ccw
-                            absoluteTheta = (float) (joystickTheta - (Math.PI)/2);
-                        }else{
-                            absoluteTheta = (float) (joystickTheta + (3*(Math.PI))/2);
+                if(relativeDrive) { //if the robot drives relative to the field
+                    robotTheta = joystickTheta; //the direction of the joystick is the direction of motion
+                }else {
+                    if (blueTeam) { //if our team is on blue
+                        if (joystickTheta > ((Math.PI)) / 2) { //keeps the theta value positive while rotating the polar coordinates pi/2 ccw
+                            absoluteTheta = (float) (joystickTheta - (Math.PI) / 2);
+                        } else {
+                            absoluteTheta = (float) (joystickTheta + (3 * (Math.PI)) / 2);
                         }
-                    }else{
+                    } else {
                         absoluteTheta = joystickTheta; //the field coordinate does not need to be adjusted
                     }
 
-                    if((absoluteTheta+robotRotation)<(2*Math.PI)){ //sets the robotTheta to the direction the robot has to move while keeping the theta value positive
+                    if ((absoluteTheta + robotRotation) < (2 * Math.PI)) { //sets the robotTheta to the direction the robot has to move while keeping the theta value positive
                         robotTheta = (float) (absoluteTheta + robotRotation);
-                    }else{
-                        robotTheta = (float) (absoluteTheta + robotRotation - 2*(Math.PI));
+                    } else {
+                        robotTheta = (float) (absoluteTheta + robotRotation - 2 * (Math.PI));
                     }
-                }else{
-                    robotTheta = joystickTheta; //the direction of the joystick is the direction of motion
                 }
 
                 //calculates the shaft magnitude (AC shaft has diagonal motors "A" and "C")
@@ -102,6 +93,7 @@ public class VectorDrive {
         this.blMotor = blMotor;
         this.settings = settings;
         this.vectorDriveActive = false;
+        this.joystickControl = false;
 
         this.blueTeam = settings.getBool("blue_team");
         this.relativeDrive = settings.getBool("relative_drive");
@@ -117,7 +109,7 @@ public class VectorDrive {
     /**
      * Starts driveThread and changes vectorDriveActive to true
      */
-    public void initiateVelocity(){
+    public void startVelocity(){
         vectorDriveActive = true;
         driveThread.start();
     }
@@ -125,7 +117,7 @@ public class VectorDrive {
     /**
      * Uses driveThread to move robot to position
      */
-    public void initiatePosition(){
+    public void startPosition(){
         vectorDriveActive = true;
         driveThread.start();
 
@@ -135,7 +127,7 @@ public class VectorDrive {
      * Stops driveThread and changes vectorDriveActive to false
      * Resets relativeDrive to true
      */
-    public void endDriveThread(){
+    public void stop(){
         if(driveThread.isAlive()){driveThread.interrupt();}
 
         this.relativeDrive = true;
@@ -149,26 +141,5 @@ public class VectorDrive {
      */
     public void setRelative(boolean isRelative){
         relativeDrive = isRelative;
-    }
-
-    /**
-     * Sets runMode of all motors to input
-     *
-     * @param runMode desired Runmode(DcMotor.RunMode)
-     */
-    public void setRunMode(DcMotor.RunMode runMode){
-        frMotor.setMode(runMode);
-        flMotor.setMode(runMode);
-        brMotor.setMode(runMode);
-        blMotor.setMode(runMode);
-    }
-
-    /**
-     * sets whether the robot will be controlled by input or autonomous when driveThread is launched
-     *
-     * @param setJoystickControl (true: robot will be controlled by joystick/ false: robot will be controlled by autonomous)
-     */
-    public void setJoystickControl(boolean setJoystickControl){
-        joystickControl = setJoystickControl;
     }
 }

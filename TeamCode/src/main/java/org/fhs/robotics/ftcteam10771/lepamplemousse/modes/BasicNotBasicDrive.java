@@ -76,12 +76,9 @@ public class BasicNotBasicDrive extends OpMode {
     }
 
     public void start() {
-        drive.initiateVelocity();
+        drive.startVelocity();
         //should be true for driving relative to itself, so please fix that
-        drive.setRelative(false);
-        //There's a problem with this: null pointer error if false, and there shouldn't
-        // be a reason in using this to begin with
-        drive.setJoystickControl(true);
+        drive.setRelative(true);
     }
 
     /**
@@ -100,6 +97,6 @@ public class BasicNotBasicDrive extends OpMode {
     public void stop(){
         //cleanup code
         Aliases.clearAll();
-        drive.endDriveThread();
+        drive.stop();
     }
 }
