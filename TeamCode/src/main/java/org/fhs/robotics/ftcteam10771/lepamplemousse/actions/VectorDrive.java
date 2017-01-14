@@ -1,5 +1,7 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
@@ -16,7 +18,7 @@ public class VectorDrive {
     DcMotor flMotor;
     DcMotor brMotor;
     DcMotor blMotor;
-    Config.ParsedData settings;
+    Config.ParsedData driveSettings;
     boolean vectorDriveActive;
     boolean blueTeam;
     boolean relativeDrive;
@@ -57,14 +59,14 @@ public class VectorDrive {
                 }
 
                 //calculates the shaft magnitude (AC shaft has diagonal motors "A" and "C")
-                float ACShaftPower = (float) ((Math.sin(absoluteTheta - (Math.PI/ 4))) * joystickRadius);
-                float BDShaftPower = (float) ((Math.cos(absoluteTheta - (Math.PI / 4))) * joystickRadius);
+                float ACShaftPower = (float) ((Math.sin(robotTheta - (Math.PI/ 4))) * joystickRadius);
+                float BDShaftPower = (float) ((Math.cos(robotTheta - (Math.PI / 4))) * joystickRadius);
 
                 //calculates the motor powers
-                frMotor.setPower((-robotTheta) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-                flMotor.setPower((robotTheta) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-                blMotor.setPower((robotTheta) + ((ACShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
-                brMotor.setPower((-robotTheta) + ((BDShaftPower) * (1.0 - (Math.abs(rotationalPower)))));
+                frMotor.setPower((-ACShaftPower)+(ACShaftPower*(1.0-Math.abs(ACShaftPower))));
+                flMotor.setPower((BDShaftPower)+(BDShaftPower*(1.0-Math.abs(BDShaftPower))));
+                blMotor.setPower((ACShaftPower)+(ACShaftPower*(1.0-Math.abs(ACShaftPower))));
+                brMotor.setPower((-BDShaftPower)+(BDShaftPower*(1.0-Math.abs(BDShaftPower))));
 
                 //waits before refreshing motor powers
                 try {
@@ -91,12 +93,14 @@ public class VectorDrive {
         this.flMotor = flMotor;
         this.brMotor = brMotor;
         this.blMotor = blMotor;
-        this.settings = settings;
+        this.driveSettings = settings.subData("drivetrain");
         this.vectorDriveActive = false;
         this.joystickControl = false;
 
-        this.blueTeam = settings.getBool("blue_team");
-        this.relativeDrive = settings.getBool("relative_drive");
+        this.blueTeam = false;
+        if (settings.getString("alliance") == "blue")
+            this.blueTeam = true;
+        this.relativeDrive = false;
 
         DcMotor.RunMode runMode = DcMotor.RunMode.RUN_USING_ENCODER;
         frMotor.setMode(runMode);
@@ -104,6 +108,10 @@ public class VectorDrive {
         brMotor.setMode(runMode);
         blMotor.setMode(runMode);
 
+        if(driveSettings.subData("motors").subData("front_right").getBool("reversed")){frMotor.setDirection(DcMotorSimple.Direction.REVERSE);}else{frMotor.setDirection(DcMotorSimple.Direction.FORWARD);}
+        if(driveSettings.subData("motors").subData("front_left").getBool("reversed")){flMotor.setDirection(DcMotorSimple.Direction.REVERSE);}else{flMotor.setDirection(DcMotorSimple.Direction.FORWARD);}
+        if(driveSettings.subData("motors").subData("back_left").getBool("reversed")){blMotor.setDirection(DcMotorSimple.Direction.REVERSE);}else{blMotor.setDirection(DcMotorSimple.Direction.FORWARD);}
+        if(driveSettings.subData("motors").subData("back_right").getBool("reversed")){brMotor.setDirection(DcMotorSimple.Direction.REVERSE);}else{brMotor.setDirection(DcMotorSimple.Direction.FORWARD);}
     }
 
     /**
@@ -118,6 +126,9 @@ public class VectorDrive {
      * Uses driveThread to move robot to position
      */
     public void startPosition(){
+        VectorR positionVectorR = new VectorR();
+        this.vectorR = positionVectorR;
+
         vectorDriveActive = true;
         driveThread.start();
 
