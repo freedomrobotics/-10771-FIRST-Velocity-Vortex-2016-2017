@@ -2,6 +2,11 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ReadWriteFile;
+
+import org.firstinspires.ftc.robotcore.internal.AppUtil;
+
+import java.io.File;
 
 
 /**
@@ -14,7 +19,7 @@ public class IMU {
     protected BNO055IMU imu;
     protected static BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
     protected boolean imuInitialized = false;
-
+    private String calibrationFileName = "IMU.json";
     /*
         Default constructor
      */
@@ -33,9 +38,9 @@ public class IMU {
         Constructor that requires user to indicate both IMU
         and whether to initialize the IMU instantly
      */
-    public IMU(BNO055IMU imu, boolean initilize){
+    public IMU(BNO055IMU imu, boolean initialize){
         this.imu = imu;
-        if (initilize){
+        if (initialize){
             imuInitialized = imu.initialize();
         }
     }
@@ -64,14 +69,53 @@ public class IMU {
 
     /**
      * Function that changes the sensor mode
-     * @param mode
+     * @param mode operational mode of the IMU
      */
     protected void setSensorMode(BNO055IMU.SensorMode mode){
         parameters.mode = mode;
     }
 
-    // todo refer to op mode sample for calibration method
-    protected void calibrate(LinearOpMode opMode){
+    /**
+     * Store the calibration data of the IMU into a file
+     */
+    public void storeCalibration(LinearOpMode opMode, Boolean teleopUsed, boolean buttonPressed){
+        boolean beginSave;
+        if (opMode != null){
+            opMode.telemetry.addData("GyroCalib", imu.isGyroCalibrated());
+            opMode.telemetry.addData("AccelCalib", imu.isAccelerometerCalibrated());
+            opMode.telemetry.addData("MagnetCalib", imu.isMagnetometerCalibrated());
+            opMode.telemetry.addData("SystemCalib", imu.isSystemCalibrated());
+            opMode.telemetry.update();
+        }
+        beginSave = teleopUsed ? buttonPressed : getIMUCalibrationStatus();
+        if (beginSave){
+            BNO055IMU.CalibrationData calibrationData = imu.readCalibrationData();
+            File calibFile = AppUtil.getInstance().getSettingsFile(calibrationFileName);
+            ReadWriteFile.writeFile(calibFile, calibrationData.serialize());
+        }
+    }
 
+    /**
+     * Sets the file to be used by the IMU to read/write calibration data
+     * @param fileName the string fileName to be used by the IMU
+     */
+    public void setCalibrationFileName(String fileName){
+        parameters.calibrationDataFile = calibrationFileName = fileName;
+    }
+
+    /**
+     * Writes the calibration data from the stored file to the IMU
+     */
+    public void writeCalibrationData(){
+        imu.writeCalibrationData(BNO055IMU.CalibrationData.deserialize(calibrationFileName));
+    }
+
+    /**
+     * Determines if all parts of IMU is calibrated
+     * @return if the whole IMU is calibrated
+     */
+    public boolean getIMUCalibrationStatus(){
+        return (imu.isGyroCalibrated() && imu.isAccelerometerCalibrated()
+                && imu.isMagnetometerCalibrated() && imu.isSystemCalibrated());
     }
 }
