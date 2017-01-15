@@ -1,21 +1,31 @@
-package org.firstinspires.ftc.teamcode;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.Range;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Matthew on 11/14/2016.
  */
 
-@TeleOp(name = "TestDrive2")
-public class TestDrive2 extends LinearOpMode{
+@TeleOp(name = "TestDrive3")
+public class TestDrive3 extends LinearOpMode{
 
     //initializes motors in order of standard graph quadrants
     private DcMotor motorA;
     private DcMotor motorB;
     private DcMotor motorC;
     private DcMotor motorD;
+    private DcMotor intakeMotor;
+    private double intakePower = 0.0;
+    private boolean intakeF = false, intakeB = false;
+    private List<String> toggle = new LinkedList<>();
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -24,6 +34,13 @@ public class TestDrive2 extends LinearOpMode{
         motorB = hardwareMap.dcMotor.get("motorFrontLeft"); //sets variable motorB to front left motor
         motorC = hardwareMap.dcMotor.get("motorBackLeft"); //sets variable motorC to back left motor
         motorD = hardwareMap.dcMotor.get("motorBackRight"); //sets variable motorD to back right motor
+
+        intakeMotor = hardwareMap.dcMotor.get("motorIntake");
+
+        motorA.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorC.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorD.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         /*
         In our mecanum setup, the two front wheels are chain driven and the two rear wheels are
@@ -40,7 +57,14 @@ public class TestDrive2 extends LinearOpMode{
 
         waitForStart();
         while(opModeIsActive()){
-            
+
+            if (intakePower < 0){
+                intakePower = 0;
+            } if (intakePower > 1){
+                intakePower = 1;
+            }
+            intakePower += gamepad1.right_stick_y / 5000;
+
             double joystickTheta = Math.atan2((gamepad1.left_stick_y),(gamepad1.left_stick_x)); //declares the angle of joystick position in standard polar coordinates
             double joystickRadius = Math.sqrt((gamepad1.left_stick_x)*(gamepad1.left_stick_x)+(gamepad1.left_stick_y)*(gamepad1.left_stick_y)); //declares the magnitude of the radius of the joystick position
 
@@ -59,12 +83,49 @@ public class TestDrive2 extends LinearOpMode{
              involves positive motor values for all when rotation is disregarded, so motors C
              and D have signage on shaft power changed to positive again.
              */
-            motorA.setPower((-ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower))));
-            motorB.setPower((BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower))));
-            motorC.setPower((ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower))));
-            motorD.setPower((-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower))));
 
-            idle();
+            double powerA = (-ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
+            double powerB = (BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
+            double powerC = (ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
+            double powerD = (-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
+            motorA.setPower(Range.scale(powerA, -1, 1, -.778, .778));
+            motorB.setPower(Range.scale(powerB, -1, 1, -.778, .778));
+            motorC.setPower(Range.scale(powerC, -1, 1, -.778, .778));
+            motorD.setPower(Range.scale(powerD, -1, 1, -.778, .778));
+
+            telemetry.addData("Speed-FR", powerA);
+            telemetry.addData("Speed-FL", powerB);
+            telemetry.addData("Speed-BL", powerC);
+            telemetry.addData("Speed-BR", powerD);
+
+            telemetry.addData("IntakeSpeed", intakePower);
+
+            if (gamepad1.b && !toggle.contains("intakeF")){
+                intakeB = !intakeB;
+                intakeF = false;
+                toggle.add("intakeB");
+            } if (!gamepad1.b && toggle.contains("intakeB")){
+                toggle.remove("intakeB");
+            }
+            if (gamepad1.a && !toggle.contains("intakeF")){
+                intakeF = !intakeF;
+                intakeB = false;
+                toggle.add("intakeF");
+            } if (!gamepad1.a && toggle.contains("intakeF")){
+                toggle.remove("intakeF");
+            }
+
+            if (intakeF){
+                intakeMotor.setPower(Range.scale(intakePower, 0, 1, -.778, .778));
+            } else if (intakeB){
+                intakeMotor.setPower(-Range.scale(intakePower, 0, 1, -.778, .778));
+            } else {
+                intakeMotor.setPower(0);
+            }
+
+            telemetry.update();
+
+            //idle();
 
         }
     }
