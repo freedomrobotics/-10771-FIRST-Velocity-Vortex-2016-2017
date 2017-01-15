@@ -10,9 +10,10 @@ import com.qualcomm.robotcore.hardware.IrSeekerSensor;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+
+import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Core;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.Camera;
@@ -27,11 +28,11 @@ import java.util.Map;
 /**
  * Create the actual references to the components based on the configuration
  */
-public class InitComp {
+public class Components {
 
     HardwareMap hardwareMap = null;
 
-    Components components = null;
+    Map<String, Object> components = null;
 
     Telemetry telemetry = null;
 
@@ -47,10 +48,10 @@ public class InitComp {
      * @param telemetry   Reference to the telemetry output for debug
      * @param components  Reference to the components configuration object
      */
-    public InitComp(HardwareMap hardwareMap, Telemetry telemetry, Components components) {
+    public Components(HardwareMap hardwareMap, Telemetry telemetry, Config components) {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
-        this.components = components;
+        this.components = components.getRawMap();
     }
 
     /**
@@ -60,39 +61,39 @@ public class InitComp {
      */
     public ReturnValues initialize() {
         failures.clear();
-        Core.motor = new DcMotor[components.count(mappedType(hardwareMap.dcMotor))];
+        Core.motor = new DcMotor[count(mappedType(hardwareMap.dcMotor))];
         if (objectInit(hardwareMap.dcMotor, Core.motor) == ReturnValues.FAIL) {
             failures.add(ReturnValues.MOTOR_NOT_INIT);
         }
-        Core.servo = new Servo[components.count(mappedType(hardwareMap.servo))];
+        Core.servo = new Servo[count(mappedType(hardwareMap.servo))];
         if (objectInit(hardwareMap.servo, Core.servo) == ReturnValues.FAIL) {
             failures.add(ReturnValues.SERVO_NOT_INIT);
         }
-        Core.touchSensor = new TouchSensor[components.count(mappedType(hardwareMap.touchSensor))];
+        Core.touchSensor = new TouchSensor[count(mappedType(hardwareMap.touchSensor))];
         if (objectInit(hardwareMap.touchSensor, Core.touchSensor) == ReturnValues.FAIL) {
             failures.add(ReturnValues.TOUCHSENSOR_NOT_INIT);
         }
-        Core.lightSensor = new LightSensor[components.count(mappedType(hardwareMap.lightSensor))];
+        Core.lightSensor = new LightSensor[count(mappedType(hardwareMap.lightSensor))];
         if (objectInit(hardwareMap.lightSensor, Core.lightSensor) == ReturnValues.FAIL) {
             failures.add(ReturnValues.LIGHTSENSOR_NOT_INIT);
         }
-        Core.colorSensor = new ColorSensor[components.count(mappedType(hardwareMap.colorSensor))];
+        Core.colorSensor = new ColorSensor[count(mappedType(hardwareMap.colorSensor))];
         if (objectInit(hardwareMap.colorSensor, Core.colorSensor) == ReturnValues.FAIL) {
             failures.add(ReturnValues.COLORSENSOR_NOT_INIT);
         }
-        Core.irSeeker = new IrSeekerSensor[components.count(mappedType(hardwareMap.irSeekerSensor))];
+        Core.irSeeker = new IrSeekerSensor[count(mappedType(hardwareMap.irSeekerSensor))];
         if (objectInit(hardwareMap.irSeekerSensor, Core.irSeeker) == ReturnValues.FAIL) {
             failures.add(ReturnValues.IRSEEKER_NOT_INIT);
         }
-        Core.gyrometer = new GyroSensor[components.count(mappedType(hardwareMap.gyroSensor))];
+        Core.gyrometer = new GyroSensor[count(mappedType(hardwareMap.gyroSensor))];
         if (objectInit(hardwareMap.gyroSensor, Core.gyrometer) == ReturnValues.FAIL) {
             failures.add(ReturnValues.GYROMETER_NOT_INIT);
         }
-        Core.accelerometer = new AccelerationSensor[components.count(mappedType(hardwareMap.accelerationSensor))];
+        Core.accelerometer = new AccelerationSensor[count(mappedType(hardwareMap.accelerationSensor))];
         if (objectInit(hardwareMap.accelerationSensor, Core.accelerometer) == ReturnValues.FAIL) {
             failures.add(ReturnValues.ACCELEROMETER_NOT_INIT);
         }
-        Core.camera = new Camera[components.count("camera", "camera")];
+        Core.camera = new Camera[count("camera", "camera")];
         if (cameraInit(Core.camera) == ReturnValues.FAIL) {
             failures.add(ReturnValues.CAMERA_NOT_INIT);
         }
@@ -115,15 +116,15 @@ public class InitComp {
      */
     private ReturnValues objectInit(HardwareMap.DeviceMapping deviceMapping, Object devices[]) {
         String deviceType = mappedType(deviceMapping);
-        if (components.deviceExists(deviceType)) {
-            for (int i = 0; i < components.count(deviceType); i++) {
+        if (deviceExists(deviceType)) {
+            for (int i = 0; i < count(deviceType); i++) {
                 int id = i + 1;
-                int max = components.maxSubdevices(deviceType);
-                while ((!(components.deviceEnabled(deviceType, id)) && (id <= max))) {
+                int max = maxSubdevices(deviceType);
+                while ((!(deviceEnabled(deviceType, id)) && (id <= max))) {
                     id++;
                 }
-                if (components.deviceEnabled(deviceType, id) && componentExists(components.getMapName(deviceType, id), deviceMapping)) {
-                    devices[i] = deviceMapping.get(components.getMapName(deviceType, id));
+                if (deviceEnabled(deviceType, id) && componentExists(getMapName(deviceType, id), deviceMapping)) {
+                    devices[i] = deviceMapping.get(getMapName(deviceType, id));
                     setAlias(deviceType, i, id);
                 } else {
                     //Returns FAIL if there are not any existing enabled device keys to initialize the array elements with
@@ -145,15 +146,15 @@ public class InitComp {
     //I'm cheap, don't bother with it. This entire class needs a rewrite.
     private ReturnValues cameraInit(Object devices[]) {
         String device = "camera";
-        if (components.deviceExists(device)) {
-            for (int i = 0; i < components.count(device, device); i++) {
+        if (deviceExists(device)) {
+            for (int i = 0; i < count(device, device); i++) {
                 int id = i + 1;
-                int max = components.maxSubdevices(device);
-                while ((!(components.deviceEnabled(device, device, id)) && (id <= max))) {
+                int max = maxSubdevices(device);
+                while ((!(deviceEnabled(device, device, id)) && (id <= max))) {
                     id++;
                 }
-                if (components.deviceEnabled(device, device, id)) {
-                    Map<String, Object> TcameraObj = components.getSubdevice(device, device, id);
+                if (deviceEnabled(device, device, id)) {
+                    Map<String, Object> TcameraObj = getSubdevice(device, device, id);
                     String func = TcameraObj.get("function").toString();
                     if (func.equals("color_grid")){
                         if (TcameraObj.get("extra") == null) continue;
@@ -198,15 +199,15 @@ public class InitComp {
 
     private void stopAllCamera(){
         String device = "camera";
-        if (components.deviceExists(device)) {
-            for (int i = 0; i < components.count(device, device); i++) {
+        if (deviceExists(device)) {
+            for (int i = 0; i < count(device, device); i++) {
                 int id = i + 1;
-                int max = components.maxSubdevices(device);
-                while ((!(components.deviceEnabled(device, device, id)) && (id <= max))) {
+                int max = maxSubdevices(device);
+                while ((!(deviceEnabled(device, device, id)) && (id <= max))) {
                     id++;
                 }
-                if (components.deviceEnabled(device, device, id)) {
-                    Map<String, Object> TcameraObj = components.getSubdevice(device, device, id);
+                if (deviceEnabled(device, device, id)) {
+                    Map<String, Object> TcameraObj = getSubdevice(device, device, id);
                     String func = TcameraObj.get("function").toString();
                     if (func.equals("color_grid")){
                         ((ColorGrid) Core.camera[i]).closeGrid();
@@ -292,31 +293,31 @@ public class InitComp {
     //CHEAP I know, but it works (I was being dumb with the old way, so that didn't work :/)
     private void setAlias(String deviceType, Integer deviceId, Integer configId) {
         if (deviceType.equals("dc_motors")) {
-            Aliases.put(components.getAlias(deviceType, configId), Core.motor[deviceId]);
+            Aliases.put(getAlias(deviceType, configId), Core.motor[deviceId]);
         }
         if (deviceType.equals("servos")) {
-            Aliases.put(components.getAlias(deviceType, configId), Core.servo[deviceId]);
+            Aliases.put(getAlias(deviceType, configId), Core.servo[deviceId]);
         }
         if (deviceType.equals("touch_sensors")) {
-            Aliases.put(components.getAlias(deviceType, configId), Core.touchSensor[deviceId]);
+            Aliases.put(getAlias(deviceType, configId), Core.touchSensor[deviceId]);
         }
         if (deviceType.equals("light_sensors")) {
-            Aliases.put(components.getAlias(deviceType, configId), Core.lightSensor[deviceId]);
+            Aliases.put(getAlias(deviceType, configId), Core.lightSensor[deviceId]);
         }
         if (deviceType.equals("color_sensors")) {
-            Aliases.put(components.getAlias(deviceType, configId), Core.colorSensor[deviceId]);
+            Aliases.put(getAlias(deviceType, configId), Core.colorSensor[deviceId]);
         }
         if (deviceType.equals("ir_seekers")) {
-            Aliases.put(components.getAlias(deviceType, configId), Core.irSeeker[deviceId]);
+            Aliases.put(getAlias(deviceType, configId), Core.irSeeker[deviceId]);
         }
         if (deviceType.equals("gyrometers")) {
-            Aliases.put(components.getAlias(deviceType, configId), Core.gyrometer[deviceId]);
+            Aliases.put(getAlias(deviceType, configId), Core.gyrometer[deviceId]);
         }
         if (deviceType.equals("accelerometers")) {
-            Aliases.put(components.getAlias(deviceType, configId), Core.accelerometer[deviceId]);
+            Aliases.put(getAlias(deviceType, configId), Core.accelerometer[deviceId]);
         }
         if (deviceType.equals("camera")) {
-            Aliases.put(components.getAlias(deviceType, configId), Core.camera[deviceId]);
+            Aliases.put(getAlias(deviceType, configId), Core.camera[deviceId]);
         }
     }
 
@@ -326,4 +327,250 @@ public class InitComp {
     public List<ReturnValues> getFailures() {
         return failures;
     }
+
+    //region Retrieval Code
+
+    //region Device Types / Overarching Device Methods
+
+    /**
+     * Checks the existance of an overarching device/device category given it's device type
+     *
+     * @param deviceType The name of hte overarching device
+     * @return a boolean of the device's existence
+     */
+    public boolean deviceExists(String deviceType) {
+        return components.containsKey(deviceType);
+    }
+
+    /**
+     * Gets the map object associated with a device type
+     *
+     * @param deviceType The name of the device type (e.g. dc_motors)
+     * @return A map object associated with the deviceType
+     */
+    public Map getDevice(String deviceType) {
+        if (deviceExists(deviceType)) {
+            return (Map) components.get(deviceType);
+        }
+        return null;
+    }
+    //endregion
+
+    //region Device Name / Subdevice Methods
+
+    /**
+     * Checks whether a subdevice exists or not depending on the given custom name
+     *
+     * @param deviceType The name of the overarching device
+     * @param deviceName The name of the subdevice
+     * @param id         The id of the device
+     * @return An boolean of the subdevice's existence
+     */
+    public boolean subDeviceExists(String deviceType, String deviceName, Integer id) {
+        Map device;
+        if ((device = getDevice(deviceType)) != null) {
+            return device.containsKey(deviceName + id);
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether a subdevice exists or not depending on the given type and id. Uses the rule that the device name is either the same or without an extra s
+     *
+     * @param deviceType The name of the overarching device
+     * @param id         The id of the device
+     * @return An boolean of the subdevice's existence
+     */
+    public boolean subDeviceExists(String deviceType, Integer id) {
+        return subDeviceExists(deviceType, deviceName(deviceType), id);
+    }
+
+    /**
+     * Retrieves a subdevice based on a custom name
+     *
+     * @param deviceType The name of the overarching device
+     * @param deviceName The name of the subdevice
+     * @param id         The id of the device
+     * @return A map object associated with the subdevice
+     */
+    public Map getSubdevice(String deviceType, String deviceName, Integer id) {
+        Map device = getDevice(deviceType);
+        if (subDeviceExists(deviceType, deviceName, id)) {
+            return (Map) device.get(deviceName + id);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves a subdevice based on the rule that the device name is either the same or without an extra s
+     *
+     * @param deviceType The name of the overarching device
+     * @param id         The id of the device
+     * @return An boolean of the subdevice's existence
+     */
+    public Map getSubdevice(String deviceType, Integer id) {
+        return getSubdevice(deviceType, deviceName(deviceType), id);
+    }
+
+    /**
+     * Checks if device is deviceEnabled or not given a custom name
+     *
+     * @param deviceType The name of the overarching device
+     * @param deviceName The name of the subdevice
+     * @param id         The id of the device
+     * @return An boolean of whether the subdevice is deviceEnabled or not
+     */
+    public boolean deviceEnabled(String deviceType, String deviceName, Integer id) {
+        Map device;
+        if ((device = getSubdevice(deviceType, deviceName, id)) != null) {
+            return device.get("enabled").equals(true);
+        }
+        return false;
+    }
+
+    /**
+     * Checks if device is deviceEnabled or not based on the rule that the device name is either the same or without an extra s
+     *
+     * @param deviceType The name of the overarching device
+     * @param id         The id of the device
+     * @return An boolean of whether the subdevice is deviceEnabled or not
+     */
+    public boolean deviceEnabled(String deviceType, Integer id) {
+        return deviceEnabled(deviceType, deviceName(deviceType), id);
+    }
+
+    /**
+     * Retrieves the hardware_map name of a subdevice given a custom name
+     *
+     * @param deviceType The name of the overarching device
+     * @param deviceName Dhe name of the subdevice
+     * @param id         The id of the device
+     * @return The name of the hardware map / the map name
+     */
+    public String getMapName(String deviceType, String deviceName, Integer id) {
+        Map device;
+        if ((device = getSubdevice(deviceType, deviceName, id)) != null) {
+            if (device.get("map_name") != null)
+                return device.get("map_name").toString();
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the hardware_map name of a subdevice based on the rule that the device name is either the same or without an extra s
+     *
+     * @param deviceType The name of the overarching device
+     * @param id         The id of the device
+     * @return The name of the hardware map / the map name
+     */
+    public String getMapName(String deviceType, Integer id) {
+        return getMapName(deviceType, deviceName(deviceType), id);
+    }
+
+    /**
+     * Counts the subdevices matching a device name in a device types
+     *
+     * @param deviceType The name of the overarching device
+     * @param deviceName The name of the device
+     * @return An integer count of the number of subdevices matching the device name
+     */
+    public Integer count(String deviceType, String deviceName) {
+        int quantity = 0;
+        Map device;
+        if ((device = getDevice(deviceType)) != null) {
+            for (int i = 1; i <= device.size(); i++) {
+                if (deviceEnabled(deviceType, deviceName, i)) {
+                    quantity++;
+                }
+            }
+        }
+        return quantity;
+    }
+
+    /**
+     * Counts the subdevices in a device type based on the rule that the device name is either the same or without an extra s
+     *
+     * @param deviceType The name of the overarching device
+     * @return An integer count of the number of subdevices matching the device name
+     */
+    public Integer count(String deviceType) {
+        return count(deviceType, deviceName(deviceType));
+    }
+
+    /**
+     * Returns the total count of Subdevices in a device type
+     *
+     * @param deviceType The name of the overarchin device
+     * @return An integer count of the total number of subdevices in the device type
+     */
+    public Integer maxSubdevices(String deviceType) {
+        Map device;
+        if ((device = getDevice(deviceType)) != null) {
+            return device.size();
+        } else return 0;
+    }
+
+    /**
+     * Returns a list of the aliases in a subdevice including the map_name given a custom name
+     *
+     * @param deviceType The name of the overarching device
+     * @param deviceName The name of the device
+     * @param id         The id of the device
+     * @return A list object of the aliases
+     */
+    public List<String> getAlias(String deviceType, String deviceName, Integer id) {
+        Map device;
+        List<String> alias = null;
+        if ((device = getSubdevice(deviceType, deviceName, id)) != null) {
+            if ((device.get("alias")) != null) {
+                alias = (List<String>) device.get("alias");
+                if (getMapName(deviceType, deviceName, id) != null)
+                    alias.add(getMapName(deviceType, deviceName, id));
+            }
+        }
+        return alias;
+    }
+
+    /**
+     * Returns a list of the aliases in a subdevice including the map_name based on the rule that the device name is either the same or without an extra s
+     *
+     * @param deviceType The name of the overarching device
+     * @param id         The id of the device
+     * @return A list object of the aliases
+     */
+    public List<String> getAlias(String deviceType, Integer id) {
+        return getAlias(deviceType, deviceName(deviceType), id);
+    }
+    //endregion
+
+    //region Misc Methods
+
+    /**
+     * Returns the general device/subdevice name
+     *
+     * @param deviceType The name of the overarching device
+     * @return The name of the device
+     */
+    private String deviceName(String deviceType) {
+        String deviceName = deviceType;
+        if (deviceType.charAt(deviceType.length() - 1) == 's')
+            deviceName = deviceType.substring(0, deviceType.length() - 1);
+        return deviceName;
+    }
+
+    /**
+     * Returns the device/subdevice name and it's id
+     *
+     * @param deviceType The name of the overarching device
+     * @param id         The id of the device
+     * @return The name of the device
+     */
+    private String deviceName(String deviceType, Integer id) {
+        return deviceName(deviceType) + id;
+    }
+    //endregion
+
+    //endregion
+
+    //endregion
 }

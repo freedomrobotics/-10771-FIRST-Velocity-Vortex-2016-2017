@@ -256,6 +256,9 @@ public class FtcRobotControllerActivity extends Activity {
     wifiLock.acquire();
     callback.networkConnectionUpdate(WifiDirectAssistant.Event.DISCONNECTED);
     bindToService();
+
+    //Added by Adam Li
+    globalAssets = getAssets();
   }
 
   protected UpdateUI createUpdateUI() {
@@ -526,5 +529,15 @@ public class FtcRobotControllerActivity extends Activity {
         }
       });
     }
+  }
+
+  /**
+   * Added by Adam Li. Dangerous, sorta, but it'll work well enough
+   */
+  private static android.content.res.AssetManager globalAssets;
+
+  //Returns AssetsManager, which is needed to access files in assets.
+  public static android.content.res.AssetManager getGlobalAssets(){
+    return globalAssets;
   }
 }
