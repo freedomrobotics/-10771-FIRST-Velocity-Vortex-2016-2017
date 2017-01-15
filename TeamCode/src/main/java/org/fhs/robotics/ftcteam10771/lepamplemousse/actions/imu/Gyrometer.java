@@ -22,6 +22,7 @@ public class Gyrometer extends IMU {
     private final AxesReference reference = AxesReference.INTRINSIC;
     private Orientation orientation;
     private AngularVelocity velocity;
+    private boolean gyroStreamEnabled = true;
 
     /*
         Default constructor
@@ -108,8 +109,19 @@ public class Gyrometer extends IMU {
      * To be used in a looping thread
      */
     public void streamGyroData(){
-        orientation = sensorOrientation();
-        velocity = angularVelocity();
+        if (gyroStreamEnabled){
+            orientation = sensorOrientation();
+            velocity = angularVelocity();
+        }
+
+    }
+
+    /**
+     * toggles the stream method of gyro
+     * @param state the method's state
+     */
+    public void enableStream(boolean state){
+        gyroStreamEnabled = state;
     }
 
     /**

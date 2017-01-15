@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.MagneticFlux;
 public class Magnetometer extends IMU{
 
     private MagneticFlux magneticFlux;
+    private boolean magnetStreamEnabled = true;
 
     /*
         Default constructor
@@ -76,7 +77,17 @@ public class Magnetometer extends IMU{
      * To be used in a looping thread
      */
     public void streamMagnetometerData(){
-        magneticFlux = magneticFlux();
+         if (magnetStreamEnabled){
+             magneticFlux = magneticFlux();
+         }
+    }
+
+    /**
+     * Toggle the stream method
+     * @param state of the stream method
+     */
+    public void enableStream(boolean state){
+        magnetStreamEnabled = state;
     }
 
     /**

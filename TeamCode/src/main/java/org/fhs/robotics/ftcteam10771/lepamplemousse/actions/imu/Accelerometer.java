@@ -21,6 +21,7 @@ public class Accelerometer extends IMU{
     private Acceleration acceleration;
     private Position position;
     private Velocity velocity;
+    private boolean streamEnabled = true;
 
     /*
         Default constructor
@@ -66,9 +67,19 @@ public class Accelerometer extends IMU{
      * To be used in a thread loop
      */
     public void streamAccelData(){
-        acceleration = acceleration();
-        velocity = velocity();
-        position = position();
+        if (streamEnabled){
+            acceleration = acceleration();
+            velocity = velocity();
+            position = position();
+        }
+    }
+
+    /**
+     * Toggles the stream method
+     * @param state of the stream method
+     */
+    public void enableStream(boolean state){
+        streamEnabled = state;
     }
 
     /**
