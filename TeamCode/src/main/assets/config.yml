@@ -11,6 +11,25 @@
 alliance: red
 position: general
 
+robot:
+  initial_position:
+    x: 0.0
+    y: 0.0
+  intial_rotation: 0.0
+  size:
+    x: 444.5    #width approx 17.5in
+    y: 431.8    #length approx 15in
+  imu_offset:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    r: 0.0
+  phone_offset:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    r: 0.0
+
 encoder:
   output_pulses: 1440
   encoder_pulses: 28
@@ -48,10 +67,22 @@ bumper:
   preset: 15.0
   start_pos: 0.0
   left_servo:
+    map_name: bumper_left
     reversed: true
     offset: 15.75
   right_servo:
+    map_name: bumper_right
     reversed: false
+    offset: 0.0
+
+#color sensors
+color_sensor:
+  side: back
+  left:
+    map_name: color_sensor_left
+    offset: 0.0
+  right:
+    map_name: color_sensor_right
     offset: 0.0
 
 #Beacon colors
