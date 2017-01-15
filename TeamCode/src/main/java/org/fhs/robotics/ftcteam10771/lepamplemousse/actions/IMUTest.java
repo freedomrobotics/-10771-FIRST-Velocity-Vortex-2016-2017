@@ -2,6 +2,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.Accelerometer;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.Gyrometer;
@@ -12,6 +13,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.Magnetometer;
  * Created by joelv on 1/14/2017.
  */
 
+@TeleOp(name = "IMU Test")
 public class IMUTest extends LinearOpMode{
 
     BNO055IMU imu;
