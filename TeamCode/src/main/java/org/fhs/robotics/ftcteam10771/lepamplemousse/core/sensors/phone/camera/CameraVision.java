@@ -58,7 +58,7 @@ public class CameraVision {
     }
 
     //Flag for whether Vuforia should be running or not
-    boolean vuforiaRunning = false;
+    boolean vuforiaRunning = true;
 
     //Variables that indicate the targeted image
     private int targetedImageIndex;
@@ -108,9 +108,7 @@ public class CameraVision {
         @Override
         public void run() {
             while(!Thread.interrupted()) {
-                if (vuforiaRunning){
-                    runImageTracking();
-                }
+                runImageTracking();
             }
         }
     };
@@ -144,18 +142,20 @@ public class CameraVision {
      * Function that runs the image tracking during opMode
      */
     public void runImageTracking() {
-        for (int i=0; i < beacons.size(); i++) {
-            imageData[i].imageName = beacons.get(i).getName();
-            imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
-            if (imageData[i].matrix != null) {
-                imageData[i].translation = imageData[i].matrix.getTranslation();
-                imageData[i].perpendicularness = imageData[i].matrix.getData()[0];
-                imageData[i].degreesToTurn = imageData[i].matrix.getData()[8];
-            }
-            else {
-                imageData[i].translation = new VectorF(0f, 0f, 0f);
-                imageData[i].perpendicularness = 0;
-                imageData[i].degreesToTurn = 0;
+        if (vuforiaRunning){
+            for (int i=0; i < beacons.size(); i++) {
+                imageData[i].imageName = beacons.get(i).getName();
+                imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
+                if (imageData[i].matrix != null) {
+                    imageData[i].translation = imageData[i].matrix.getTranslation();
+                    imageData[i].perpendicularness = imageData[i].matrix.getData()[0];
+                    imageData[i].degreesToTurn = imageData[i].matrix.getData()[8];
+                }
+                else {
+                    imageData[i].translation = new VectorF(0f, 0f, 0f);
+                    imageData[i].perpendicularness = 0;
+                    imageData[i].degreesToTurn = 0;
+                }
             }
         }
     }
