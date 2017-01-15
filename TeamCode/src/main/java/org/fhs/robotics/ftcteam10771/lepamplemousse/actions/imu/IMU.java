@@ -13,7 +13,7 @@ public class IMU {
 
     protected BNO055IMU imu;
     protected static BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-    private boolean imuInitialized = false;
+    protected boolean imuInitialized = false;
 
     /*
         Default constructor
@@ -60,6 +60,14 @@ public class IMU {
      */
     protected boolean isImuInit(){
         return imuInitialized;
+    }
+
+    /**
+     * Function that changes the sensor mode
+     * @param mode
+     */
+    protected void setSensorMode(BNO055IMU.SensorMode mode){
+        parameters.mode = mode;
     }
 
     // todo refer to op mode sample for calibration method

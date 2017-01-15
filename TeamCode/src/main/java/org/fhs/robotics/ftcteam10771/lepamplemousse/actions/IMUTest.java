@@ -20,6 +20,7 @@ public class IMUTest extends LinearOpMode{
     IMU imuHandler;
     Gyrometer gyrometer;
     Accelerometer accelerometer;
+    Magnetometer magnetometer;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -27,10 +28,12 @@ public class IMUTest extends LinearOpMode{
         imuHandler = new IMU(imu, false);
         gyrometer.setAngleUnit(BNO055IMU.AngleUnit.DEGREES);
         accelerometer.setAccelerationUnit(BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC);
+        magnetometer.toggleMagnetometer(true);
         imuHandler.imuInit();
         gyrometer = (Gyrometer)imuHandler;
         accelerometer = (Accelerometer)imuHandler;
         gyrometer.testGyro(this, false);
-        accelerometer.testGyro(this, true);
+        accelerometer.testGyro(this, false);
+        magnetometer.testMagnetometer(this, false);
     }
 }

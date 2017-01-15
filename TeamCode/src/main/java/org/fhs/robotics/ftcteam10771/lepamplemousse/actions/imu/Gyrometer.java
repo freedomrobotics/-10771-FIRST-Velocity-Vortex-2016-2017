@@ -30,6 +30,24 @@ public class Gyrometer extends IMU {
 
     }
 
+    /*
+        Constructor that allows reference to an IMU
+     */
+    public Gyrometer(BNO055IMU imu){
+        new Gyrometer(imu, true);
+    }
+
+    /*
+        Constructor that requires user to indicate both IMU
+        and whether to initialize the IMU instantly
+     */
+    public Gyrometer(BNO055IMU imu, boolean initialize){
+        this.imu = imu;
+        if (initialize){
+            imuInitialized = imu.initialize();
+        }
+    }
+
     /**
      * Setter for the angular unit
      * for both velocity and orientation
@@ -77,14 +95,22 @@ public class Gyrometer extends IMU {
         @Override
         public void run() {
             while (!Thread.interrupted()){
-                orientation = sensorOrientation();
-                velocity = angularVelocity();
+                streamGyroData();
             }
         }
     };
 
     //The runnable's respective thread
     public final Thread gyroThread = new Thread(gyroRunnable);
+
+    /**
+     * Streams Gyro Data at an instant;
+     * To be used in a looping thread
+     */
+    public void streamGyroData(){
+        orientation = sensorOrientation();
+        velocity = angularVelocity();
+    }
 
     /**
      * Getter for an orientation's axis angle

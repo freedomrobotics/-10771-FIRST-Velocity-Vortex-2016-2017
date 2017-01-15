@@ -29,20 +29,47 @@ public class Accelerometer extends IMU{
 
     }
 
+    /*
+        Constructor that allows reference to an IMU
+     */
+    public Accelerometer(BNO055IMU imu){
+        new IMU(imu, true);
+    }
+
+    /*
+        Constructor that requires user to indicate both IMU
+        and whether to initialize the IMU instantly
+     */
+    public Accelerometer(BNO055IMU imu, boolean initialize){
+        this.imu = imu;
+        if (initialize){
+            imuInitialized = imu.initialize();
+        }
+    }
+
     //Runnable code to stream acceleration sensor readings
     public final Runnable accelorometerRunnable = new Runnable() {
         @Override
         public void run() {
             while(!Thread.interrupted()){
-                acceleration = acceleration();
-                velocity = velocity();
-                position = position();
+                streamAccelData();
             }
         }
     };
 
     //Respective thread
     public final Thread accelerometerThread = new Thread(accelorometerRunnable);
+
+    /**
+     * Function that streams data
+     * to the variables in an instant;
+     * To be used in a thread loop
+     */
+    public void streamAccelData(){
+        acceleration = acceleration();
+        velocity = velocity();
+        position = position();
+    }
 
     /**
      * Sets the parameter at an acceleration unit
@@ -121,7 +148,7 @@ public class Accelerometer extends IMU{
      * Returns the acceleration value of an axis
      * @param axis the chosen axis
      * @param useRunnable whether to use private variable
-     * @return the accleration
+     * @return the acceleration
      */
     public double getAcceleration(Axis axis, boolean useRunnable){
         switch (axis){
