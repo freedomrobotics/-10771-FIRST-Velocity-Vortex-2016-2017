@@ -365,10 +365,10 @@ public class Controllers {
         return false;
     }
 
-    public Boolean getToggle(String name) {
+    /*public Boolean getToggle(String name) {
         // TODO: 11/19/2016 implement
         return false;
-    }
+    }*/
 
     private class inputMethods {
         boolean inverted = false;
