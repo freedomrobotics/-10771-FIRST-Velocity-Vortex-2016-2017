@@ -1,32 +1,54 @@
 # Component Configuration File
 
+# Future Goals
+#dc_motors:
+#  dc_motor1:
+#    enabled: true
+#    extern_name: drive_left
+#    intern_name: driveLeft
+
+
 # Motors
 dc_motors:
   dc_motor1:
     enabled: true
-    extern_name: drive_left
-    intern_name: driveLeft
-
+    map_name: drive_front_left
+    alias:
+      - driveFrontLeft
   dc_motor2:
     enabled: true
-    extern_name: drive_right
-    intern_name: driveRight
-
+    map_name: drive_front_right
+    alias:
+      - driveFrontRight
   dc_motor3:
+    enabled: true
+    map_name: drive_back_right
+    alias:
+      - driveBackRight
+  dc_motor4:
+    enabled: true
+    map_name: drive_back_left
+    alias:
+      - driveBackLeft
+  dc_motor5:
+    enabled: true
+    map_name: intake
+  dc_motor6:
     enabled: false
-    extern_name:
-    intern_name:
-
+    map_name: flywheel
 
 # Servos
 servos:
   servo1:
-    enabled: true
-    map_name: winch_left
+    enabled: false
+    map_name: bumper_left
     alias:
-      - servo_motor1
-      - tape_measure_winch1
-      - main_winch
+      - bumperLeft
+  servo2:
+    enabled: false
+    map_name: bumper_right
+    alias:
+      - bumperRight
 
 # Touch Sensors
 touch_sensors:
@@ -48,11 +70,15 @@ light_sensors:
 # Color Sensors
 color_sensors:
   color_sensor1:
-    enabled: false
-    map_name: color_sensor
+    enabled: true
+    map_name: color_sensor_left
     alias:
-      - main_color_sensor
-      - ada_fruit_color_sensor
+      - colorSensorLeft
+  color_sensor2:
+    enabled: true
+    map_name: color_sensor_right
+    alias:
+      - colorSensorRight
 
 # IR Seeker Sensors
 ir_seekers:
@@ -82,6 +108,9 @@ accelerometers:
     # map_name: main_accelerometer
 
 # Camera
+
+#TRASH
+
 # Valid function types:
 # color_grid    =     a grid of colors returned from the camera. Extra parameters are grid_x,
 #                     grid_y, grid_side, and refresh_rate. grid_x and grid_y set the grid width
