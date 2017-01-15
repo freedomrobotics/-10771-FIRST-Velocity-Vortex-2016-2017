@@ -17,6 +17,7 @@ public class UltrasonicRange {
     private AnalogInput rangeSensor;
     private DigitalChannel toggler;
     private final double scaleFactor = 5.0 / 512.0;
+    private boolean rangeStreamEnabled = true;
 
     /*
         Default constructors
@@ -49,9 +50,7 @@ public class UltrasonicRange {
         @Override
         public void run() {
             while (!Thread.interrupted()){
-                if (toggler.getState()){
-                    distance = distance();
-                }
+                streamDistance();
             }
         }
     };
@@ -96,6 +95,21 @@ public class UltrasonicRange {
      */
     public double getDistance(){
         return distance;
+    }
+
+    /**
+     * Functions that streams the distance in an instance
+     */
+    public void streamDistance(){
+        if (rangeStreamEnabled) distance = distance();
+    }
+
+    /**
+     * Turn stream method on or off
+     * @param state the state of the method
+     */
+    public void toggleStream(boolean state){
+        rangeStreamEnabled = state;
     }
 
     /**
