@@ -78,6 +78,11 @@ public class Magnetometer extends IMU{
          if (magnetStreamEnabled){
              magneticFlux = magneticFlux();
          }
+        else clearMagenetometerData();
+    }
+
+    public void clearMagenetometerData(){
+        magneticFlux = null;
     }
 
     /**

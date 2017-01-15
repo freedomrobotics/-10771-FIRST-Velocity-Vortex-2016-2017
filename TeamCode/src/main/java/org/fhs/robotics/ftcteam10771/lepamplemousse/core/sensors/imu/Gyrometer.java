@@ -110,7 +110,17 @@ public class Gyrometer extends IMU {
             orientation = sensorOrientation();
             velocity = angularVelocity();
         }
+        else {
+            clearData();
+        }
+    }
 
+    /**
+     * Clears the data in private objects
+     */
+    public void clearData(){
+        orientation = null;
+        velocity = null;
     }
 
     /**

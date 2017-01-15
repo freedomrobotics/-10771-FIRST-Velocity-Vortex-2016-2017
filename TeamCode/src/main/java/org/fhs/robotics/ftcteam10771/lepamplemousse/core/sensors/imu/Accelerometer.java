@@ -72,6 +72,15 @@ public class Accelerometer extends IMU{
     }
 
     /**
+     * Clears the private object data
+     */
+    public void clearData(){
+        acceleration = null;
+        velocity = null;
+        position = null;
+    }
+
+    /**
      * Toggles the stream method
      * @param state of the stream method
      */
