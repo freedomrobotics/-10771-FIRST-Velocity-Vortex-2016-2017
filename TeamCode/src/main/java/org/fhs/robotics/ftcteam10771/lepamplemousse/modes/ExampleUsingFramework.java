@@ -25,8 +25,8 @@ public class ExampleUsingFramework extends OpMode {
     private Config rawSettings;
     private Config.ParsedData settings;
     private Components components;
+    private Config.ParsedData otherComponents;
     private Drive drive;
-
 
     @Override
     public void init() {
@@ -56,6 +56,8 @@ public class ExampleUsingFramework extends OpMode {
 
         settings = rawSettings.getParsedData();
 
+        // access other components data structure from here
+        this.otherComponents = components.getParsedData().subData("other");
 
         this.components = new Components(hardwareMap, telemetry, components);
         this.components.initialize();

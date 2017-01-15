@@ -107,6 +107,13 @@ accelerometers:
     using_phone: true
     # map_name: main_accelerometer
 
+# Other components (whatever data structure - has to be initiated manually)
+other:
+  rangefinder:
+    rangefinder1:
+      analog_map_name: left_rangefinder_data
+      digital_map_name: laft_rangefinder_toggle
+
 # Camera
 
 #TRASH
