@@ -21,8 +21,8 @@ drivetrain:
   gear_ratio: 2.5
   motion:
     max_velocity: 100 # mm/s
-    max_acceleration: 100 # mm2/s
-    max_jerk: 100 # mm3/s
+    max_acceleration: 100 # mm^2/s
+    max_jerk: 100 # mm^3/s
   motor:
     front_left:
       map_name: drive_front_left
@@ -38,6 +38,42 @@ drivetrain:
       reversed: false
   wheel:
     diameter: 101.6 # 4 inches
+
+# Front Bumper-thing Settings
+bumper:
+  enabled: true
+  max_ang_vel: 20.0
+  full_rotate: 180.0  #180 degree servo
+  max_rotate: 60.0    #programmed limit
+  preset: 15.0
+  start_pos: 0.0
+  left_servo:
+    reversed: true
+    offset: 15.75
+  right_servo:
+    reversed: false
+    offset: 0.0
+
+#Beacon colors
+beacon:
+  red_alliance:
+    min:        #lower range of values
+      red: 1
+      green: 1
+      blue: 1
+    max:        #upper range of values
+      red: 2
+      green: 2
+      blue: 2
+  blue_alliance:
+    min:
+      red: 1
+      green: 1
+      blue: 1
+    max:
+      red: 2
+      green: 2
+      blue: 2
 
 autonomous:
   red_alliance:
