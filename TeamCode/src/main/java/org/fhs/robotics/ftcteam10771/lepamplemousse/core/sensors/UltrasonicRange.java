@@ -115,9 +115,10 @@ public class UltrasonicRange {
     /**
      * Tests a sensor in any test linear op mode
      * @param opMode the linear op mode used to test
+     * @param updateTelemetry whether to update telemetry
      */
-    public void testRangeSensor(LinearOpMode opMode){
+    public void testRangeSensor(LinearOpMode opMode, boolean updateTelemetry){
         opMode.telemetry.addData("Inches", distance());
-        opMode.telemetry.update();
+        if (updateTelemetry) opMode.telemetry.update();
     }
 }
