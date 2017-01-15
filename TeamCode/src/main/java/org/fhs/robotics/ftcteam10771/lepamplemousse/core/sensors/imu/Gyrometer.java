@@ -1,7 +1,5 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.imu;
 
-
-import android.bluetooth.BluetoothAssignedNumbers;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -10,7 +8,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 /**
  * Class that handles the gyro sensor readings of the IMU

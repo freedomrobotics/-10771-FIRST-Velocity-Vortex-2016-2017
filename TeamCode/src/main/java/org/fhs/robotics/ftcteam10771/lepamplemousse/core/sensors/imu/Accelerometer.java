@@ -1,10 +1,7 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu;
-
-import android.graphics.drawable.GradientDrawable;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.imu;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ThreadPool;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
