@@ -1,9 +1,12 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera;
 
+import android.provider.ContactsContract;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
@@ -57,12 +60,52 @@ public class CameraVision {
         this.vuforiaInit();
     }
 
+    public enum Image{
+
+        WHEELS("Wheels", 0, -182.9f, Coordinate.convertTo(3.0f, Coordinate.UNIT.FT_TO_UNIT)),
+        TOOLS("Tools", 1, Coordinate.convertTo(-3.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f),
+        LEGOS("Legos", 2, -182.9f, Coordinate.convertTo(-1.0f, Coordinate.UNIT.FT_TO_UNIT)),
+        GEARS("Gears", 3, Coordinate.convertTo(1.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f),
+        NULL("Null", 4, 0f, 0f);
+
+        private String name;
+        private int index;
+        private float xCoordinate;
+        private float yCoordinate;
+
+        Image(String name, int index, float xCoordinate, float yCoordinate){
+            this.name = name;
+            this.index = index;
+            this.xCoordinate = xCoordinate;
+            this.yCoordinate = yCoordinate;
+        };
+
+        public String getName(){
+            return name;
+        }
+
+        public int getIndex(){
+            return index;
+        }
+
+        public float getxCoordinate(){
+            return xCoordinate;
+        }
+
+        public float getyCoordinate(){
+            return yCoordinate;
+        }
+
+        private Image getImage(int index){
+            return this;
+        }
+    };
+
     //Flag for whether Vuforia should be running or not
     boolean vuforiaRunning = true;
 
     //Variables that indicate the targeted image
-    private int targetedImageIndex;
-    private String targetedImageName;
+    private Image targetedImage = Image.NULL;
 
     //Flag on whether to use Radians(Degrees if false)
     private boolean useRadians = true;
@@ -131,10 +174,10 @@ public class CameraVision {
         vuforia = ClassFactory.createVuforiaLocalizer(params);
         Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
         beacons = vuforia.loadTrackablesFromAsset("FTC_2016-17");
-        beacons.get(0).setName("Wheels");
-        beacons.get(1).setName("Tools");
-        beacons.get(2).setName("Legos");
-        beacons.get(3).setName("Gears");
+        beacons.get(Image.WHEELS.index).setName(Image.WHEELS.name);
+        beacons.get(Image.TOOLS.index).setName(Image.TOOLS.name);
+        beacons.get(Image.LEGOS.index).setName(Image.LEGOS.name);
+        beacons.get(Image.GEARS.index).setName(Image.GEARS.name);
         imageData = new ImageData[beacons.size()];
         for (int i=0; i < beacons.size(); i++){
             imageData[i] = new ImageData();
@@ -200,96 +243,71 @@ public class CameraVision {
     /**
      * Getter for the image data object
      *
-     * @param index of the image data class array
+     * @param image enum id
      * @return the image data object
      */
-    public ImageData getImage(int index){
-        return imageData[index];
+    public ImageData getImage(Image image){
+        return imageData[image.index];
     }
 
     /**
      * Getter for the image's matrix
      *
-     * @param index of the image data class array
+     * @param image enum id
      * @return the image's matrix
      */
-    public OpenGLMatrix getMatrix(int index){
-        return getImage(index).matrix;
+    public OpenGLMatrix getMatrix(Image image){
+        return getImage(image).matrix;
     }
 
     /**
      * Getter for the image's translation
      *
-     * @param index of the image data class array
+     * @param image enum id
      * @return the image's translation
      */
-    public VectorF getTranslation(int index){
-        return imageData[index].translation;
+    public VectorF getTranslation(Image image){
+        return imageData[image.index].translation;
     }
 
     /**
      * Gets X clip coordinate of image
      *
-     * @param index of the image data class array
+     * @param image enum id
      * @return the image's X clip coordinate
      */
-    public float getX(int index){
-        return getTranslation(index).get(0);
+    public float getX(Image image){
+        return getTranslation(image).get(0);
     }
 
     /**
      * Gets Y clip coordinate of image
      *
-     * @param index of the image's Y clip coordinate
+     * @param image enum id
      * @return the image's Y clip coordinate
      */
-    public float getY(int index){
-        return getTranslation(index).get(1);
+    public float getY(Image image){
+        return getTranslation(image).get(1);
     }
 
     /**
      * Get Z axis of the image's translational position
      *
-     * @param index of the image
+     * @param image enum id
      * @return the Z clip coordinate
      */
-    public float getZ(int index){
-        return getTranslation(index).get(2);
+    public float getZ(Image image){
+        return getTranslation(image).get(2);
     }
 
     /**
      * Getter for the image's degrees to turn
      *
-     * @param index of the image data class array
+     * @param image enum id
      * @return the image's degrees to turn
      */
-    public float getAngleToTurn(int index){
-        return imageData[index].angleToTurn;
-    }
-
-    /**
-     * Gets the image's data object array index given its name
-     *
-     * @param imageName The name of target image
-     * @return the index of the data object of image
-     */
-    public int getIndex(String imageName){
-        int result = -1;
-        for (int i=0; i<beacons.size(); i++){
-            if (imageData[i].imageName.equals(imageName)){
-                result = i;
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Getter for beacon name
-     * @param index of the beacon image array
-     * @return the name that it is associated with
-     */
-    public String getImageName(int index){
-        return beacons.get(index).getName();
+    public float getAngleToTurn(Image image){
+        return imageData[image.index].angleToTurn;
     }
 
     /**
@@ -303,13 +321,13 @@ public class CameraVision {
 
     /**
      * Determines whether the name exists in a trackable image
-     * @param image name
+     * @param image enum id
      * @return the state of image name's existence
      */
-    private boolean imageExists(String image){
+    private boolean imageExists(Image image){
         int match = -1;
         for (int i=0; i<beacons.size(); i++){
-            if (imageData[i].imageName.equals(image)){
+            if (imageData[i].imageName.equals(image.name)){
                 match = i;
             }
         }
@@ -319,33 +337,38 @@ public class CameraVision {
     /**
      * Determines if the camera can see a specific image
      *
-     * @param image name to be detected
+     * @param image enum id
      * @return whether the camera is detecting it
      */
-    public boolean imageInSight(String image){
-        int match = -1;
+    public boolean imageInSight(Image image){
         if (imageExists(image)){
-            for (int i=0; i<beacons.size(); i++){
-                if (imageData[i].imageName.equals(image)){
-                    match = i;
-                }
-            }
-            return (imageData[match].matrix!=null);
+            return (imageData[image.index].matrix!=null);
         }
         return false;
+    }
+
+    /**
+     * Sets an image as the target for Vuforia
+     * @param image the chosen image to be targeted
+     */
+    public void setTargetImage(Image image){
+        targetedImage = image;
     }
 
     /**
      * Sets the highest indexed detected image as a target by assigning its index
      * and its string id to the public variables
      */
-    public void setTargetImage(){
-        for (int i=0; i<beacons.size(); i++){
-            if (imageData[i].matrix!=null){
-                targetedImageIndex = i;
-                targetedImageName = imageData[i].imageName;
-            }
+    public void setADetectedImageAsTarget(){
+        Image target = null;
+        target = (imageInSight(Image.WHEELS)) ? Image.WHEELS : target;
+        target = (imageInSight(Image.TOOLS)) ? Image.TOOLS : target;
+        target = (imageInSight(Image.LEGOS)) ? Image.LEGOS : target;
+        target = (imageInSight(Image.GEARS)) ? Image.GEARS : target;
+        if (target != null){
+            setTargetImage(target);
         }
+        else setTargetImage(Image.NULL);
     }
 
     /**
@@ -354,54 +377,16 @@ public class CameraVision {
      */
     public void setSingleImageFoundAsTarget(){
         if (countTrackedImages()==1){
-            setTargetImage();
+            setADetectedImageAsTarget();
         }
     }
 
     /**
-     * Sets a target image by name and index
-     * @param image
-     * @param index
+     * Getter for the targeted image enumeration
+     * @return
      */
-    private void setTargetImage(String image, int index){
-        targetedImageName = image;
-        targetedImageIndex = index;
-    }
-
-    /**
-     * Sets the target image by name
-     * @param image
-     */
-    public void setTargetImage(String image){
-        if (imageExists(image)){
-            setTargetImage(image, getIndex(image));
-        }
-    }
-
-    /**
-     * Sets the target image by index
-     * @param index of the image on the array
-     */
-    public void setTargetImage(int index){
-        if (index < beacons.size() && index >= 0){
-            setTargetImage(getImageName(index), index);
-        }
-    }
-
-    /**
-     * Getter for image's string ID
-     * @return the targeted image's string id
-     */
-    public String getTargetImageName(){
-        return targetedImageName;
-    }
-
-    /**
-     * Getter for the image's index ID
-     * @return the targeted image's index id
-     */
-    public int getTargetedImageIndex(){
-        return targetedImageIndex;
+    public Image getTargetedImage(){
+        return targetedImage;
     }
 
     /**
