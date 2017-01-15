@@ -64,6 +64,9 @@ public class CameraVision {
     private int targetedImageIndex;
     private String targetedImageName;
 
+    //Flag on whether to use Radians(Degrees if false)
+    private boolean useRadians = true;
+
     //Paramters for Vuforia initializtion to be used
     private VuforiaLocalizer.Parameters params = null;
     private VuforiaLocalizer.CameraDirection cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
@@ -89,7 +92,7 @@ public class CameraVision {
      *  - 0: camera view is parallel to image
      *  - 1: camera view is perpendicular to image
      *
-     * degreesToTurn = matrix.getData()[8]
+     * angleToTurn = matrix.getData()[8]
      *  - Range: -1 to 1
      *  - If < 0, camera is looking at image from left
      *  - If > 0, camera is looking at image from right
@@ -99,8 +102,7 @@ public class CameraVision {
         String imageName;
         OpenGLMatrix matrix;
         VectorF translation;
-        float perpendicularness;
-        float degreesToTurn;
+        float angleToTurn;
     }
 
     //The thread loop code
@@ -118,6 +120,8 @@ public class CameraVision {
 
     /**
      * Vuforia is initialized with pre-created parameters
+     * Source: FTC Team FIXIT 3491
+     * https://www.youtube.com/watch?v=2z-o9Ts8XoE
      */
     public void vuforiaInit() {
         params = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
@@ -148,16 +152,23 @@ public class CameraVision {
                 imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
                 if (imageData[i].matrix != null) {
                     imageData[i].translation = imageData[i].matrix.getTranslation();
-                    imageData[i].perpendicularness = imageData[i].matrix.getData()[0];
-                    imageData[i].degreesToTurn = imageData[i].matrix.getData()[8];
+                    imageData[i].angleToTurn = useRadians ? (imageData[i].matrix.getData()[8] * (float)Math.PI / 2) :
+                            (imageData[i].matrix.getData()[8] * 90.0f);
                 }
                 else {
                     imageData[i].translation = new VectorF(0f, 0f, 0f);
-                    imageData[i].perpendicularness = 0;
-                    imageData[i].degreesToTurn = 0;
+                    imageData[i].angleToTurn = 0f;
                 }
             }
         }
+    }
+
+    /**
+     * User sets to use radians or degrees
+     * @param useRadians true for radians, false for degrees
+     */
+    public void setUnitToRadians(boolean useRadians){
+        this.useRadians = useRadians;
     }
 
     /**
@@ -247,23 +258,13 @@ public class CameraVision {
     }
 
     /**
-     * Getter for the image's perpendicularness to image
-     *
-     * @param index of the image data class array
-     * @return the image's translation
-     */
-    public float getPerpendicularness(int index){
-        return imageData[index].perpendicularness;
-    }
-
-    /**
      * Getter for the image's degrees to turn
      *
      * @param index of the image data class array
      * @return the image's degrees to turn
      */
-    public float getDegreesToTurn(int index){
-        return imageData[index].degreesToTurn;
+    public float getAngleToTurn(int index){
+        return imageData[index].angleToTurn;
     }
 
     /**
