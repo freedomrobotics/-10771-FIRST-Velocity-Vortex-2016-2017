@@ -45,16 +45,16 @@ drivetrain:
   motor:
     front_left:
       map_name: drive_front_left
-      reversed: true
+      reversed: false
     front_right:
       map_name: drive_front_right
-      reversed: false
+      reversed: true
     back_right:
       map_name: drive_back_left
       reversed: false
     back_left:
       map_name: drive_back_right
-      reversed: false
+      reversed: true
   wheel:
     diameter: 101.6 # 4 inches
 
