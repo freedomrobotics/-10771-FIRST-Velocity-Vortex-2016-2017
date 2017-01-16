@@ -14,9 +14,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
  * Class that handles the readings of the accerlation sensor of IMU
  * Created by joelv on 1/14/2017.
  */
-public class Accelerometer extends IMU{
+public class Accelerometer{
 
-
+    private IMU handler;
     private Acceleration gravity;
     private Acceleration acceleration;
     private Position position;
@@ -33,18 +33,18 @@ public class Accelerometer extends IMU{
     /*
         Constructor that allows reference to an IMU
      */
-    public Accelerometer(BNO055IMU imu){
-        new IMU(imu, true);
+    public Accelerometer(IMU handler){
+        new Accelerometer(handler, true);
     }
 
     /*
         Constructor that requires user to indicate both IMU
         and whether to initialize the IMU instantly
      */
-    public Accelerometer(BNO055IMU imu, boolean initialize){
-        this.imu = imu;
+    public Accelerometer(IMU handler, boolean initialize){
+        this.handler = handler;
         if (initialize){
-            imuInitialized = imu.initialize();
+            handler.imu.initialize();
         }
     }
 
@@ -83,20 +83,11 @@ public class Accelerometer extends IMU{
     }
 
     /**
-     * Sets the parameter at an acceleration unit
-     * Default: meters per second
-     * @param unit to be used for acceleration
-     */
-    public void setAccelerationUnit(BNO055IMU.AccelUnit unit){
-        parameters.accelUnit = unit;
-    }
-
-    /**
      * Gets the gravity reading from IMU at instance
      * @return IMU's acceleration with respect to gravity
      */
     public Acceleration gravity(){
-        return imu.getGravity();
+        return handler.imu.getGravity();
     }
 
     /**
@@ -104,7 +95,7 @@ public class Accelerometer extends IMU{
      * @return IMU's acceleration
      */
     public Acceleration acceleration(){
-        return imu.getAcceleration();
+        return handler.imu.getAcceleration();
     }
 
     /**
@@ -112,7 +103,7 @@ public class Accelerometer extends IMU{
      * @return IMU's velocity
      */
     public Velocity velocity(){
-        return imu.getVelocity();
+        return handler.imu.getVelocity();
     }
 
     /**
@@ -120,7 +111,7 @@ public class Accelerometer extends IMU{
      * @return IMU's position
      */
     public Position position(){
-        return imu.getPosition();
+        return handler.imu.getPosition();
     }
 
     /**
@@ -161,7 +152,7 @@ public class Accelerometer extends IMU{
      * @param useRunnable whether to use private variable
      * @return the acceleration
      */
-    public double getAcceleration(Axis axis, boolean useRunnable){
+    public double getAcceleration(IMU.Axis axis, boolean useRunnable){
         switch (axis){
             case X:
                 return useRunnable ? acceleration.xAccel : acceleration().xAccel;
@@ -180,7 +171,7 @@ public class Accelerometer extends IMU{
      * @param useRunnable whether to use private variable
      * @return the velocity
      */
-    public double getVelocity(Axis axis, boolean useRunnable){
+    public double getVelocity(IMU.Axis axis, boolean useRunnable){
         switch (axis){
             case X:
                 return useRunnable ? velocity.xVeloc : velocity().xVeloc;
@@ -199,7 +190,7 @@ public class Accelerometer extends IMU{
      * @param useRunnable whether to use runnable
      * @return the chosen axis
      */
-    public double getPosition(Axis axis, boolean useRunnable){
+    public double getPosition(IMU.Axis axis, boolean useRunnable){
         switch (axis){
             case X:
                 return useRunnable ? position.x : position().x;
@@ -218,7 +209,7 @@ public class Accelerometer extends IMU{
      * @param axis chosen axis
      * @return accelration
      */
-    public double getAcceleration(Axis axis){
+    public double getAcceleration(IMU.Axis axis){
         return getAcceleration(axis, false);
     }
 
@@ -228,7 +219,7 @@ public class Accelerometer extends IMU{
      * @param axis chosen axis
      * @return velocity
      */
-    public double getVelocity(Axis axis){
+    public double getVelocity(IMU.Axis axis){
         return getVelocity(axis, false);
     }
 
@@ -238,7 +229,7 @@ public class Accelerometer extends IMU{
      * @param axis chosen axis
      * @return position
      */
-    public double getPosition(Axis axis){
+    public double getPosition(IMU.Axis axis){
         return getPosition(axis, false);
     }
 
@@ -247,10 +238,10 @@ public class Accelerometer extends IMU{
      * @param opMode test op mode chosen
      * @param updateTelemetry whether to update telemetry
      */
-    public void testGyro(LinearOpMode opMode, boolean updateTelemetry){
-        opMode.telemetry.addData("AccelX", getAcceleration(Axis.X));
-        opMode.telemetry.addData("AccelY", getAcceleration(Axis.Y));
-        opMode.telemetry.addData("AccelZ", getAcceleration(Axis.Z));
+    public void testAccelerometer(LinearOpMode opMode, boolean updateTelemetry){
+        opMode.telemetry.addData("AccelX", getAcceleration(IMU.Axis.X));
+        opMode.telemetry.addData("AccelY", getAcceleration(IMU.Axis.Y));
+        opMode.telemetry.addData("AccelZ", getAcceleration(IMU.Axis.Z));
         if (updateTelemetry) opMode.telemetry.update();
     }
 }

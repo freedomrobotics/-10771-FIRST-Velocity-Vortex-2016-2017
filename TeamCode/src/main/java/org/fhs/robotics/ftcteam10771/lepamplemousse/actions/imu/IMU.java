@@ -16,9 +16,9 @@ import java.io.File;
  */
 public class IMU {
 
-    protected BNO055IMU imu;
-    protected static BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-    protected boolean imuInitialized = false;
+    public BNO055IMU imu;
+    BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+    boolean imuInitialized = false;
     private String calibrationFileName = "IMU.json";
     /*
         Default constructor
@@ -71,8 +71,27 @@ public class IMU {
      * Function that changes the sensor mode
      * @param mode operational mode of the IMU
      */
-    protected void setSensorMode(BNO055IMU.SensorMode mode){
+    public void setSensorMode(BNO055IMU.SensorMode mode){
         parameters.mode = mode;
+    }
+
+    /**
+     * Setter for the angular unit
+     * for both velocity and orientation
+     * Default: RADIANS
+     * @param unit to use for gyro measurements
+     */
+    public void setAngleUnit(BNO055IMU.AngleUnit unit){
+        parameters.angleUnit = unit;
+    }
+
+    /**
+     * Sets the parameter at an acceleration unit
+     * Default: meters per second
+     * @param unit to be used for acceleration
+     */
+    public void setAccelerationUnit(BNO055IMU.AccelUnit unit){
+        parameters.accelUnit = unit;
     }
 
     /**

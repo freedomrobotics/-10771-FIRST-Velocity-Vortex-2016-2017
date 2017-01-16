@@ -12,8 +12,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.MagneticFlux;
  * by the IMU
  * Created by joelv on 1/14/2017.
  */
-public class Magnetometer extends IMU{
+public class Magnetometer{
 
+    private IMU handler;
     private MagneticFlux magneticFlux;
     private boolean magnetStreamEnabled = true;
 
@@ -27,18 +28,18 @@ public class Magnetometer extends IMU{
     /*
         Constructor that requires reference to an IMU
      */
-    public Magnetometer(BNO055IMU imu){
-        new IMU(imu, true);
+    public Magnetometer(IMU handler){
+        new Magnetometer(handler, true);
     }
 
     /*
         Constructor that requires user to indicate both IMU
         and whether to initialize the IMU instantly
      */
-    public Magnetometer(BNO055IMU imu, boolean initilize){
-        this.imu = imu;
+    public Magnetometer(IMU handler, boolean initilize){
+        this.handler = handler;
         if (initilize){
-            imuInitialized = imu.initialize();
+            handler.imu.initialize();
         }
     }
 
@@ -56,19 +57,11 @@ public class Magnetometer extends IMU{
     public final Thread magnetThread = new Thread(magnetRunnable);
 
     /**
-     * Function that enables or disables the magnetometer
-     * @param state the state of magnetometer use
-     */
-    public void toggleMagnetometer(boolean state){
-        setSensorMode(state ? BNO055IMU.SensorMode.NDOF : BNO055IMU.SensorMode.IMU);
-    }
-
-    /**
      * Reads the magnetic strength from IMU
      * @return the magetic field strength
      */
     public MagneticFlux magneticFlux(){
-        return imu.getMagneticFieldStrength();
+        return handler.imu.getMagneticFieldStrength();
     }
 
     /**
@@ -104,7 +97,7 @@ public class Magnetometer extends IMU{
      * @param useRunnable whether to use private streaming variable
      * @return the magnetic readings of one axis
      */
-    public double getMagneticFlux(Axis axis, boolean useRunnable){
+    public double getMagneticFlux(IMU.Axis axis, boolean useRunnable){
         switch (axis){
             case X:
                 return useRunnable ? magneticFlux.x : magneticFlux().x;
@@ -123,7 +116,7 @@ public class Magnetometer extends IMU{
      * @param axis the chosen axis
      * @return the magnetic readings at that instant
      */
-    public double getMagneticFlux(Axis axis){
+    public double getMagneticFlux(IMU.Axis axis){
         return getMagneticFlux(axis, false);
     }
 
@@ -133,9 +126,9 @@ public class Magnetometer extends IMU{
      * @param updateTelemetry whether to update telemetry
      */
     public void testMagnetometer(LinearOpMode opMode, boolean updateTelemetry){
-        opMode.telemetry.addData("MagnetX", getMagneticFlux(Axis.X));
-        opMode.telemetry.addData("MagnetY", getMagneticFlux(Axis.Y));
-        opMode.telemetry.addData("MagnetZ", getMagneticFlux(Axis.Z));
+        opMode.telemetry.addData("MagnetX", getMagneticFlux(IMU.Axis.X));
+        opMode.telemetry.addData("MagnetY", getMagneticFlux(IMU.Axis.Y));
+        opMode.telemetry.addData("MagnetZ", getMagneticFlux(IMU.Axis.Z));
         if (updateTelemetry) opMode.telemetry.update();
     }
 }

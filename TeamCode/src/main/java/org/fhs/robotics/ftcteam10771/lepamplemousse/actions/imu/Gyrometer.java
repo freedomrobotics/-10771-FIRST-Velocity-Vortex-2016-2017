@@ -16,8 +16,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
  * Class that handles the gyro sensor readings of the IMU
  * Created by joelv on 1/14/2017.
  */
-public class Gyrometer extends IMU {
+public class Gyrometer {
 
+
+    private IMU handler;
     private final AxesOrder axesOrder = AxesOrder.XYZ;
     private final AxesReference reference = AxesReference.INTRINSIC;
     private Orientation orientation;
@@ -34,29 +36,8 @@ public class Gyrometer extends IMU {
     /*
         Constructor that allows reference to an IMU
      */
-    public Gyrometer(BNO055IMU imu){
-        new Gyrometer(imu, true);
-    }
-
-    /*
-        Constructor that requires user to indicate both IMU
-        and whether to initialize the IMU instantly
-     */
-    public Gyrometer(BNO055IMU imu, boolean initialize){
-        this.imu = imu;
-        if (initialize){
-            imuInitialized = imu.initialize();
-        }
-    }
-
-    /**
-     * Setter for the angular unit
-     * for both velocity and orientation
-     * Default: RADIANS
-     * @param unit to use for gyro measurements
-     */
-    public void setAngleUnit(BNO055IMU.AngleUnit unit){
-        parameters.angleUnit = unit;
+    public Gyrometer(IMU handler){
+        new Gyrometer(handler);
     }
 
     /**
@@ -64,7 +45,7 @@ public class Gyrometer extends IMU {
      * @return the IMU's input orientation
      */
     public Orientation sensorOrientation(){
-        return imu.getAngularOrientation();
+        return handler.imu.getAngularOrientation();
     }
 
     /**
@@ -72,7 +53,7 @@ public class Gyrometer extends IMU {
      * @return the IMU's input angular velocity
      */
     public AngularVelocity angularVelocity(){
-        return imu.getAngularVelocity();
+        return handler.imu.getAngularVelocity();
     }
 
     /**
@@ -131,7 +112,7 @@ public class Gyrometer extends IMU {
      * @param useRunnable whether to use the private runnable variable
      * @return the angle in parameter's set angle unit
      */
-    public float getOrientation(Axis axis, boolean intrinsicReference, boolean useRunnable){
+    public float getOrientation(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
         Orientation orientation;
         Orientation vectorToUse = useRunnable ? this.orientation : sensorOrientation();
         if (intrinsicReference){
@@ -158,7 +139,7 @@ public class Gyrometer extends IMU {
      * @param useRunnable whether to use the private runnable variable
      * @return the velocity in parameter's set angle unit
      */
-    public float getAngularVelocity(Axis axis, boolean intrinsicReference, boolean useRunnable){
+    public float getAngularVelocity(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
         AngularVelocity angularVelocity;
         AngularVelocity vectorToUse = useRunnable ? velocity : angularVelocity();
         if (intrinsicReference){
@@ -184,7 +165,7 @@ public class Gyrometer extends IMU {
      * @param intrinsicReference whether to use intrinsic reference
      * @return the orienatation
      */
-    public float getOrientation(Axis axis, boolean intrinsicReference){
+    public float getOrientation(IMU.Axis axis, boolean intrinsicReference){
         return getOrientation(axis, intrinsicReference, false);
     }
 
@@ -195,7 +176,7 @@ public class Gyrometer extends IMU {
      * @param intrinsicReference whether to use intrinsic reference
      * @return the angular velocity
      */
-    public float getAngularVelocity(Axis axis, boolean intrinsicReference){
+    public float getAngularVelocity(IMU.Axis axis, boolean intrinsicReference){
         return getAngularVelocity(axis, intrinsicReference, false);
     }
 
@@ -206,7 +187,7 @@ public class Gyrometer extends IMU {
      * @param useRunnable whether to use private variable
      * @return the orienatation
      */
-    public float getOrientation(Axis axis, Boolean useRunnable){
+    public float getOrientation(IMU.Axis axis, Boolean useRunnable){
         return getOrientation(axis, false, useRunnable);
     }
 
@@ -217,7 +198,7 @@ public class Gyrometer extends IMU {
      * @param useRunnable whether to use private variable
      * @return the angular velocity
      */
-    public float getAngularVelocity(Axis axis, Boolean useRunnable){
+    public float getAngularVelocity(IMU.Axis axis, Boolean useRunnable){
         return getAngularVelocity(axis, false, useRunnable);
     }
 
@@ -227,7 +208,7 @@ public class Gyrometer extends IMU {
      * @param axis the chosen axis
      * @return the orienatation
      */
-    public float getOrientation(Axis axis){
+    public float getOrientation(IMU.Axis axis){
         return getOrientation(axis, false, false);
     }
 
@@ -237,7 +218,7 @@ public class Gyrometer extends IMU {
      * @param axis the chosen axis
      * @return the angular velocity
      */
-    public float getAngularVelocity(Axis axis){
+    public float getAngularVelocity(IMU.Axis axis){
         return getAngularVelocity(axis, false, false);
     }
 
@@ -247,9 +228,9 @@ public class Gyrometer extends IMU {
      * @param updateTelemetry whether to update the telemetry
      */
     public void testGyro(LinearOpMode opMode, boolean updateTelemetry){
-        opMode.telemetry.addData("GyroX", getOrientation(Axis.X));
-        opMode.telemetry.addData("GyroY", getOrientation(Axis.Y));
-        opMode.telemetry.addData("GyroZ", getOrientation(Axis.Z));
+        opMode.telemetry.addData("GyroX", getOrientation(IMU.Axis.X));
+        opMode.telemetry.addData("GyroY", getOrientation(IMU.Axis.Y));
+        opMode.telemetry.addData("GyroZ", getOrientation(IMU.Axis.Z));
         if (updateTelemetry) opMode.telemetry.update();
     }
 }

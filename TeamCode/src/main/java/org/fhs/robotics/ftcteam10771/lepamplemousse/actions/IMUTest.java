@@ -25,19 +25,17 @@ public class IMUTest extends LinearOpMode{
     @Override
     public void runOpMode() throws InterruptedException {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imuHandler = new IMU(imu, false);
-        gyrometer = new Gyrometer(imuHandler.getImu());
-        accelerometer = new Accelerometer(imuHandler.getImu());
-        magnetometer = new Magnetometer(imuHandler.getImu());
-        gyrometer.setAngleUnit(BNO055IMU.AngleUnit.DEGREES);
-        accelerometer.setAccelerationUnit(BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC);
-        magnetometer.toggleMagnetometer(true);
+        imuHandler = new IMU(imu);
+        gyrometer = new Gyrometer(imuHandler);
         imuHandler.imuInit();
+        //accelerometer = new Accelerometer(imuHandler);
+        //magnetometer = new Magnetometer(imuHandler);
+        //Sensor mode is IMU in default initialization which does not include magnetometer
         waitForStart();
         while (opModeIsActive()){
-            gyrometer.testGyro(this, false);
-            accelerometer.testGyro(this, false);
-            magnetometer.testMagnetometer(this, true);
+            gyrometer.testGyro(this, true);
+            //accelerometer.testAccelerometer(this, false);
+            //magnetometer.testMagnetometer(this, true);
         }
     }
 }
