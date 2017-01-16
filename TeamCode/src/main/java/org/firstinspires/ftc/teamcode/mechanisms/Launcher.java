@@ -60,10 +60,10 @@ public class Launcher {
      * @param button to press or the flag to toggle launch motor
      */
     public void launch(boolean button){
-        if (button){
-            launch.setPower(launchPower);
+        if (launch!=null){
+            launch.setPower(button ? launchPower : 0.0);
         }
-        else launch.setPower(0.0);
+
     }
 
     /**
@@ -71,10 +71,7 @@ public class Launcher {
      * @param button
      */
     public void intake(boolean button){
-        if (button){
-            intake.setPower(intakePower);
-        }
-        else intake.setPower(0.0);
+        if (intake!=null) intake.setPower(button ? intakePower : 0.0);
     }
 
     /**
@@ -83,7 +80,9 @@ public class Launcher {
      * @param joystick the input from analog stick
      */
     public void launch(float joystick){
-        launch.setPower((double)joystick);
+        if (launch!=null){
+            launch.setPower((double)joystick);
+        }
     }
 
     /**
@@ -92,7 +91,7 @@ public class Launcher {
      * @param joystick
      */
     public void intake(float joystick){
-        intake.setPower((double)joystick);
+        if (intake!=null) intake.setPower((double)joystick);
     }
 
     /**
@@ -148,7 +147,7 @@ public class Launcher {
      * @param button to press to decrease the power
      * @param decrementFactor the number which to multiply decrement
      */
-    public void decresePower(boolean button, int decrementFactor){
+    public void decreasePower(boolean button, int decrementFactor){
         if (button) adjustPower(-1, decrementFactor);
     }
 
@@ -167,7 +166,7 @@ public class Launcher {
      * @param button to press to decrease power
      */
     public void decreasePower(boolean button){
-        decresePower(button, 1);
+        decreasePower(button, 1);
     }
 
     /**
