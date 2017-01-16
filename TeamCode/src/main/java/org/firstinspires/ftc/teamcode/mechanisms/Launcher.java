@@ -37,13 +37,21 @@ public class Launcher {
 
     /*
         Constructor that assigns the two motors of the mechanism
+        Default motor direction = Forwards
      */
     public Launcher(DcMotor intake, DcMotor launch){
+        // todo determine correct directions of each motor
+        new Launcher(intake, DcMotorSimple.Direction.FORWARD, launch, DcMotorSimple.Direction.FORWARD);
+    }
+
+    /*
+        Constructor that takes motor directions as parameters
+     */
+    public Launcher(DcMotor intake, DcMotorSimple.Direction intakeDirection, DcMotor launch, DcMotorSimple.Direction launchDirection){
         this.intake = intake;
         this.launch = launch;
-        // todo determine correct directions of each motor
-        this.intake.setDirection(DcMotorSimple.Direction.FORWARD);
-        this.launch.setDirection(DcMotorSimple.Direction.FORWARD);
+        this.intake.setDirection(intakeDirection);
+        this.launch.setDirection(launchDirection);
     }
 
     /**
