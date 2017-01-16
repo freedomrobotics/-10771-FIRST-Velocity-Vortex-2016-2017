@@ -27,6 +27,8 @@ public class MechanismTest extends LinearOpMode{
         waitForStart();
         while(opModeIsActive()){
             launcher.adjustPower(gamepad1.right_stick_y);
+            launcher.increasePower(gamepad1.y);
+            launcher.decreasePower(gamepad1.a);
             launcher.launch(gamepad1.right_bumper);
             launcher.intake(gamepad1.left_bumper);
             telemetry.addData("Launch Motor Power", launcher.getLaunchPower());
