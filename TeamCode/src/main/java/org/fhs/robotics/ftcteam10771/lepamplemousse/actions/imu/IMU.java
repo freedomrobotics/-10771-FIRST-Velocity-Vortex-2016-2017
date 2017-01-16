@@ -118,4 +118,11 @@ public class IMU {
         return (imu.isGyroCalibrated() && imu.isAccelerometerCalibrated()
                 && imu.isMagnetometerCalibrated() && imu.isSystemCalibrated());
     }
+
+    /**
+     * @return the class's IMU
+     */
+    public BNO055IMU getImu(){
+        return imu;
+    }
 }
