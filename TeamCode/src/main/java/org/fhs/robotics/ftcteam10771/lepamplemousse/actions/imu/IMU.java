@@ -4,10 +4,14 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.*;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
 
 import java.io.File;
@@ -25,11 +29,18 @@ public class IMU {
     boolean imuInitialized = false;
     private String calibrationFileName = "IMU.json";
 
+    //Runnable variables
     private Orientation orientation = null;    //might move to main IMU class
     private AngularVelocity angularVelocity = null;   //might move to main IMU class
+    private Acceleration gravity;
+    private Acceleration acceleration;
+    private Position position;
+    private Velocity velocity;
 
+
+    //Stream flags that can be toggled on or off
     private boolean gyroStreamEnabled = true;
-
+    private boolean accelStreamEnabled = true;
 
     /*
         Default constructor
@@ -142,11 +153,31 @@ public class IMU {
                 && imu.isMagnetometerCalibrated() && imu.isSystemCalibrated());
     }
 
+    //Runnable code that streams orientation and angular velocity
+    public final Runnable imuRunnable = new Runnable() {
+        @Override
+        public void run() {
+            while (!Thread.interrupted()){
+                streamIMUData();
+            }
+        }
+    };
+
+    //The runnable's respective thread
+    public final Thread imuThread = new Thread(imuRunnable);
+
     /**
-     * @return the class's IMU
+     * Streams Gyro Data at an instant;
+     * To be used in a looping thread
      */
-    public BNO055IMU getImu(){
-        return imu;
+    public void streamIMUData(){
+        if (gyroStreamEnabled){
+            orientation = imu.getAngularOrientation();
+            angularVelocity = imu.getAngularVelocity();
+            acceleration = imu.getAcceleration();
+            velocity = imu.getVelocity();
+            position = imu.getPosition();
+        }
     }
 
     //Axis enumeration
@@ -160,7 +191,7 @@ public class IMU {
      * The class that handles gyrometer outputs
      * which are angular velocity and orientation
      */
-    private class Gyrometer{
+    public class Gyrometer implements GyroSensor{
 
         private final AxesOrder axesOrder = AxesOrder.XYZ;
         private final AxesReference reference = AxesReference.INTRINSIC;
@@ -170,22 +201,6 @@ public class IMU {
          */
         public Gyrometer(){
 
-        }
-
-        /**
-         * Gets orientation straight from IMU feed
-         * @return the IMU's input orientation
-         */
-        public Orientation sensorOrientation(){
-            return imu.getAngularOrientation();
-        }
-
-        /**
-         * Gets angular velocity straight from IMU
-         * @return the IMU's input angular velocity
-         */
-        public AngularVelocity angularVelocity(){
-            return imu.getAngularVelocity();
         }
 
         /**
@@ -205,17 +220,6 @@ public class IMU {
         }
 
         /**
-         * Streams Gyro Data at an instant;
-         * To be used in a looping thread
-         */
-        public void streamGyroData(){
-            if (gyroStreamEnabled){
-                orientation = sensorOrientation();
-                angularVelocity = angularVelocity();
-            }
-        }
-
-        /**
          * toggles the stream method of gyro
          * @param state the method's state
          */
@@ -231,7 +235,7 @@ public class IMU {
          * @return the angle in parameter's set angle unit
          */
         public float getOrientation(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
-            Orientation vectorToUse = useRunnable ? orientation : sensorOrientation();
+            Orientation vectorToUse = useRunnable ? orientation : imu.getAngularOrientation();
             if (intrinsicReference){
                 vectorToUse = vectorToUse.toAxesReference(reference);
             }
@@ -256,7 +260,7 @@ public class IMU {
          * @return the velocity in parameter's set angle unit
          */
         public float getAngularVelocity(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
-            AngularVelocity vectorToUse = useRunnable ? angularVelocity : angularVelocity();
+            AngularVelocity vectorToUse = useRunnable ? angularVelocity : imu.getAngularVelocity();
             if (intrinsicReference){
                 vectorToUse = vectorToUse.toAxesReference(reference);
             }
@@ -338,11 +342,23 @@ public class IMU {
     }
 
     /**
-     * Creates a new instance of the class Gyrometer for the
+     * Creates a new instance of the class GyroSensor for the
      * @return
      */
     public IMU.Gyrometer getGyrometer(){
         return new IMU.Gyrometer();
+    }
+
+    private class Accelerometer{
+
+    }
+
+    /**
+     * Creates a new instance of the class GyroSensor for the
+     * @return
+     */
+    public IMU.Accelerometer getAccelerometer(){
+        return new IMU.Accelerometer();
     }
 
     /**

@@ -26,6 +26,7 @@ public class IMUTest extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);
+
     }
 
 
