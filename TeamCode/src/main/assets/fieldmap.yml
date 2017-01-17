@@ -1,0 +1,72 @@
+# All units in centimeters
+
+
+values:
+  size_x: 365.76
+  size_y: 365.76
+  map_type: SQUARE
+  rotation: 0.0
+  max_x: 182.88
+  max_y: 182.88
+  min_x: -182.88
+  min_y: -182.88
+
+#Boundaries in the field
+boundaries:
+  lines:
+    - blue_line:
+        slope: -1.0
+        y-int: 2.0
+        inequality: ">"
+    - red_line:
+        slope: -1.0
+        y-int: -2.0
+        inequality: "<"
+  vortex:
+    - center:
+        min_x: -38.1
+        max_x: 38.1
+        min_y: -38.1
+        max_y: 38.1
+    - corner:
+        - blue:
+            slope: -1.0
+            y-int: 250.063
+            inequality: ">"
+        - red:
+            slope: -1.0
+            y-int: 250.063
+            inequality: "<"
+            linked_map: red_corner_vortex
+
+
+#The objects the field
+objects:
+  beacons:
+      - gears:
+          location: [30.48, 182.88]
+          blue_side: true
+      - tools:
+          location: [-91.44, 182.88]
+          blue_side: true
+      - wheels:
+          location: [-182.88, 91.44]
+          blue_side: false
+      - legos:
+          location: [-182.88, -30.48]
+          blue_side: false
+  yellow_pole:
+    location: [0.0, 0.0]
+    height: 85.852
+  ball_collector:
+    - blue:
+        initial_location: [26.94076836, 26.94076836]
+        distance_from_origin: 38.1
+        height: 85.852
+        radius: 38.1
+    - red:
+        initial_location: [-26.94076836,-26.94076836]
+        distance_from_origin: 38.1
+        height: 85.852
+        radius: 38.1
+
