@@ -1,10 +1,13 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.Range;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.lang.Math;
 
 /**
@@ -12,6 +15,7 @@ import java.lang.Math;
  * Class to manage how the robot drives (smart control schemes, drivetrain types, etc.)
  */
 public class VectorDrive {
+    private final Telemetry telemetry;
     VectorR vectorR;
     Robot robot;
     DcMotor frMotor;
@@ -31,7 +35,7 @@ public class VectorDrive {
             while (!Thread.interrupted()) {
 
                 //sets values from the vectorR needed for movement
-                float joystickTheta = vectorR.getTheta();
+                float joystickTheta = (float) Math.atan2(-vectorR.getY(), vectorR.getX());
                 float absoluteTheta = 0;
                 float robotTheta;
                 float joystickRadius = vectorR.getRadius();
@@ -59,21 +63,30 @@ public class VectorDrive {
                 }
 
                 //calculates the shaft magnitude (AC shaft has diagonal motors "A" and "C")
-                float ACShaftPower = (float) ((Math.sin(robotTheta - (Math.PI/ 4))) * joystickRadius);
-                float BDShaftPower = (float) ((Math.cos(robotTheta - (Math.PI / 4))) * joystickRadius);
+                float ACShaftPower = (float) -((Math.sin(robotTheta - (Math.PI / 4))) * joystickRadius);
+                float BDShaftPower = (float) -((Math.cos(robotTheta - (Math.PI / 4))) * joystickRadius);
+
+                //sets the motor power where the ratio of input from translational motion is dictated by the magnitude of the rotational motion
+                double ACRotationalPower = (rotationalPower+ACShaftPower) == 0 ? 0 : (rotationalPower*Math.abs(rotationalPower))/(Math.abs(rotationalPower)+Math.abs(ACShaftPower));
+                double BDRotationalPower = (rotationalPower+BDShaftPower) == 0 ? 0 : (rotationalPower*Math.abs(rotationalPower))/(Math.abs(rotationalPower)+Math.abs(BDShaftPower));
+
+                double fr = (-ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
+                double fl = (BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
+                double bl = (ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
+                double br = (-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
 
                 //calculates the motor powers
-                frMotor.setPower((-ACShaftPower)+(ACShaftPower*(1.0-Math.abs(ACShaftPower))));
-                flMotor.setPower((BDShaftPower)+(BDShaftPower*(1.0-Math.abs(BDShaftPower))));
-                blMotor.setPower((ACShaftPower)+(ACShaftPower*(1.0-Math.abs(ACShaftPower))));
-                brMotor.setPower((-BDShaftPower)+(BDShaftPower*(1.0-Math.abs(BDShaftPower))));
+                frMotor.setPower(Range.scale(fr, -1, 1, -.778, .778));
+                flMotor.setPower(Range.scale(fl, -1, 1, -.778, .778));
+                blMotor.setPower(Range.scale(bl, -1, 1, -.778, .778));
+                brMotor.setPower(Range.scale(br, -1, 1, -.778, .778));
 
-                //waits before refreshing motor powers
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                /* spams the console
+                telemetry.addData("Speed-FR", fr);
+                telemetry.addData("Speed-FL", fl);
+                telemetry.addData("Speed-BL", bl);
+                telemetry.addData("Speed-BR", br);
+                */
             }
         }
     };
@@ -84,8 +97,8 @@ public class VectorDrive {
      * Constructor
      */
     public VectorDrive(VectorR vectorR, Robot robot, DcMotor frMotor,
-                       DcMotor flMotor, DcMotor brMotor, DcMotor blMotor,
-                       Config.ParsedData settings){
+                       DcMotor flMotor, DcMotor blMotor, DcMotor brMotor,
+                       Config.ParsedData settings, Telemetry telemetry){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -96,6 +109,7 @@ public class VectorDrive {
         this.driveSettings = settings.subData("drivetrain");
         this.vectorDriveActive = false;
         this.joystickControl = false;
+        this.telemetry = telemetry;
 
         this.blueTeam = false;
         if (settings.getString("alliance") == "blue")
@@ -108,10 +122,10 @@ public class VectorDrive {
         brMotor.setMode(runMode);
         blMotor.setMode(runMode);
 
-        if(driveSettings.subData("motors").subData("front_right").getBool("reversed")){frMotor.setDirection(DcMotorSimple.Direction.REVERSE);}else{frMotor.setDirection(DcMotorSimple.Direction.FORWARD);}
-        if(driveSettings.subData("motors").subData("front_left").getBool("reversed")){flMotor.setDirection(DcMotorSimple.Direction.REVERSE);}else{flMotor.setDirection(DcMotorSimple.Direction.FORWARD);}
-        if(driveSettings.subData("motors").subData("back_left").getBool("reversed")){blMotor.setDirection(DcMotorSimple.Direction.REVERSE);}else{blMotor.setDirection(DcMotorSimple.Direction.FORWARD);}
-        if(driveSettings.subData("motors").subData("back_right").getBool("reversed")){brMotor.setDirection(DcMotorSimple.Direction.REVERSE);}else{brMotor.setDirection(DcMotorSimple.Direction.FORWARD);}
+        if(driveSettings.subData("motor").subData("front_right").getBool("reversed")){frMotor.setDirection(DcMotor.Direction.REVERSE);}else{frMotor.setDirection(DcMotor.Direction.FORWARD);}
+        if(driveSettings.subData("motor").subData("front_left").getBool("reversed")){flMotor.setDirection(DcMotor.Direction.REVERSE);}else{flMotor.setDirection(DcMotor.Direction.FORWARD);}
+        if(driveSettings.subData("motor").subData("back_left").getBool("reversed")){blMotor.setDirection(DcMotor.Direction.REVERSE);}else{blMotor.setDirection(DcMotor.Direction.FORWARD);}
+        if(driveSettings.subData("motor").subData("back_right").getBool("reversed")){brMotor.setDirection(DcMotor.Direction.REVERSE);}else{brMotor.setDirection(DcMotor.Direction.FORWARD);}
     }
 
     /**
@@ -126,9 +140,12 @@ public class VectorDrive {
      * Uses driveThread to move robot to position
      */
     public void startPosition(){
+        //shouldn't be a point to this
         VectorR positionVectorR = new VectorR();
         this.vectorR = positionVectorR;
 
+        //this flag should be enough to announce that a math change is needed. Robot's current
+        // position can be gained from getVectorR and the vectorR provided is the aim position.
         vectorDriveActive = true;
         driveThread.start();
 

@@ -77,7 +77,7 @@ public class BasicNotBasicDrive extends OpMode {
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings);
+                settings, telemetry);
 
         this.lastTime = System.currentTimeMillis();
     }
@@ -96,7 +96,10 @@ public class BasicNotBasicDrive extends OpMode {
     public void loop() {
         driveVector.setX(controls.getAnalog("drive_x"));
         driveVector.setY(controls.getAnalog("drive_y"));
-        driveVector.setRawR(controls.getAnalog("drive_rotation"));
+        driveVector.setRawR(controls.getAnalog("drive_rotate"));
+        telemetry.addData("drive_x", driveVector.getX());
+        telemetry.addData("drive_y", driveVector.getY());
+        telemetry.addData("drive_rot", driveVector.getRawR());
     }
 
     @Override

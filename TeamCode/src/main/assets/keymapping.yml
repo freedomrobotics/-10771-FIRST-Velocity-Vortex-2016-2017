@@ -1,10 +1,10 @@
 # Gamepad mappings
 # Function List:
-# drivetrain_x          = the x axis of the drivetrain          - analog(-1, 1)   - float
-# drivetrain_y          = the y axis of the drivetrain          - analog(-1, 1)   - float
-# drivetrain_rotate     = the rotation for the drivetrain       - analog(-1, 1)   - float
-# drivetrain_l_rotate   = the rotation for the drivetrain (ccw) - analog(0, 1)    - float
-# drivetrain_r_rotate   = the rotation for the drivetrain (cw)  - analog(0, 1)    - float
+# drive_x               = the x axis of the drivetrain          - analog(-1, 1)   - float
+# drive_y               = the y axis of the drivetrain          - analog(-1, 1)   - float
+# drive_rotate          = the rotation for the drivetrain       - analog(-1, 1)   - float
+# drive_l_rotate        = the rotation for the drivetrain (ccw) - analog(0, 1)    - float
+# drive_r_rotate        = the rotation for the drivetrain (cw)  - analog(0, 1)    - float
 # intake_speed          = the speed control of the intake mech  - analog(-1, 1)   - float
 # intake_in             = toggle for inwards intake             - digital         - boolean
 # intake_out            = toggle for outwards in(out)take       - digital         - boolean
@@ -13,17 +13,17 @@
 # bumper_angle          = adjust the bumper angle               - analog(-1, 1)   - float
 gamepad1:
   left_stick_x:
-    function: drivetrain_x
+    function: drive_x
     inverted: false
     digital: false
 
   left_stick_y:
-    function: drivetrain_y
-    inverted: false # because it's already inverted in code
+    function: drive_y
+    inverted: true
     digital: false
 
   right_stick_x:
-    function: drivetrain_rotate
+    function: drive_rotate
     inverted: false
     digital: false
 
