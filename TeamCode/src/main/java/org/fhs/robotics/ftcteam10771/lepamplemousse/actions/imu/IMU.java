@@ -408,7 +408,7 @@ public class IMU {
      * which handles position, velocity, and
      * acceleration outputs
      */
-    private class Accelerometer implements AccelSensor{
+    public class Accelerometer implements AccelSensor{
 
         /**
          * Toggles the stream method
@@ -584,7 +584,7 @@ public class IMU {
      * them
      *
      */
-    private class Magnetometer implements MagneticSensor{
+    public class Magnetometer implements MagneticSensor{
 
         /**
          * Toggle the stream method
@@ -664,5 +664,13 @@ public class IMU {
         opMode.telemetry.addData("MagnetY", imu.getMagneticFieldStrength().y);
         opMode.telemetry.addData("MagnetZ", imu.getMagneticFieldStrength().z);
         if (updateTelemetry) opMode.telemetry.update();
+    }
+
+    /**
+     * IMU getter
+     * @return this imu
+     */
+    public BNO055IMU getImu(){
+        return imu;
     }
 }
