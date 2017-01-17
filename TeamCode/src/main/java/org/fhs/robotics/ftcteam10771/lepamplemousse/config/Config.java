@@ -514,7 +514,7 @@ public class Config {
      * <li><b>State.FAILED:</b> Something went wrong
      */
     public State create(boolean createDefault) {
-        if (configFile != null)
+        if (configFile == null)
             return State.MISSING_FILEPATH;
         if (createDefault) {
             try {
