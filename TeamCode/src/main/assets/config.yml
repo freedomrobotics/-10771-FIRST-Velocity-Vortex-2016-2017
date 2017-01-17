@@ -1,180 +1,140 @@
-# settings.yml
-# Use this to define changeable values such as max_power.
-# All values are in metric
-# Unit of length is millimeters, not meters
-# Unit of rotation is degrees (angular velocity is in degrees per second)
+# Component Configuration File
 
-# Encoder pulses per full revolution http://ftcforum.usfirst.org/archive/index.php/t-5189.html
-# update https://www.reddit.com/r/FTC/comments/3qhfvj/help_with_encoders/
+# Future Goals
+#dc_motors:
+#  dc_motor1:
+#    enabled: true
+#    extern_name: drive_left
+#    intern_name: driveLeft
 
-# flags
-alliance: red
-position: general
 
-robot:
-  initial_position:
-    x: 0.0
-    y: 0.0
-  intial_rotation: 0.0
-  size:
-    x: 444.5    #width approx 17.5in
-    y: 431.8    #length approx 15in
-  imu_offset:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    r: 0.0
-  phone_offset:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    r: 0.0
+# Motors
+dc_motors:
+  dc_motor1:
+    enabled: true
+    map_name: drive_front_left
+    alias:
+      - driveFrontLeft
+  dc_motor2:
+    enabled: true
+    map_name: drive_front_right
+    alias:
+      - driveFrontRight
+  dc_motor3:
+    enabled: true
+    map_name: drive_back_right
+    alias:
+      - driveBackRight
+  dc_motor4:
+    enabled: true
+    map_name: drive_back_left
+    alias:
+      - driveBackLeft
+  dc_motor5:
+    enabled: true
+    map_name: intake
+  dc_motor6:
+    enabled: false
+    map_name: flywheel
 
-encoder:
-  output_pulses: 1440
-  encoder_pulses: 28
-
-# The drivetrain's settings.
-drivetrain:
-  motor_max_power: 1
-  gear_ratio: 2.5
-  motion:
-    max_velocity: 100 # mm/s
-    max_acceleration: 100 # mm^2/s
-    max_jerk: 100 # mm^3/s
-  motor:
-    front_left:
-      map_name: drive_front_left
-      reversed: false
-    front_right:
-      map_name: drive_front_right
-      reversed: true
-    back_right:
-      map_name: drive_back_left
-      reversed: false
-    back_left:
-      map_name: drive_back_right
-      reversed: true
-  wheel:
-    diameter: 101.6 # 4 inches
-
-# Front Bumper-thing Settings
-bumper:
-  enabled: true
-  max_ang_vel: 20.0
-  full_rotate: 180.0  #180 degree servo
-  max_rotate: 60.0    #programmed limit
-  preset: 15.0
-  start_pos: 0.0
-  left_servo:
+# Servos
+servos:
+  servo1:
+    enabled: false
     map_name: bumper_left
-    reversed: true
-    offset: 15.75
-  right_servo:
+    alias:
+      - bumperLeft
+  servo2:
+    enabled: false
     map_name: bumper_right
-    reversed: false
-    offset: 0.0
+    alias:
+      - bumperRight
 
-#color sensors
-color_sensor:
-  side: back
-  left:
+# Touch Sensors
+touch_sensors:
+  touch_sensor1:
+    enabled: false
+    map_name: touch_sensor
+    alias:
+      - button
+
+# Light Sensors
+light_sensors:
+  light_sensor1:
+    enabled: false
+    map_name: light_sensor
+    alias:
+      - mod_rob_light_sensor
+      - ods
+
+# Color Sensors
+color_sensors:
+  color_sensor1:
+    enabled: true
     map_name: color_sensor_left
-    offset: 0.0
-  right:
+    alias:
+      - colorSensorLeft
+  color_sensor2:
+    enabled: true
     map_name: color_sensor_right
-    offset: 0.0
+    alias:
+      - colorSensorRight
 
-#Beacon colors
-beacon:
-  red_alliance:
-    min:        #lower range of values
-      red: 1
-      green: 1
-      blue: 1
-    max:        #upper range of values
-      red: 2
-      green: 2
-      blue: 2
-  blue_alliance:
-    min:
-      red: 1
-      green: 1
-      blue: 1
-    max:
-      red: 2
-      green: 2
-      blue: 2
-
-autonomous:
-  red_alliance:
-    starting_pos:
-      x: 10.0
-      y: 10.0
-      rot: 0.0
-    #Compute later
-    travel_to_beacon:
-      - move 100
-      - stop
-    travel_to_park:
-      - move 100
-      - stop
-    travel_to_low:
-      near:
-        - move 100
-        - stop
-      far:
-        - move 100
-        - stop
-    travel_to_mid:
-      near:
-        - move 100
-        - stop
-      far:
-        - move 100
-        - stop
-
-  blue_alliance:
-    starting_pos:
-      x: 10.0
-      y: 20.0
-      rot: 0.0
-    #Compute later
-    travel_to_beacon:
-      - move 100
-      - stop
-    travel_to_park:
-      - move 100
-      - stop
-    travel_to_low:
-      near:
-        - move 100
-        - stop
-      far:
-        - move 100
-        - stop
-    travel_to_mid:
-      near:
-        - move 100
-        - stop
-      far:
-        - move 100
-        - stop
-
-  # This is the autonomous commands!
-  command_list:
-    - move 500
-    - travel_to_beacon
-    - drop_off_people
-    - move -1000
-    - climb_mountain_low near
-    - stop
-
-  # The below define the other commands that aren't alliance specific (make up your own if you want)
-  drop_off_people:
-    - winch_servo 50
-    - winch_motor out,2
-    - winch_servo down,5
-    - winch_motor in,1
+# IR Seeker Sensors
+ir_seekers:
+  ir_seeker1:
+    enabled: false
+    map_name: main_ir_seeker
+    alias:
+      - ir_seeker1
+      - ir1
 
 
+# Gyrometers
+gyrometers:
+  gyrometer1:
+    enabled: false
+    using_phone: true
+    # map_name: main_gyrometer
+    alias:
+      - gyrometer1
+      - phone_gyro
+
+# Accelermoters
+accelerometers:
+  accelerometer1:
+    enabled: false
+    using_phone: true
+    # map_name: main_accelerometer
+
+# Other components (whatever data structure - has to be initiated manually)
+other:
+  rangefinder:
+    rangefinder1:
+      analog_map_name: left_rangefinder_data
+      digital_map_name: laft_rangefinder_toggle
+
+# Camera
+
+#TRASH
+
+# Valid function types:
+# color_grid    =     a grid of colors returned from the camera. Extra parameters are grid_x,
+#                     grid_y, grid_side, and refresh_rate. grid_x and grid_y set the grid width
+#                     & height; grid_side overrides grid_x and grid_y to set both width & height;
+#                     refresh_rate sets how many times per second the grid is going to update itself.
+#                     Either grid_x and grid_y or grid_size required. refresh_rate required. Will
+#                     silently fail to load otherwise.
+#
+# NOTE: If function is undefined, it will silently assume that the device is disabled.
+camera:
+  camera1:
+    enabled: false
+    function: color_grid
+    extra:
+      grid_x: 3
+      grid_y: 3
+      grid_side: 3
+      refresh_rate: 30.0
+    alias:
+      - color_grid

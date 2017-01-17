@@ -1,6 +1,7 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.config;
 
 import android.os.Environment;
+import android.util.Log;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -313,21 +314,21 @@ public class Config {
         //Check for write permissions
         if (!fsWrite) {
             fsWrite = Environment.getExternalStorageDirectory().canWrite();
-            if (debug) telemetry.addData("FS-Write", fsWrite);
+            if (debug) Log.d("FS-Write", fsWrite ? "true" : "false");
         }
 
         //Check and prepare parent dirctory
         if (this.parentPath != null && !this.parentPath.equals("")){
             parentDirectory = new File(dataPath + this.parentPath);
             if (parentDirectory.exists()) {
-                if (debug) telemetry.addData(this.parentPath, "exists");
+                if (debug) Log.d(this.parentPath, "exists");
             } else {
-                if (debug) telemetry.addData(this.parentPath, "does not exist... creating...");
+                if (debug) Log.d(this.parentPath, "does not exist... creating...");
 
                 if (parentDirectory.mkdirs()) {
-                    if (debug) telemetry.addData(this.parentPath, "created successfully");
+                    if (debug) Log.d(this.parentPath, "created successfully");
                 } else {
-                    if (debug) telemetry.addData(this.parentPath, "failed to create");
+                    if (debug) Log.d(this.parentPath, "failed to create");
                 }
             }
         }
@@ -341,13 +342,14 @@ public class Config {
         if (this.filename != null && !this.filename.equals("")){
             configFile = new File(parentDirectory, this.filename);
             if (configFile.exists()) {
-                telemetry.addData("File-" + this.id, "exists");
+                Log.d("File-" + this.id, "exists");
             } else {
-                telemetry.addData("File-" + this.id, "does not exist... creating with defaults...");
+                Log.d("File-" + this.id, "does not exist... creating with defaults...");
                 if (create(true) == State.SUCCESS && fsWrite) {
-                    telemetry.addData("File-"+id, "created successfully");
+                    Log.d("File-"+id, "created successfully");
                 } else {
-                    telemetry.addData("File-"+id, "failed to create...");
+                    Log.d("File-"+id, "failed to create...");
+                    Log.d("File-"+id, create(true).name());
                 }
             }
         }
@@ -390,10 +392,10 @@ public class Config {
             try {
                 config = FtcRobotControllerActivity.getGlobalAssets().open(filename);
                 if (debug)
-                    telemetry.addData("LoadFile-" + id, "default selected");
+                    Log.d("LoadFile-" + id, "default selected");
             } catch (IOException e) {
                 if (debug)
-                    telemetry.addData("LoadFile-" + id, "failed to read default");
+                    Log.d("LoadFile-" + id, "failed to read default");
                 e.printStackTrace();
                 if (configFile.exists())
                     return State.FILE_EXISTS;
@@ -405,7 +407,7 @@ public class Config {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 if (debug)
-                    telemetry.addData("LoadFile-" + id, "failed to read file");
+                    Log.d("LoadFile-" + id, "failed to read file");
                 try {
                     FtcRobotControllerActivity.getGlobalAssets().open(filename);
                     return State.DEFAULT_EXISTS;
@@ -413,7 +415,7 @@ public class Config {
                     return State.FAILED;
                 }
             }
-            telemetry.addData("LoadFile-" + id, "file selected");
+            Log.d("LoadFile-" + id, "file selected");
         }
 
 
@@ -421,11 +423,11 @@ public class Config {
             data = (Map<String,Object>) yaml.load(config);
             if (data != null) {
                 if (debug)
-                    telemetry.addData("LoadFile-" + id, (useDefault ? "default" : "file") + "loaded");
+                    Log.d("LoadFile-" + id, (useDefault ? "default" : "file") + "loaded");
                 return State.SUCCESS;
             } else {
                 if (debug)
-                    telemetry.addData("LoadFile-" + id, "failed to load");
+                    Log.d("LoadFile-" + id, "failed to load");
                 return State.FAILED;
             }
         }
@@ -514,13 +516,13 @@ public class Config {
      * <li><b>State.FAILED:</b> Something went wrong
      */
     public State create(boolean createDefault) {
-        if (configFile != null)
+        if (configFile == null)
             return State.MISSING_FILEPATH;
         if (createDefault) {
             try {
                 if (!configFile.isFile() && !configFile.createNewFile()) {
                     if (debug)
-                        telemetry.addData("CreatedFile-" + id, "failed to create default");
+                        Log.d("CreatedFile-" + id, "failed to create default");
                     return State.FAILED;
                 }
                 InputStream in = FtcRobotControllerActivity.getGlobalAssets().open(filename);
@@ -536,13 +538,13 @@ public class Config {
                 out.close();
 
                 if (debug)
-                    telemetry.addData("CreateFile-" + id, "default created");
+                    Log.d("CreateFile-" + id, "default created");
 
                 return State.SUCCESS;
             } catch (Exception e) {
                 e.printStackTrace();
                 if (debug)
-                    telemetry.addData("CreatedFile-" + id, "failed to create default");
+                    Log.d("CreatedFile-" + id, "failed to create default");
                 return State.FAILED;
             }
         }
@@ -552,12 +554,12 @@ public class Config {
             configWrite.flush();
             configWrite.close();
             if (debug)
-                telemetry.addData("CreateFile-" + id, "created successfully");
+                Log.d("CreateFile-" + id, "created successfully");
             return State.SUCCESS;
         } catch (IOException e) {
             e.printStackTrace();
             if (debug)
-                telemetry.addData("CreatedFile-" + id, "failed to create");
+                Log.d("CreatedFile-" + id, "failed to create");
             return State.FAILED;
         }
     }

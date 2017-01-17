@@ -90,10 +90,15 @@ public class TestDrive3 extends LinearOpMode{
         Log.d(TAG, "controllers-init");
 
         //sets variables to motors
-        motorFR = Aliases.motorMap.get(settings.subData("drivetrain").subData("motor").subData("front_right").getString("map_name"));
-        motorFL = Aliases.motorMap.get(settings.subData("drivetrain").subData("motor").subData("front_left").getString("map_name"));
-        motorBL = Aliases.motorMap.get(settings.subData("drivetrain").subData("motor").subData("back_left").getString("map_name"));
-        motorBR = Aliases.motorMap.get(settings.subData("drivetrain").subData("motor").subData("back_right").getString("map_name"));
+        motorFR = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("front_right").getString("map_name"));
+        motorFL = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("front_left").getString("map_name"));
+        motorBL = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("back_left").getString("map_name"));
+        motorBR = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("back_right").getString("map_name"));
+
+        Log.d(TAG, settings.subData("drivetrain").subData("motor").subData("front_right").getString("map_name"));
+        Log.d(TAG, settings.subData("drivetrain").subData("motor").subData("front_left").getString("map_name"));
+        Log.d(TAG, settings.subData("drivetrain").subData("motor").subData("back_left").getString("map_name"));
+        Log.d(TAG, settings.subData("drivetrain").subData("motor").subData("back_right").getString("map_name"));
 
         Log.d(TAG, "motor setup");
 
