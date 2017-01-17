@@ -6,10 +6,8 @@ values:
   size_y: 365.76
   map_type: SQUARE
   rotation: 0.0
-  max_x: 182.88
-  max_y: 182.88
-  min_x: -182.88
-  min_y: -182.88
+  orgin_x: 182.88
+  origin_y: 182.88
 
 #Boundaries in the field
 boundaries:
