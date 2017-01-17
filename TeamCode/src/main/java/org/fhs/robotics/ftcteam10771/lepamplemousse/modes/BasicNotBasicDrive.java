@@ -68,16 +68,22 @@ public class BasicNotBasicDrive extends OpMode {
         this.controls = new Controllers(gamepad1, gamepad2, keymapping);
         this.controls.initialize();
 
-        drive = new VectorDrive(driveVector, new Robot(), Aliases.motorMap.get("left_drive"),
-                Aliases.motorMap.get("left_drive"), Aliases.motorMap.get("left_drive"),
-                Aliases.motorMap.get("left_drive"), rawSettings.getParsedData().subData("drivetrain"));
+        Config.ParsedData drivetrainMotors = settings.subData("drivetrain").subData("motor");
+
+        Aliases.motorMap.get(drivetrainMotors.subData("front_right").getString("map_name"));
+
+        drive = new VectorDrive(driveVector, new Robot(),
+                Aliases.motorMap.get(drivetrainMotors.subData("front_right").getString("map_name")),
+                Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
+                Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
+                Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
+                settings);
 
         this.lastTime = System.currentTimeMillis();
     }
 
     public void start() {
         drive.startVelocity();
-        //should be true for driving relative to itself, so please fix that
         drive.setRelative(true);
     }
 
