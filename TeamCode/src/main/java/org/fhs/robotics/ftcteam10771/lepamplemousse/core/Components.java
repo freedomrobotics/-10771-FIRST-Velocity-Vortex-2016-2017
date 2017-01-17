@@ -338,7 +338,7 @@ public class Components {
      * @param deviceType The name of hte overarching device
      * @return a boolean of the device's existence
      */
-    public boolean deviceExists(String deviceType) {
+    private boolean deviceExists(String deviceType) {
         return components.containsKey(deviceType);
     }
 
@@ -348,7 +348,7 @@ public class Components {
      * @param deviceType The name of the device type (e.g. dc_motors)
      * @return A map object associated with the deviceType
      */
-    public Map getDevice(String deviceType) {
+    private Map getDevice(String deviceType) {
         if (deviceExists(deviceType)) {
             return (Map) components.get(deviceType);
         }
@@ -366,7 +366,7 @@ public class Components {
      * @param id         The id of the device
      * @return An boolean of the subdevice's existence
      */
-    public boolean subDeviceExists(String deviceType, String deviceName, Integer id) {
+    private boolean subDeviceExists(String deviceType, String deviceName, Integer id) {
         Map device;
         if ((device = getDevice(deviceType)) != null) {
             return device.containsKey(deviceName + id);
@@ -381,7 +381,7 @@ public class Components {
      * @param id         The id of the device
      * @return An boolean of the subdevice's existence
      */
-    public boolean subDeviceExists(String deviceType, Integer id) {
+    private boolean subDeviceExists(String deviceType, Integer id) {
         return subDeviceExists(deviceType, deviceName(deviceType), id);
     }
 
@@ -393,7 +393,7 @@ public class Components {
      * @param id         The id of the device
      * @return A map object associated with the subdevice
      */
-    public Map getSubdevice(String deviceType, String deviceName, Integer id) {
+    private Map getSubdevice(String deviceType, String deviceName, Integer id) {
         Map device = getDevice(deviceType);
         if (subDeviceExists(deviceType, deviceName, id)) {
             return (Map) device.get(deviceName + id);
@@ -408,7 +408,7 @@ public class Components {
      * @param id         The id of the device
      * @return An boolean of the subdevice's existence
      */
-    public Map getSubdevice(String deviceType, Integer id) {
+    private Map getSubdevice(String deviceType, Integer id) {
         return getSubdevice(deviceType, deviceName(deviceType), id);
     }
 
@@ -420,7 +420,7 @@ public class Components {
      * @param id         The id of the device
      * @return An boolean of whether the subdevice is deviceEnabled or not
      */
-    public boolean deviceEnabled(String deviceType, String deviceName, Integer id) {
+    private boolean deviceEnabled(String deviceType, String deviceName, Integer id) {
         Map device;
         if ((device = getSubdevice(deviceType, deviceName, id)) != null) {
             return device.get("enabled").equals(true);
@@ -435,7 +435,7 @@ public class Components {
      * @param id         The id of the device
      * @return An boolean of whether the subdevice is deviceEnabled or not
      */
-    public boolean deviceEnabled(String deviceType, Integer id) {
+    private boolean deviceEnabled(String deviceType, Integer id) {
         return deviceEnabled(deviceType, deviceName(deviceType), id);
     }
 
@@ -447,7 +447,7 @@ public class Components {
      * @param id         The id of the device
      * @return The name of the hardware map / the map name
      */
-    public String getMapName(String deviceType, String deviceName, Integer id) {
+    private String getMapName(String deviceType, String deviceName, Integer id) {
         Map device;
         if ((device = getSubdevice(deviceType, deviceName, id)) != null) {
             if (device.get("map_name") != null)
@@ -463,7 +463,7 @@ public class Components {
      * @param id         The id of the device
      * @return The name of the hardware map / the map name
      */
-    public String getMapName(String deviceType, Integer id) {
+    private String getMapName(String deviceType, Integer id) {
         return getMapName(deviceType, deviceName(deviceType), id);
     }
 
@@ -474,7 +474,7 @@ public class Components {
      * @param deviceName The name of the device
      * @return An integer count of the number of subdevices matching the device name
      */
-    public Integer count(String deviceType, String deviceName) {
+    private Integer count(String deviceType, String deviceName) {
         int quantity = 0;
         Map device;
         if ((device = getDevice(deviceType)) != null) {
@@ -493,7 +493,7 @@ public class Components {
      * @param deviceType The name of the overarching device
      * @return An integer count of the number of subdevices matching the device name
      */
-    public Integer count(String deviceType) {
+    private Integer count(String deviceType) {
         return count(deviceType, deviceName(deviceType));
     }
 
@@ -503,7 +503,7 @@ public class Components {
      * @param deviceType The name of the overarchin device
      * @return An integer count of the total number of subdevices in the device type
      */
-    public Integer maxSubdevices(String deviceType) {
+    private Integer maxSubdevices(String deviceType) {
         Map device;
         if ((device = getDevice(deviceType)) != null) {
             return device.size();
@@ -518,7 +518,7 @@ public class Components {
      * @param id         The id of the device
      * @return A list object of the aliases
      */
-    public List<String> getAlias(String deviceType, String deviceName, Integer id) {
+    private List<String> getAlias(String deviceType, String deviceName, Integer id) {
         Map device;
         List<String> alias = null;
         if ((device = getSubdevice(deviceType, deviceName, id)) != null) {
@@ -538,7 +538,7 @@ public class Components {
      * @param id         The id of the device
      * @return A list object of the aliases
      */
-    public List<String> getAlias(String deviceType, Integer id) {
+    private List<String> getAlias(String deviceType, Integer id) {
         return getAlias(deviceType, deviceName(deviceType), id);
     }
     //endregion
