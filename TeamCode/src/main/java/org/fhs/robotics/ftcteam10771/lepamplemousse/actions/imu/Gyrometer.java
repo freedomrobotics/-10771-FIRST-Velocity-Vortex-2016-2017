@@ -94,7 +94,6 @@ public class Gyrometer {
             orientation = sensorOrientation();
             velocity = angularVelocity();
         }
-
     }
 
     /**
@@ -220,17 +219,5 @@ public class Gyrometer {
      */
     public float getAngularVelocity(IMU.Axis axis){
         return getAngularVelocity(axis, false, false);
-    }
-
-    /**
-     * Gyro Tester
-     * @param opMode the op mode chosen to test the gyro with
-     * @param updateTelemetry whether to update the telemetry
-     */
-    public void testGyro(LinearOpMode opMode, boolean updateTelemetry){
-        opMode.telemetry.addData("GyroX", getOrientation(IMU.Axis.X));
-        opMode.telemetry.addData("GyroY", getOrientation(IMU.Axis.Y));
-        opMode.telemetry.addData("GyroZ", getOrientation(IMU.Axis.Z));
-        if (updateTelemetry) opMode.telemetry.update();
     }
 }

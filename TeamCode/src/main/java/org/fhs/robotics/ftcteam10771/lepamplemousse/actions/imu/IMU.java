@@ -4,6 +4,10 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
 
 import java.io.File;
@@ -20,6 +24,13 @@ public class IMU {
     BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
     boolean imuInitialized = false;
     private String calibrationFileName = "IMU.json";
+
+    private Orientation orientation = null;    //might move to main IMU class
+    private AngularVelocity angularVelocity = null;   //might move to main IMU class
+
+    private boolean gyroStreamEnabled = true;
+
+
     /*
         Default constructor
      */
@@ -43,13 +54,6 @@ public class IMU {
         if (initialize){
             imuInitialized = imu.initialize();
         }
-    }
-
-    //Axis enumeration
-    public enum Axis{
-        X,
-        Y,
-        Z
     }
 
     /**
@@ -143,5 +147,211 @@ public class IMU {
      */
     public BNO055IMU getImu(){
         return imu;
+    }
+
+    //Axis enumeration
+    public enum Axis{
+        X,
+        Y,
+        Z
+    }
+
+    /**
+     * The class that handles gyrometer outputs
+     * which are angular velocity and orientation
+     */
+    private class Gyrometer{
+
+        private final AxesOrder axesOrder = AxesOrder.XYZ;
+        private final AxesReference reference = AxesReference.INTRINSIC;
+
+        /*
+            Default constructor
+         */
+        public Gyrometer(){
+
+        }
+
+        /**
+         * Gets orientation straight from IMU feed
+         * @return the IMU's input orientation
+         */
+        public Orientation sensorOrientation(){
+            return imu.getAngularOrientation();
+        }
+
+        /**
+         * Gets angular velocity straight from IMU
+         * @return the IMU's input angular velocity
+         */
+        public AngularVelocity angularVelocity(){
+            return imu.getAngularVelocity();
+        }
+
+        /**
+         * Gets orientation from private variable used by Runnable
+         * @return the private orientation variable
+         */
+        public Orientation getRunnablOrientation(){
+            return orientation;
+        }
+
+        /**
+         * Gets orientation from private variable used by Runnable
+         * @return the private orientation variable
+         */
+        public AngularVelocity getRunnableAngularVelocity(){
+            return angularVelocity;
+        }
+
+        /**
+         * Streams Gyro Data at an instant;
+         * To be used in a looping thread
+         */
+        public void streamGyroData(){
+            if (gyroStreamEnabled){
+                orientation = sensorOrientation();
+                angularVelocity = angularVelocity();
+            }
+        }
+
+        /**
+         * toggles the stream method of gyro
+         * @param state the method's state
+         */
+        public void enableStream(boolean state){
+            gyroStreamEnabled = state;
+        }
+
+        /**
+         * Getter for an orientation's axis angle
+         * @param axis the chosen axis to get angle
+         * @param intrinsicReference whether to use intrinsic reference or not
+         * @param useRunnable whether to use the private runnable variable
+         * @return the angle in parameter's set angle unit
+         */
+        public float getOrientation(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
+            Orientation vectorToUse = useRunnable ? orientation : sensorOrientation();
+            if (intrinsicReference){
+                vectorToUse = vectorToUse.toAxesReference(reference);
+            }
+            vectorToUse = vectorToUse.toAxesOrder(axesOrder);
+            switch(axis){
+                case X:
+                    return vectorToUse.firstAngle;
+                case Y:
+                    return vectorToUse.secondAngle;
+                case Z:
+                    return vectorToUse.thirdAngle;
+                default:
+                    return 0f;
+            }
+        }
+
+        /**
+         * Getter for an angular velocity vector's axis angular rate
+         * @param axis the chosen axis to get velocity
+         * @param intrinsicReference whether to use intrinsic reference or not
+         * @param useRunnable whether to use the private runnable variable
+         * @return the velocity in parameter's set angle unit
+         */
+        public float getAngularVelocity(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
+            AngularVelocity vectorToUse = useRunnable ? angularVelocity : angularVelocity();
+            if (intrinsicReference){
+                vectorToUse = vectorToUse.toAxesReference(reference);
+            }
+            switch(axis){
+                case X:
+                    return vectorToUse.firstAngleRate;
+                case Y:
+                    return vectorToUse.secondAngleRate;
+                case Z:
+                    return vectorToUse.thirdAngleRate;
+                default:
+                    return 0f;
+            }
+        }
+
+        /**
+         * Orientation getter
+         * Default initrinsic flag = false
+         * @param axis the chosen axis
+         * @param intrinsicReference whether to use intrinsic reference
+         * @return the orienatation
+         */
+        public float getOrientation(IMU.Axis axis, boolean intrinsicReference){
+            return getOrientation(axis, intrinsicReference, false);
+        }
+
+        /**
+         * Angular Velocity getter
+         * Default initrinsic flag = false
+         * @param axis the chosen axis
+         * @param intrinsicReference whether to use intrinsic reference
+         * @return the angular velocity
+         */
+        public float getAngularVelocity(IMU.Axis axis, boolean intrinsicReference){
+            return getAngularVelocity(axis, intrinsicReference, false);
+        }
+
+        /**
+         * Orientation getter
+         * Default initrinsic flag = false
+         * @param axis the chosen axis
+         * @param useRunnable whether to use private variable
+         * @return the orienatation
+         */
+        public float getOrientation(IMU.Axis axis, Boolean useRunnable){
+            return getOrientation(axis, false, useRunnable);
+        }
+
+        /**
+         * Angular Velocity getter
+         * Default initrinsic flag = false
+         * @param axis the chosen axis
+         * @param useRunnable whether to use private variable
+         * @return the angular velocity
+         */
+        public float getAngularVelocity(IMU.Axis axis, Boolean useRunnable){
+            return getAngularVelocity(axis, false, useRunnable);
+        }
+
+        /**
+         * Orientation getter
+         * Default initrinsic flag = false
+         * @param axis the chosen axis
+         * @return the orienatation
+         */
+        public float getOrientation(IMU.Axis axis){
+            return getOrientation(axis, false, false);
+        }
+
+        /**
+         * Angular Velocity getter
+         * Default initrinsic flag = false
+         * @param axis the chosen axis
+         * @return the angular velocity
+         */
+        public float getAngularVelocity(IMU.Axis axis){
+            return getAngularVelocity(axis, false, false);
+        }
+    }
+
+    /**
+     * Creates a new instance of the class Gyrometer for the
+     * @return
+     */
+    public IMU.Gyrometer getGyrometer(){
+        return new IMU.Gyrometer();
+    }
+
+    /**
+     * IMU Tester
+     * @param opMode the op mode chosen to test the gyro with
+     * @param updateTelemetry whether to update the telemetry
+     */
+    public void testGyro(LinearOpMode opMode, boolean updateTelemetry){
+
+        if (updateTelemetry) opMode.telemetry.update();
     }
 }
