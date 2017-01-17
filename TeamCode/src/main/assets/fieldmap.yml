@@ -9,33 +9,40 @@ values:
   orgin_x: 182.88
   origin_y: 182.88
 
-#Boundaries in the field
-boundaries:
-  lines:
-    - blue_line:
+#Areas of the field
+areas:
+  blue_area:
+    boundary:
+      line:
         slope: -1.0
         y-int: 2.0
-        inequality: ">"
-    - red_line:
+        equality: ">"
+  red_area:
+      line:
         slope: -1.0
         y-int: -2.0
+        equality: "<"
+  center_vortex:
+    boundary:
+      rectangle:
+        vert: [-38.1, -38.1]
+        vert: [38.1, 38.1]
+        origin:[0.0, 0.0]
+        rot: 0.0
+  red_vortex:
+    boundary:
+      line:
+        slope: -1.0
+        y-int: 250.063
         inequality: "<"
-  vortex:
-    - center:
-        min_x: -38.1
-        max_x: 38.1
-        min_y: -38.1
-        max_y: 38.1
-    - corner:
-        - blue:
-            slope: -1.0
-            y-int: 250.063
-            inequality: ">"
-        - red:
-            slope: -1.0
-            y-int: 250.063
-            inequality: "<"
-            linked_map: red_corner_vortex
+        linked_map: red_vortex
+  blue_vortex:
+    boundary:
+      line:
+        slope: -1.0
+        y-int: 250.063
+        inequality: ">"
+      linked_map: blue_vorte
 
 
 #The objects the field
