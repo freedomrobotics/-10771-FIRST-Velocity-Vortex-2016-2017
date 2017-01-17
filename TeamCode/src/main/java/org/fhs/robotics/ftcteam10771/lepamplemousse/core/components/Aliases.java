@@ -74,8 +74,8 @@ public class Aliases {
     public static Map<String, IrSeekerSensor> irSeekerMap = new HashMap<String, IrSeekerSensor>();
 
     /**
-     * GyroSensor Map. Values from Components config file can be used to
-     * create an alias reference any GyroSensor.  Retrieve using ~.gyrometerMap.get("name");
+     * Gyro Map. Values from Components config file can be used to
+     * create an alias reference any Gyro.  Retrieve using ~.gyrometerMap.get("name");
      * Set using ~.gyrometerMap.put("name", light sensor);
      * Cleared using ~.gyrometerMap.clear("name");
      */

@@ -72,30 +72,6 @@ public class Gyrometer {
         return velocity;
     }
 
-    //Runnable code that streams orientation and angular velocity
-    public final Runnable gyroRunnable = new Runnable() {
-        @Override
-        public void run() {
-            while (!Thread.interrupted()){
-                streamGyroData();
-            }
-        }
-    };
-
-    //The runnable's respective thread
-    public final Thread gyroThread = new Thread(gyroRunnable);
-
-    /**
-     * Streams Gyro Data at an instant;
-     * To be used in a looping thread
-     */
-    public void streamGyroData(){
-        if (gyroStreamEnabled){
-            orientation = sensorOrientation();
-            velocity = angularVelocity();
-        }
-    }
-
     /**
      * toggles the stream method of gyro
      * @param state the method's state

@@ -9,6 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.MagneticFlux;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
@@ -25,7 +26,8 @@ import java.io.File;
 public class IMU {
 
     public BNO055IMU imu;
-    BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+    //todo if nullptr comes on for imu.initialize(), check out parameters first
+    private BNO055IMU.Parameters parameters = null;
     boolean imuInitialized = false;
     private String calibrationFileName = "IMU.json";
 
@@ -36,11 +38,14 @@ public class IMU {
     private Acceleration acceleration;
     private Position position;
     private Velocity velocity;
+    private MagneticFlux magneticFlux;
+
 
 
     //Stream flags that can be toggled on or off
     private boolean gyroStreamEnabled = true;
     private boolean accelStreamEnabled = true;
+    private boolean magnetStreamEnabled = true;
 
     /*
         Default constructor
@@ -51,9 +56,11 @@ public class IMU {
 
     /*
         Constructor that requires reference to an IMU
+        This time, the boolean flag for auto-init is false;
+        After seeing how much (true) damage "true" has done :P
      */
     public IMU(BNO055IMU imu){
-        new IMU(imu, true);
+        new IMU(imu, false);
     }
 
     /*
@@ -62,8 +69,12 @@ public class IMU {
      */
     public IMU(BNO055IMU imu, boolean initialize){
         this.imu = imu;
+        parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.mode = BNO055IMU.SensorMode.NDOF;
         if (initialize){
-            imuInitialized = imu.initialize();
+            imuInitialized = this.imu.initialize(parameters);
         }
     }
 
@@ -174,9 +185,35 @@ public class IMU {
         if (gyroStreamEnabled){
             orientation = imu.getAngularOrientation();
             angularVelocity = imu.getAngularVelocity();
+        }
+        if (accelStreamEnabled){
             acceleration = imu.getAcceleration();
             velocity = imu.getVelocity();
             position = imu.getPosition();
+            gravity = imu.getGravity();
+        }
+        if (magnetStreamEnabled){
+            magneticFlux = imu.getMagneticFieldStrength();
+        }
+        clearData();
+    }
+
+    /**
+     * Clears data for any unused stream variables during streaming
+     */
+    private void clearData(){
+        if (!gyroStreamEnabled){
+            orientation = null;
+            angularVelocity = null;
+        }
+        if (!accelStreamEnabled){
+            acceleration = null;
+            velocity = null;
+            position = null;
+            gravity = null;
+        }
+        if (!magnetStreamEnabled){
+            magneticFlux = null;
         }
     }
 
@@ -191,7 +228,7 @@ public class IMU {
      * The class that handles gyrometer outputs
      * which are angular velocity and orientation
      */
-    public class Gyrometer implements GyroSensor{
+    public class Gyrometer implements Gyro{
 
         private final AxesOrder axesOrder = AxesOrder.XYZ;
         private final AxesReference reference = AxesReference.INTRINSIC;
@@ -201,6 +238,22 @@ public class IMU {
          */
         public Gyrometer(){
 
+        }
+
+        /**
+         * Gets orientation straight from IMU feed
+         * @return the IMU's input orientation
+         */
+        public Orientation sensorOrientation(){
+            return imu.getAngularOrientation();
+        }
+
+        /**
+         * Gets angular velocity straight from IMU
+         * @return the IMU's input angular velocity
+         */
+        public AngularVelocity angularVelocity(){
+            return imu.getAngularVelocity();
         }
 
         /**
@@ -342,23 +395,257 @@ public class IMU {
     }
 
     /**
-     * Creates a new instance of the class GyroSensor for the
-     * @return
+     * Creates a new instance of the class Gyro
+     * for the object
+     * @return the new instance of private Gyro class
      */
     public IMU.Gyrometer getGyrometer(){
         return new IMU.Gyrometer();
     }
 
-    private class Accelerometer{
+    /**
+     * The subclass of the IMU object
+     * which handles position, velocity, and
+     * acceleration outputs
+     */
+    private class Accelerometer implements AccelSensor{
 
+        /**
+         * Toggles the stream method
+         * @param state of the stream method
+         */
+        public void enableStream(boolean state){
+            accelStreamEnabled = state;
+        }
+
+        /**
+         * Gets the gravity reading from IMU at instance
+         * @return IMU's acceleration with respect to gravity
+         */
+        public Acceleration gravity(){
+            return imu.getGravity();
+        }
+
+        /**
+         * Gets the acceleration from IMU at instance
+         * @return IMU's acceleration
+         */
+        public Acceleration acceleration(){
+            return imu.getAcceleration();
+        }
+
+        /**
+         * Gets the velocity from IMU at instance
+         * @return IMU's velocity
+         */
+        public Velocity velocity(){
+            return imu.getVelocity();
+        }
+
+        /**
+         * Gets the position from IMU at instance
+         * @return IMU's position
+         */
+        public Position position(){
+            return imu.getPosition();
+        }
+
+        /**
+         * Gets the position from private variable
+         * @return the private variable position
+         */
+        public Acceleration getRunnableAccleration(){
+            return gravity;
+        }
+
+        /**
+         * Gets the acceleration from private variable
+         * @return private acceleration variable
+         */
+        public Acceleration getRunnableAcceleration(){
+            return acceleration;
+        }
+
+        /**
+         * Gets the velocity from private variable
+         * @return private velocity variable
+         */
+        public Velocity getRunnableVelocity(){
+            return velocity;
+        }
+
+        /**
+         * Gets the position from private variable
+         * @return the private variable position
+         */
+        public Position getRunnablePositioon(){
+            return position;
+        }
+
+        /**
+         * Returns the acceleration value of an axis
+         * @param axis the chosen axis
+         * @param useRunnable whether to use private variable
+         * @return the acceleration
+         */
+        public double getAcceleration(IMU.Axis axis, boolean useRunnable){
+            switch (axis){
+                case X:
+                    return useRunnable ? acceleration.xAccel : imu.getAcceleration().xAccel;
+                case Y:
+                    return useRunnable ? acceleration.yAccel : imu.getAcceleration().yAccel;
+                case Z:
+                    return useRunnable ? acceleration.zAccel : imu.getAcceleration().zAccel;
+                default:
+                    return 0.0;
+            }
+        }
+
+        /**
+         * Returns the velocity value of an axis
+         * @param axis the chosen axis
+         * @param useRunnable whether to use private variable
+         * @return the velocity
+         */
+        public double getVelocity(IMU.Axis axis, boolean useRunnable){
+            switch (axis){
+                case X:
+                    return useRunnable ? velocity.xVeloc : imu.getVelocity().xVeloc;
+                case Y:
+                    return useRunnable ? velocity.xVeloc : imu.getVelocity().xVeloc;
+                case Z:
+                    return useRunnable ? velocity.xVeloc : imu.getVelocity().xVeloc;
+                default:
+                    return 0.0;
+            }
+        }
+
+        /**
+         * Returns the position value of a specific axis
+         * @param axis the chosen axis
+         * @param useRunnable whether to use runnable
+         * @return the chosen axis
+         */
+        public double getPosition(IMU.Axis axis, boolean useRunnable){
+            switch (axis){
+                case X:
+                    return useRunnable ? position.x : imu.getPosition().x;
+                case Y:
+                    return useRunnable ? position.y : imu.getPosition().y;
+                case Z:
+                    return useRunnable ? position.z : imu.getPosition().z;
+                default:
+                    return 0.0;
+            }
+        }
+
+        /**
+         * Returns acceleration of an axis
+         * Default Runnable use state: false
+         * @param axis chosen axis
+         * @return accelration
+         */
+        public double getAcceleration(IMU.Axis axis){
+            return getAcceleration(axis, false);
+        }
+
+        /**
+         * Returns velocity of an axis
+         * Default Runnable use state: false
+         * @param axis chosen axis
+         * @return velocity
+         */
+        public double getVelocity(IMU.Axis axis){
+            return getVelocity(axis, false);
+        }
+
+        /**
+         * Returns position of an axis
+         * Default Runnable use state: false
+         * @param axis chosen axis
+         * @return position
+         */
+        public double getPosition(IMU.Axis axis){
+            return getPosition(axis, false);
+        }
     }
 
     /**
-     * Creates a new instance of the class GyroSensor for the
-     * @return
+     * Creates a new instance of the class Accelerometer for the
+     * @return a created instance of an object within an object
      */
     public IMU.Accelerometer getAccelerometer(){
         return new IMU.Accelerometer();
+    }
+
+    /**
+     * Class that handles the readings of
+     * the magnetic sensor and outputs
+     * them
+     *
+     */
+    private class Magnetometer implements MagneticSensor{
+
+        /**
+         * Toggle the stream method
+         * @param state of the stream method
+         */
+        public void enableStream(boolean state){
+            magnetStreamEnabled = state;
+        }
+
+        /**
+         * Getter for the stream private variable
+         * @return the private object variable
+         */
+        public MagneticFlux getRunnableMagneticFlux(){
+            return magneticFlux;
+        }
+
+        /**
+         * Reads the magnetic strength from IMU
+         * @return the magetic field strength
+         */
+        public MagneticFlux magneticFlux(){
+            return imu.getMagneticFieldStrength();
+        }
+
+        /**
+         * Obtains the magnetic field readings of one axis
+         * @param axis the chosen axis
+         * @param useRunnable whether to use private streaming variable
+         * @return the magnetic readings of one axis
+         */
+        public double getMagneticFlux(IMU.Axis axis, boolean useRunnable){
+            switch (axis){
+                case X:
+                    return useRunnable ? magneticFlux.x : imu.getMagneticFieldStrength().x;
+                case Y:
+                    return useRunnable ? magneticFlux.y : imu.getMagneticFieldStrength().y;
+                case Z:
+                    return useRunnable ? magneticFlux.z : imu.getMagneticFieldStrength().z;
+                default:
+                    return 0.0;
+            }
+        }
+
+        /**
+         * Obtains magnetic field strength of one axis
+         * Default useRunnable state: false
+         * @param axis the chosen axis
+         * @return the magnetic readings at that instant
+         */
+        public double getMagneticFlux(IMU.Axis axis){
+            return getMagneticFlux(axis, false);
+        }
+    }
+
+    /**
+     * Creates a new instance of the class Magnetometer for the object
+     * @return a created instance of an object within an object
+     */
+    public IMU.Magnetometer getMagnetometer(){
+        return new IMU.Magnetometer();
     }
 
     /**
@@ -366,8 +653,16 @@ public class IMU {
      * @param opMode the op mode chosen to test the gyro with
      * @param updateTelemetry whether to update the telemetry
      */
-    public void testGyro(LinearOpMode opMode, boolean updateTelemetry){
-
+    public void testIMU(LinearOpMode opMode, boolean updateTelemetry){
+        opMode.telemetry.addData("GyroX", imu.getAngularOrientation().firstAngle);
+        opMode.telemetry.addData("GyroY", imu.getAngularOrientation().secondAngle);
+        opMode.telemetry.addData("GyroZ", imu.getAngularOrientation().thirdAngle);
+        opMode.telemetry.addData("AccelX", imu.getAcceleration().xAccel);
+        opMode.telemetry.addData("AccelY", imu.getAcceleration().yAccel);
+        opMode.telemetry.addData("AccelZ", imu.getAcceleration().zAccel);
+        opMode.telemetry.addData("MagnetX", imu.getMagneticFieldStrength().x);
+        opMode.telemetry.addData("MagnetY", imu.getMagneticFieldStrength().y);
+        opMode.telemetry.addData("MagnetZ", imu.getMagneticFieldStrength().z);
         if (updateTelemetry) opMode.telemetry.update();
     }
 }
