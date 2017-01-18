@@ -30,7 +30,7 @@ public class IMU {
 
     public BNO055IMU imu;
     //todo if nullptr comes on for imu.initialize(), check out parameters first
-    private BNO055IMU.Parameters parameters;
+    private BNO055IMU.Parameters parameters = null;
     boolean imuInitialized = false;
     private String calibrationFileName = "IMU.json";
 

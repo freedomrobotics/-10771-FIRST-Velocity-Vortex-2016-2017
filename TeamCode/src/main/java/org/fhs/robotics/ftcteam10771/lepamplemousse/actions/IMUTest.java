@@ -27,13 +27,16 @@ public class IMUTest extends LinearOpMode{
 
     BNO055IMU imu;
     IMU imuHandler;
+    Gyrometer gyrometer;
+    Accelerometer accelerometer;
+    Magnetometer magnetometer;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);
-        imuHandler.imuInit(); //FIXME: this is making the op mode close for some reason
+        imuHandler.imuInit(); //possible null pointer here; if there is, check parameters at method
         //imu.initialize();
 
         /*
@@ -49,9 +52,9 @@ public class IMUTest extends LinearOpMode{
         the scope of the three subclasses to public
         and uncomment this*/
 
-        //IMU.Gyrometer gyroOutput = imuHandler.getGyrometer();
-        //IMU.Accelerometer accelSensor = imuHandler.getAccelerometer();
-        //IMU.Magnetometer magneticSensor = imuHandler.getMagnetometer();
+        IMU.Gyrometer gyroOutput = imuHandler.getGyrometer();
+        IMU.Accelerometer accelSensor = imuHandler.getAccelerometer();
+        IMU.Magnetometer magneticSensor = imuHandler.getMagnetometer();
 
 
         /*
@@ -63,17 +66,16 @@ public class IMUTest extends LinearOpMode{
         waitForStart();
 
         //start accel integrator
-        //imu.startAccelerationIntegration(new Position(), new Velocity(), 100);
-        //imu.getLinearAcceleration();
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 100);
+        imu.getLinearAcceleration();
 
         while(opModeIsActive()){
-            /*
             telemetry.addData("GyroX", gyroOutput.getOrientation(X));
             telemetry.addData("GyroY", gyroOutput.getOrientation(Y));
             telemetry.addData("GyroZ", gyroOutput.getOrientation(Z));
             telemetry.addData("Gyro", gyroOutput.getOrientation());
             telemetry.addData("Velo", gyroOutput.getAngularVelocity());
-            */
+
 
 
             //If telemetry does not get data, use this
