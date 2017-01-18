@@ -43,7 +43,7 @@ public class VectorDrive {
 
                 if (vectorDriveActive) {
                     //sets values from the vectorR needed for movement
-                    joystickTheta = (float) Math.atan2(-vectorR.getY(), vectorR.getX());
+                    joystickTheta = (float) ((Math.atan2(vectorR.getY(), vectorR.getX())*(Math.PI*2))%(Math.PI*2));
                     joystickRadius = vectorR.getRadius();
                     rotationalPower = vectorR.getRad();
                     robotRotation = robot.getVectorR().getRad();
@@ -52,25 +52,17 @@ public class VectorDrive {
                         robotTheta = joystickTheta; //the direction of the joystick is the direction of motion
                     } else {
                         if (blueTeam) { //if our team is on blue
-                            if (joystickTheta > ((Math.PI)) / 2) { //keeps the theta value positive while rotating the polar coordinates pi/2 ccw
-                                absoluteTheta = (float) (joystickTheta - (Math.PI) / 2);
-                            } else {
-                                absoluteTheta = (float) (joystickTheta + (3 * (Math.PI)) / 2);
-                            }
+                            absoluteTheta = (float) ((joystickTheta+(Math.PI*2))%(Math.PI*2));
                         } else {
                             absoluteTheta = joystickTheta; //the field coordinate does not need to be adjusted
                         }
 
-                        if ((absoluteTheta + robotRotation) < (2 * Math.PI)) { //sets the robotTheta to the direction the robot has to move while keeping the theta value positive
-                            robotTheta = (float) (absoluteTheta + robotRotation);
-                        } else {
-                            robotTheta = (float) (absoluteTheta + robotRotation - 2 * (Math.PI));
-                        }
+                        robotTheta = (float) ((absoluteTheta+robotRotation)%(Math.PI*2));
                     }
                 } else {
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();
                     float vectorY = vectorR.getY() - robot.getVectorR().getY();
-                    robotTheta = (float) Math.acos(vectorX/Math.sqrt(vectorX * vectorX + vectorY * vectorY));
+                    robotTheta = (float) Math.atan2(vectorY, vectorX);
                     joystickRadius = .667f;
                     if (vectorR.getRad() > robot.getVectorR().getRad()){
                         rotationalPower = 0.25f;
