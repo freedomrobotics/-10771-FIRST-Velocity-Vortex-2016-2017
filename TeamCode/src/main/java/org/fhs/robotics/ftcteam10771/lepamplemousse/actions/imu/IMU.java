@@ -75,7 +75,8 @@ public class IMU {
         parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.mode = BNO055IMU.SensorMode.IMU;
+        //parameters.mode = BNO055IMU.SensorMode.IMU; FIXME: the problem might be here
+        //parameters.mode = BNO055IMU.SensorMode.NDOF;
         parameters.accelerationIntegrationAlgorithm = new NaiveAccelerationIntegrator();
         if (initialize){
             imuInitialized = this.imu.initialize(parameters);
