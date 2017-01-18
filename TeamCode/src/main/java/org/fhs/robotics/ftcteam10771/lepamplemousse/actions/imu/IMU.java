@@ -18,6 +18,8 @@ import org.firstinspires.ftc.robotcore.internal.AppUtil;
 
 import java.io.File;
 
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
+
 
 /**
  * Class that handles the robot's IMU device
@@ -71,9 +73,9 @@ public class IMU {
     public IMU(BNO055IMU imu, boolean initialize){
         this.imu = imu;
         parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.mode = BNO055IMU.SensorMode.NDOF;
+        parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.accelerationIntegrationAlgorithm = new NaiveAccelerationIntegrator();
         if (initialize){
             imuInitialized = this.imu.initialize(parameters);
@@ -239,7 +241,7 @@ public class IMU {
      */
     public class Gyrometer implements Gyro{
 
-        private final AxesOrder axesOrder = AxesOrder.XYZ;
+        private final AxesOrder axesOrder = XYZ;
         private final AxesReference reference = AxesReference.INTRINSIC;
 
         /*
@@ -297,11 +299,8 @@ public class IMU {
          * @return the angle in parameter's set angle unit
          */
         public float getOrientation(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
-            Orientation vectorToUse = useRunnable ? orientation : imu.getAngularOrientation();
-            if (intrinsicReference){
-                vectorToUse = vectorToUse.toAxesReference(reference);
-            }
-            vectorToUse = vectorToUse.toAxesOrder(axesOrder);
+            Orientation vectorToUse = useRunnable ? orientation.toAxesReference(AxesReference.EXTRINSIC).toAxesOrder(XYZ)
+                    : imu.getAngularOrientation().toAxesReference(AxesReference.EXTRINSIC).toAxesOrder(XYZ);
             switch(axis){
                 case X:
                     return vectorToUse.firstAngle;
@@ -400,6 +399,14 @@ public class IMU {
          */
         public float getAngularVelocity(IMU.Axis axis){
             return getAngularVelocity(axis, false, false);
+        }
+
+        public AngularVelocity getAngularVelocity(){
+            return imu.getAngularVelocity();
+        }
+
+        public Orientation getOrientation(){
+            return imu.getAngularOrientation();
         }
     }
 
