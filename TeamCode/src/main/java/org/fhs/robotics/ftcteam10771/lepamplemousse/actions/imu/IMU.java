@@ -196,7 +196,7 @@ public class IMU {
             angularVelocity = imu.getAngularVelocity();
         }
         if (accelStreamEnabled){
-            acceleration = imu.getAcceleration();
+            acceleration = imu.getLinearAcceleration();
             velocity = imu.getVelocity();
             position = imu.getPosition();
             gravity = imu.getGravity();
@@ -440,7 +440,7 @@ public class IMU {
          * @return IMU's acceleration
          */
         public Acceleration acceleration(){
-            return imu.getAcceleration();
+            return imu.getLinearAcceleration();
         }
 
         /**
@@ -500,11 +500,11 @@ public class IMU {
         public double getAcceleration(IMU.Axis axis, boolean useRunnable){
             switch (axis){
                 case X:
-                    return useRunnable ? acceleration.xAccel : imu.getAcceleration().xAccel;
+                    return useRunnable ? acceleration.xAccel : imu.getLinearAcceleration().xAccel;
                 case Y:
-                    return useRunnable ? acceleration.yAccel : imu.getAcceleration().yAccel;
+                    return useRunnable ? acceleration.yAccel : imu.getLinearAcceleration().yAccel;
                 case Z:
-                    return useRunnable ? acceleration.zAccel : imu.getAcceleration().zAccel;
+                    return useRunnable ? acceleration.zAccel : imu.getLinearAcceleration().zAccel;
                 default:
                     return 0.0;
             }
@@ -666,9 +666,9 @@ public class IMU {
         opMode.telemetry.addData("GyroX", imu.getAngularOrientation().firstAngle);
         opMode.telemetry.addData("GyroY", imu.getAngularOrientation().secondAngle);
         opMode.telemetry.addData("GyroZ", imu.getAngularOrientation().thirdAngle);
-        opMode.telemetry.addData("AccelX", imu.getAcceleration().xAccel);
-        opMode.telemetry.addData("AccelY", imu.getAcceleration().yAccel);
-        opMode.telemetry.addData("AccelZ", imu.getAcceleration().zAccel);
+        opMode.telemetry.addData("AccelX", imu.getLinearAcceleration().xAccel);
+        opMode.telemetry.addData("AccelY", imu.getLinearAcceleration().yAccel);
+        opMode.telemetry.addData("AccelZ", imu.getLinearAcceleration().zAccel);
         opMode.telemetry.addData("MagnetX", imu.getMagneticFieldStrength().x);
         opMode.telemetry.addData("MagnetY", imu.getMagneticFieldStrength().y);
         opMode.telemetry.addData("MagnetZ", imu.getMagneticFieldStrength().z);
