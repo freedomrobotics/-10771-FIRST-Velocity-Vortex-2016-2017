@@ -11,6 +11,8 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.Magnetometer;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.AccelSensor;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.Gyro;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.MagneticSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import static com.qualcomm.hardware.adafruit.BNO055IMU.SensorMode.IMU;
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.*;
@@ -61,6 +63,11 @@ public class IMUTest extends LinearOpMode{
         IMU.MagneticSensor magneticSensor = imuHandler.new IMU.MagneticSensor();
         */
         waitForStart();
+
+        //start accel integrator
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 100);
+        imu.getLinearAcceleration();
+
         while(opModeIsActive()){
             telemetry.addData("GyroX", gyroOutput.getOrientation(X));
             telemetry.addData("GyroY", gyroOutput.getOrientation(Y));
@@ -71,6 +78,10 @@ public class IMUTest extends LinearOpMode{
             telemetry.addData("MagX", magneticSensor.getMagneticFlux(X));
             telemetry.addData("MagY", magneticSensor.getMagneticFlux(Y));
             telemetry.addData("MagZ", magneticSensor.getMagneticFlux(Z));
+
+            telemetry.addData("Pos", imu.getPosition());
+            telemetry.addData("Vel", imu.getVelocity());
+            telemetry.addData("aVel", imu.getAngularVelocity());
 
             //If telemetry does not get data, use this
             //imuHandler.testIMU(this, false);

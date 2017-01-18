@@ -1,6 +1,7 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
@@ -60,7 +61,7 @@ public class IMU {
         After seeing how much (true) damage "true" has done :P
      */
     public IMU(BNO055IMU imu){
-        new IMU(imu, false);
+        this(imu, false);
     }
 
     /*
@@ -73,6 +74,7 @@ public class IMU {
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.mode = BNO055IMU.SensorMode.NDOF;
+        parameters.accelerationIntegrationAlgorithm = new NaiveAccelerationIntegrator();
         if (initialize){
             imuInitialized = this.imu.initialize(parameters);
         }
@@ -82,6 +84,13 @@ public class IMU {
      * Initializes the IMU with the given parameters
      */
     public void imuInit(){
+        /*parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();*/
         imuInitialized = imu.initialize(parameters);
     }
 
