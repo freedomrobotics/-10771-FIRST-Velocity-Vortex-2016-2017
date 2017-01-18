@@ -19,16 +19,6 @@ robot:
   size:
     x: 444.5    #width approx 17.5in
     y: 431.8    #length approx 15in
-  imu_offset:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    r: 0.0
-  phone_offset:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    r: 0.0
 
 encoder:
   output_pulses: 1440

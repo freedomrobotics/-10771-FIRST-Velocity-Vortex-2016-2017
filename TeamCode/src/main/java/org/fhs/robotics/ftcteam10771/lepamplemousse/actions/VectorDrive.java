@@ -34,31 +34,50 @@ public class VectorDrive {
 
             while (!Thread.interrupted()) {
 
-                //sets values from the vectorR needed for movement
-                float joystickTheta = (float) Math.atan2(-vectorR.getY(), vectorR.getX());
-                float absoluteTheta = 0;
+                float joystickTheta;
+                float absoluteTheta;
                 float robotTheta;
                 float joystickRadius = vectorR.getRadius();
-                float rotationalPower = vectorR.getRad();
-                float robotRotation = robot.getVectorR().getRad();
+                float rotationalPower;
+                float robotRotation;
 
-                if(relativeDrive) { //if the robot drives relative to the field
-                    robotTheta = joystickTheta; //the direction of the joystick is the direction of motion
-                }else {
-                    if (blueTeam) { //if our team is on blue
-                        if (joystickTheta > ((Math.PI)) / 2) { //keeps the theta value positive while rotating the polar coordinates pi/2 ccw
-                            absoluteTheta = (float) (joystickTheta - (Math.PI) / 2);
+                if (vectorDriveActive) {
+                    //sets values from the vectorR needed for movement
+                    joystickTheta = (float) Math.atan2(-vectorR.getY(), vectorR.getX());
+                    joystickRadius = vectorR.getRadius();
+                    rotationalPower = vectorR.getRad();
+                    robotRotation = robot.getVectorR().getRad();
+
+                    if (relativeDrive) { //if the robot drives relative to the field
+                        robotTheta = joystickTheta; //the direction of the joystick is the direction of motion
+                    } else {
+                        if (blueTeam) { //if our team is on blue
+                            if (joystickTheta > ((Math.PI)) / 2) { //keeps the theta value positive while rotating the polar coordinates pi/2 ccw
+                                absoluteTheta = (float) (joystickTheta - (Math.PI) / 2);
+                            } else {
+                                absoluteTheta = (float) (joystickTheta + (3 * (Math.PI)) / 2);
+                            }
                         } else {
-                            absoluteTheta = (float) (joystickTheta + (3 * (Math.PI)) / 2);
+                            absoluteTheta = joystickTheta; //the field coordinate does not need to be adjusted
                         }
-                    } else {
-                        absoluteTheta = joystickTheta; //the field coordinate does not need to be adjusted
-                    }
 
-                    if ((absoluteTheta + robotRotation) < (2 * Math.PI)) { //sets the robotTheta to the direction the robot has to move while keeping the theta value positive
-                        robotTheta = (float) (absoluteTheta + robotRotation);
+                        if ((absoluteTheta + robotRotation) < (2 * Math.PI)) { //sets the robotTheta to the direction the robot has to move while keeping the theta value positive
+                            robotTheta = (float) (absoluteTheta + robotRotation);
+                        } else {
+                            robotTheta = (float) (absoluteTheta + robotRotation - 2 * (Math.PI));
+                        }
+                    }
+                } else {
+                    float vectorX = vectorR.getX() - robot.getVectorR().getX();
+                    float vectorY = vectorR.getY() - robot.getVectorR().getY();
+                    robotTheta = (float) Math.acos(vectorX/Math.sqrt(vectorX * vectorX + vectorY * vectorY));
+                    joystickRadius = .667f;
+                    if (vectorR.getRad() > robot.getVectorR().getRad()){
+                        rotationalPower = 0.25f;
+                    } else if (vectorR.getRad() < robot.getVectorR().getRad()){
+                        rotationalPower = -0.25f;
                     } else {
-                        robotTheta = (float) (absoluteTheta + robotRotation - 2 * (Math.PI));
+                        rotationalPower = 0;
                     }
                 }
 
@@ -107,7 +126,7 @@ public class VectorDrive {
         this.brMotor = brMotor;
         this.blMotor = blMotor;
         this.driveSettings = settings.subData("drivetrain");
-        this.vectorDriveActive = false;
+        this.vectorDriveActive = true;
         this.joystickControl = false;
         this.telemetry = telemetry;
 
@@ -140,15 +159,10 @@ public class VectorDrive {
      * Uses driveThread to move robot to position
      */
     public void startPosition(){
-        //shouldn't be a point to this
-        VectorR positionVectorR = new VectorR();
-        this.vectorR = positionVectorR;
-
         //this flag should be enough to announce that a math change is needed. Robot's current
         // position can be gained from getVectorR and the vectorR provided is the aim position.
-        vectorDriveActive = true;
+        vectorDriveActive = false;
         driveThread.start();
-
     }
 
     /**
