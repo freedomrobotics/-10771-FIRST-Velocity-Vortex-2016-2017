@@ -35,20 +35,21 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.position.calculations;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.meanIntegrate;
 import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
+import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.scale;
 
 /**
  * {@link KalmanFilterAccelerationIntegrator} is based on the
  * {@link com.qualcomm.hardware.adafruit.NaiveAccelerationIntegrator}.
  * It uses the Kalman filter to filter noise.
  */
-public class KalmanFilterAccelerationIntegrator implements BNO055IMU.AccelerationIntegrator
-    {
+public class KalmanFilterAccelerationIntegrator implements BNO055IMU.AccelerationIntegrator {
     //------------------------------------------------------------------------------------------
     // State
     //------------------------------------------------------------------------------------------
@@ -58,67 +59,108 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
     Velocity velocity;
     Acceleration acceleration;
 
-    public Position getPosition() { return this.position; }
-    public Velocity getVelocity() { return this.velocity; }
-    public Acceleration getAcceleration() { return this.acceleration; }
+    Config.ParsedData kalmanConfig;
+
+    Position positionError;
+    float velocityError;
+
+    float processNoise;
+    float sensorNoise;
+
+    public Position getPosition() {
+        return this.position;
+    }
+
+    public Velocity getVelocity() {
+        return this.velocity;
+    }
+
+    public Acceleration getAcceleration() {
+        return this.acceleration;
+    }
 
     //------------------------------------------------------------------------------------------
     // Construction
     //------------------------------------------------------------------------------------------
 
-    KalmanFilterAccelerationIntegrator()
-        {
+    KalmanFilterAccelerationIntegrator(Config.ParsedData kalmanConfig) {
         this.parameters = null;
         this.position = null;
         this.velocity = null;
         this.acceleration = null;
-        }
+        this.kalmanConfig = kalmanConfig;
+    }
 
     //------------------------------------------------------------------------------------------
     // Operations
     //------------------------------------------------------------------------------------------
 
-    @Override public void initialize(BNO055IMU.Parameters parameters, Position initialPosition, Velocity initialVelocity)
-        {
+    @Override
+    public void initialize(BNO055IMU.Parameters parameters, Position initialPosition, Velocity initialVelocity) {
         this.parameters = parameters;
         this.position = initialPosition;
         this.velocity = initialVelocity;
         this.acceleration = null;
-        }
+        this.positionError = new Position();
+        positionError.x = kalmanConfig.subData("inital_error").getFloat("x");
+        positionError.y = kalmanConfig.subData("inital_error").getFloat("y");
+        positionError.z = kalmanConfig.subData("inital_error").getFloat("z");
+        velocityError = 0;
+        processNoise = kalmanConfig.getFloat("process_noise");
+        sensorNoise = kalmanConfig.getFloat("sensor_noise");
+    }
 
     //This is where to perform the actual math
-    @Override public void update(Acceleration linearAcceleration)
-        {
+    @Override
+    public void update(Acceleration linearAcceleration) {
         // We should always be given a timestamp here
-        if (linearAcceleration.acquisitionTime != 0)
-            {
+        if (linearAcceleration.acquisitionTime != 0) {
             // We can only integrate if we have a previous acceleration to baseline from
-            if (acceleration != null)
-                {
-                Acceleration accelPrev    = acceleration;
-                Velocity     velocityPrev = velocity;
+            if (acceleration != null) {
+                Acceleration accelPrev = acceleration;
+                Velocity velocityPrev = velocity;
+                Position positionPrev = position;
 
                 acceleration = linearAcceleration;
 
-                if (accelPrev.acquisitionTime != 0)
-                    {
-                    Velocity deltaVelocity = meanIntegrate(acceleration, accelPrev);
-                    velocity = plus(velocity, deltaVelocity);
-                    }
+                if (accelPrev.acquisitionTime != 0) {
+                    velocityError = velocityError + processNoise;
 
-                if (velocityPrev.acquisitionTime != 0)
-                    {
-                    Position deltaPosition = meanIntegrate(velocity, velocityPrev);
-                    position = plus(position, deltaPosition);
-                    }
+                    float kalmanGain = velocityError/(velocityError+sensorNoise);
+                    velocityError = (1.0f - kalmanGain) * velocityError;
 
-                if (parameters.loggingEnabled)
-                    {
-                    RobotLog.vv(parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", (acceleration.acquisitionTime - accelPrev.acquisitionTime)*1e-9, acceleration, velocity, position);
-                    }
+                    Velocity gainVelocity = meanIntegrate(acceleration, accelPrev);
+                    gainVelocity = scale(gainVelocity, kalmanGain);
+                    velocity = plus(velocity, gainVelocity);
                 }
-            else
+
+                if (velocityPrev.acquisitionTime != 0) {
+                    positionError.x = positionError.x + processNoise;
+                    positionError.y = positionError.y + processNoise;
+                    positionError.z = positionError.z + processNoise;
+
+                    Position kalmanGain = positionError;
+                    kalmanGain.x = positionError.x / (positionError.x + sensorNoise);
+                    kalmanGain.y = positionError.y / (positionError.y + sensorNoise);
+                    kalmanGain.z = positionError.z / (positionError.z + sensorNoise);
+
+                    Position gainPosition = meanIntegrate(velocity, velocityPrev);
+                    gainPosition.x = gainPosition.x * kalmanGain.x;
+                    gainPosition.y = gainPosition.y * kalmanGain.y;
+                    gainPosition.z = gainPosition.z * kalmanGain.z;
+
+                    positionError.x = (1.0f - kalmanGain.x) * positionError.x;
+                    positionError.y = (1.0f - kalmanGain.y) * positionError.y;
+                    positionError.z = (1.0f - kalmanGain.z) * positionError.z;
+
+                    position = plus(position, gainPosition);
+                }
+
+                if (parameters.loggingEnabled) {
+                    RobotLog.vv(parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", (acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1e-9, acceleration, velocity, position);
+                }
+            } else
                 acceleration = linearAcceleration;
-            }
         }
     }
+}
