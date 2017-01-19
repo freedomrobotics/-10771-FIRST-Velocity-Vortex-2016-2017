@@ -105,8 +105,7 @@ import java.util.Locale;
  * @see <a href="https://www.bosch-sensortec.com/bst/products/all_products/bno055">BNO055 product page</a>
  * @see <a href="https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST_BNO055_DS000_14.pdf">BNO055 specification</a>
  */
-@TeleOp(name = "Sensor: Adafruit IMU Calibration", group = "Sensor")
-@Disabled                            // Uncomment this to add to the opmode list
+@TeleOp(name = "Sensor: Adafruit IMU Calibration", group = "Sensor") // Uncomment this to add to the opmode list
 public class SensorAdafruitIMUCalibration extends LinearOpMode
     {
     //----------------------------------------------------------------------------------------------
@@ -166,7 +165,7 @@ public class SensorAdafruitIMUCalibration extends LinearOpMode
                 // when you initialize the IMU in an opmode in which it is used. If you
                 // have more than one IMU on your robot, you'll of course want to use
                 // different configuration file names for each.
-                String filename = "AdafruitIMUCalibration.json";
+                String filename = "imu.json";
                 File file = AppUtil.getInstance().getSettingsFile(filename);
                 ReadWriteFile.writeFile(file, calibrationData.serialize());
                 telemetry.log().add("saved to '%s'", filename);

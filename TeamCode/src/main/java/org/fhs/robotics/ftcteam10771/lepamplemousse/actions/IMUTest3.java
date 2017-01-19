@@ -8,25 +8,20 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.Accelerometer;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.Gyrometer;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.Magnetometer;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.AccelSensor;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.Gyro;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.MagneticSensor;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
-import static com.qualcomm.hardware.adafruit.BNO055IMU.SensorMode.IMU;
-import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.*;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.X;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.Y;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.Z;
 
 /**
  * Created by joelv on 1/14/2017.
  */
 
-@TeleOp(name = "IMU Test")
-public class IMUTest extends LinearOpMode{
+@TeleOp(name = "IMU Test3")
+public class IMUTest3 extends LinearOpMode{
 
     BNO055IMU imu;
     IMU imuHandler;
@@ -51,7 +46,7 @@ public class IMUTest extends LinearOpMode{
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);
-        imuHandler.createAccelerationIntegrator(parsedKalman, 1);
+        imuHandler.createAccelerationIntegrator(parsedKalman, 3);
         imuHandler.imuInit(); //possible null pointer here; if there is, check parameters at method
         //imu.initialize();
 
@@ -83,7 +78,7 @@ public class IMUTest extends LinearOpMode{
 
         //start accel integrator
         //imuHandler.parameters.accelerationIntegrationAlgorithm.initialize(imuHandler.parameters, new Position(), new Velocity());
-        imuHandler.getImu().startAccelerationIntegration(new Position(), new Velocity(), 50);
+        imuHandler.getImu().startAccelerationIntegration(new Position(), new Velocity(), 0);
         while(opModeIsActive()){
             //imuHandler.parameters.accelerationIntegrationAlgorithm.update(new Acceleration(DistanceUnit.METER,
                    // accelSensor.getAbsoluteAcceleration(X), accelSensor.getAbsoluteAcceleration(Y), 0.0, 100));

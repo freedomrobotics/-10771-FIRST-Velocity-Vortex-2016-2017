@@ -68,6 +68,7 @@ public class KalmanFilterAccelerationIntegrator2 implements BNO055IMU.Accelerati
 
     float processNoise;
     float sensorNoise;
+    private float lowPassAlpha;
 
     public Position getPosition() {
         return this.position;
@@ -85,7 +86,7 @@ public class KalmanFilterAccelerationIntegrator2 implements BNO055IMU.Accelerati
     // Construction
     //------------------------------------------------------------------------------------------
 
-    KalmanFilterAccelerationIntegrator2(Config.ParsedData kalmanConfig) {
+    public KalmanFilterAccelerationIntegrator2(Config.ParsedData kalmanConfig) {
         this.parameters = null;
         this.position = null;
         this.velocity = null;
@@ -104,13 +105,14 @@ public class KalmanFilterAccelerationIntegrator2 implements BNO055IMU.Accelerati
         this.velocity = initialVelocity;
         this.acceleration = null;
         this.positionError = new Position();
-        positionError.x = kalmanConfig.subData("inital_error").getFloat("x");
-        positionError.y = kalmanConfig.subData("inital_error").getFloat("y");
-        positionError.z = kalmanConfig.subData("inital_error").getFloat("z");
-        velocityError = 0;
+        positionError.x = kalmanConfig.subData("initial_error").getFloat("x");
+        positionError.y = kalmanConfig.subData("initial_error").getFloat("y");
+        positionError.z = kalmanConfig.subData("initial_error").getFloat("z");
+        velocityError = kalmanConfig.getFloat("initial_velocity_error");
         processNoise = kalmanConfig.getFloat("process_noise");
         sensorNoise = kalmanConfig.getFloat("sensor_noise");
         accelerationError = kalmanConfig.getFloat("initial_acceleration_error");
+        lowPassAlpha = kalmanConfig.getFloat("low_pass_alpha");
     }
 
     //This is where to perform the actual math
@@ -123,7 +125,7 @@ public class KalmanFilterAccelerationIntegrator2 implements BNO055IMU.Accelerati
                 Acceleration accelPrev = acceleration;
                 Velocity velocityPrev = velocity;
 
-                acceleration = linearAcceleration;
+                acceleration = plus(accelPrev, scale(minus(linearAcceleration, accelPrev), lowPassAlpha));
 
                 // filter acceleration
                 accelerationError += processNoise;
@@ -145,7 +147,11 @@ public class KalmanFilterAccelerationIntegrator2 implements BNO055IMU.Accelerati
                     RobotLog.vv(parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", (acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1e-9, acceleration, velocity, position);
                 }
             } else
-                acceleration = linearAcceleration;
+                accelerationError += processNoise;
+                float accelGain = accelerationError / (accelerationError + sensorNoise);
+                accelerationError = (1.0f - accelGain) * accelerationError;
+
+                acceleration = scale(linearAcceleration, accelGain);
         }
     }
 }

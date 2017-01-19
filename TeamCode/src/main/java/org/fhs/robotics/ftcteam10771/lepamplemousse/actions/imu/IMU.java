@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.util.ReadWriteFile;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.*;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.calculations.KalmanFilterAccelerationIntegrator;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.calculations.KalmanFilterAccelerationIntegrator2;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.calculations.KalmanFilterAccelerationIntegrator3;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -114,8 +116,13 @@ public class IMU {
      * With parsed configuration data
      * @param parsedData the parsed data from a yml
      */
-    public void createAccelerationIntegrator(Config.ParsedData parsedData){
-        parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator(parsedData);
+    public void createAccelerationIntegrator(Config.ParsedData parsedData, int type){
+        if (type == 1)
+            parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator(parsedData);
+        if (type == 2)
+            parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator2(parsedData);
+        if (type == 3)
+            parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator3(parsedData);
     }
 
     /**
