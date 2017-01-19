@@ -70,12 +70,21 @@ public class IMUTest extends LinearOpMode{
         imu.getLinearAcceleration();
 
         while(opModeIsActive()){
-            telemetry.addData("GyroX", (int)gyroOutput.convertAngletoSemiPossibleRange(X, gyroOutput.getOrientation(X)));
-            telemetry.addData("GyroY", (int)gyroOutput.convertAngletoSemiPossibleRange(Y, gyroOutput.getOrientation(Y)));
-            telemetry.addData("GyroZ", (int)gyroOutput.convertAngletoSemiPossibleRange(Z, gyroOutput.getOrientation(Z)));
-            telemetry.addData("Gyro", gyroOutput.getOrientation());
-            telemetry.addData("GyroE", gyroOutput.getExtrinsicOrientation());
-            telemetry.addData("Velo", gyroOutput.getAngularVelocity());
+            //telemetry.addData("GyroX", (int)gyroOutput.convertAngletoSemiPossibleRange(X, gyroOutput.getOrientation(X)));
+            //telemetry.addData("GyroY", (int)gyroOutput.convertAngletoSemiPossibleRange(Y, gyroOutput.getOrientation(Y)));
+            //telemetry.addData("GyroZ", (int)gyroOutput.convertAngletoSemiPossibleRange(Z, gyroOutput.getOrientation(Z)));
+
+            telemetry.addData("Accelx", (int)accelSensor.getAbsoluteAcceleration(X));
+            telemetry.addData("Accely", (int)accelSensor.getAbsoluteAcceleration(Y));
+            //telemetry.addData("AccelZ", (int)accelSensor.getAcceleration(Z));
+            telemetry.addData("======", "========");
+            telemetry.addData("Velox", (int)accelSensor.getVelocity(X));
+            telemetry.addData("Veloy", (int)accelSensor.getVelocity(Y));
+            telemetry.addData("Veloz", (int)accelSensor.getVelocity(Z));
+            telemetry.addData("======", "========");
+            telemetry.addData("Position", (int)accelSensor.getPosition(X));
+            telemetry.addData("Position", (int)accelSensor.getPosition(Y));
+            telemetry.addData("Position", (int)accelSensor.getPosition(Z));
 
 
 
@@ -96,7 +105,7 @@ public class IMUTest extends LinearOpMode{
             telemetry.addData("MagX", imu.getMagneticFieldStrength().x);
             telemetry.addData("MagY", imu.getMagneticFieldStrength().y);
             telemetry.addData("MagZ", imu.getMagneticFieldStrength().z);
-            */
+           */
             
             telemetry.update();
         }

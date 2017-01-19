@@ -433,7 +433,7 @@ public class IMU {
          * Get the parameter range to use
          * @return the range depending on the IMU's current unit
          */
-        private float angleParam(){
+        float angleParam(){
             return (parameters.angleUnit==BNO055IMU.AngleUnit.RADIANS) ? radians : degrees;
         }
 
@@ -627,9 +627,9 @@ public class IMU {
                 case X:
                     return useRunnable ? velocity.xVeloc : imu.getVelocity().xVeloc;
                 case Y:
-                    return useRunnable ? velocity.xVeloc : imu.getVelocity().xVeloc;
+                    return useRunnable ? velocity.xVeloc : imu.getVelocity().yVeloc;
                 case Z:
-                    return useRunnable ? velocity.xVeloc : imu.getVelocity().xVeloc;
+                    return useRunnable ? velocity.xVeloc : imu.getVelocity().zVeloc;
                 default:
                     return 0.0;
             }
@@ -682,6 +682,31 @@ public class IMU {
          */
         public double getPosition(IMU.Axis axis){
             return getPosition(axis, false);
+        }
+
+        public double getAbsoluteAcceleration(Axis axis){
+            IMU.Gyrometer gyrometer = getGyrometer();
+            double intrinsicAccelX = imu.getAcceleration().xAccel;
+            double intrinsicAccelY = imu.getAcceleration().yAccel;
+            double robotRotation = (double)gyrometer.convert(Z, imu.getAngularOrientation().toAxesOrder(XYZ).thirdAngle);
+            double intrinsicVectorAngle = Math.atan2(intrinsicAccelY, intrinsicAccelX);
+            if (intrinsicVectorAngle<0){
+                intrinsicVectorAngle += gyrometer.angleParam();
+            }
+            double absoluteRotation = intrinsicVectorAngle + robotRotation;
+            if (absoluteRotation > gyrometer.angleParam()){
+                absoluteRotation = absoluteRotation % gyrometer.angleParam();
+            }
+            double hypothenusLength = Math.sqrt((intrinsicAccelX*intrinsicAccelX)+
+                    (intrinsicAccelY*intrinsicAccelY));
+            switch (axis){
+                case X:
+                    return hypothenusLength * Math.cos(absoluteRotation);
+                case Y:
+                    return hypothenusLength * Math.sin(absoluteRotation);
+                default:
+                    return 0.0;
+            }
         }
     }
 
