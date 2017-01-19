@@ -19,11 +19,10 @@ public class IMUCalibration extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
         bno055IMU = hardwareMap.get(BNO055IMU.class, "imu");
         imu = new IMU(bno055IMU, false);
-        imu.setCalibrationFileName("imu.json");
         imu.imuInit();
         waitForStart();
         while (opModeIsActive()){
-            imu.storeCalibration(this, true, gamepad1.a);
+            imu.storeCalibration(this, false, false);
         }
     }
 }

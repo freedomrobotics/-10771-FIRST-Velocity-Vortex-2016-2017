@@ -104,9 +104,9 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
         this.velocity = initialVelocity;
         this.acceleration = null;
         this.positionError = new Position();
-        positionError.x = kalmanConfig.subData("inital_error").getFloat("x");
-        positionError.y = kalmanConfig.subData("inital_error").getFloat("y");
-        positionError.z = kalmanConfig.subData("inital_error").getFloat("z");
+        positionError.x = kalmanConfig.subData("initial_error").getFloat("x");
+        positionError.y = kalmanConfig.subData("initial_error").getFloat("y");
+        positionError.z = kalmanConfig.subData("initial_error").getFloat("z");
         velocityError = 0;
         processNoise = kalmanConfig.getFloat("process_noise");
         sensorNoise = kalmanConfig.getFloat("sensor_noise");

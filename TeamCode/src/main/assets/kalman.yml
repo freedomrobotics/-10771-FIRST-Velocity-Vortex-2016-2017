@@ -2,5 +2,5 @@ initial_error:
    x: 10
    y: 10
    z: 10
-process_noise: 19283.2
-sensor_noise: 123.2
+process_noise: 10.0
+sensor_noise: 1.0

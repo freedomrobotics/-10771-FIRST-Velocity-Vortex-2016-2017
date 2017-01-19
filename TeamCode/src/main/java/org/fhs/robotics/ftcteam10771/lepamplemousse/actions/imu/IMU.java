@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.*;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.calculations.KalmanFilterAccelerationIntegrator;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
@@ -33,9 +34,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 public class IMU {
 
     public BNO055IMU imu;
-    private BNO055IMU.Parameters parameters = null;
+    public BNO055IMU.Parameters parameters = null;
     boolean imuInitialized = false;
-    private String calibrationFileName = "IMU.json";
+    private String calibrationFileName = "imu.json";
 
     //Runnable variables
     private Orientation orientation = null;    //might move to main IMU class
@@ -79,6 +80,7 @@ public class IMU {
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.mode = BNO055IMU.SensorMode.IMU;
+        parameters.calibrationDataFile = calibrationFileName;
         //parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator();
         if (initialize){
             imuInitialized = this.imu.initialize(parameters);
@@ -105,6 +107,15 @@ public class IMU {
      */
     protected boolean isImuInit(){
         return imuInitialized;
+    }
+
+    /**
+     * Set the Kalman Filter
+     * With parsed configuration data
+     * @param parsedData the parsed data from a yml
+     */
+    public void createAccelerationIntegrator(Config.ParsedData parsedData){
+        parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator(parsedData);
     }
 
     /**
@@ -151,6 +162,7 @@ public class IMU {
             BNO055IMU.CalibrationData calibrationData = imu.readCalibrationData();
             File calibFile = AppUtil.getInstance().getSettingsFile(calibrationFileName);
             ReadWriteFile.writeFile(calibFile, calibrationData.serialize());
+            opMode.stop();
         }
     }
 
@@ -174,8 +186,7 @@ public class IMU {
      * @return if the whole IMU is calibrated
      */
     public boolean getIMUCalibrationStatus(){
-        return (imu.isGyroCalibrated() && imu.isAccelerometerCalibrated()
-                && imu.isMagnetometerCalibrated() && imu.isSystemCalibrated());
+        return (imu.isGyroCalibrated() && imu.isAccelerometerCalibrated());
     }
 
     //Runnable code that streams orientation and angular velocity
@@ -604,7 +615,7 @@ public class IMU {
          * @param useRunnable whether to use private variable
          * @return the acceleration
          */
-        public double getAcceleration(IMU.Axis axis, boolean useRunnable){
+        public double getLinearAcceleration(IMU.Axis axis, boolean useRunnable){
             switch (axis){
                 case X:
                     return useRunnable ? acceleration.xAccel : imu.getLinearAcceleration().xAccel;
@@ -612,6 +623,25 @@ public class IMU {
                     return useRunnable ? acceleration.yAccel : imu.getLinearAcceleration().yAccel;
                 case Z:
                     return useRunnable ? acceleration.zAccel : imu.getLinearAcceleration().zAccel;
+                default:
+                    return 0.0;
+            }
+        }
+
+        /**
+         * Returns the acceleration value of an axis
+         * @param axis the chosen axis
+         * @param useRunnable whether to use private variable
+         * @return the acceleration
+         */
+        public double getAcceleration(IMU.Axis axis, boolean useRunnable){
+            switch (axis){
+                case X:
+                    return useRunnable ? acceleration.xAccel : imu.getAcceleration().xAccel;
+                case Y:
+                    return useRunnable ? acceleration.yAccel : imu.getAcceleration().yAccel;
+                case Z:
+                    return useRunnable ? acceleration.zAccel : imu.getAcceleration().zAccel;
                 default:
                     return 0.0;
             }

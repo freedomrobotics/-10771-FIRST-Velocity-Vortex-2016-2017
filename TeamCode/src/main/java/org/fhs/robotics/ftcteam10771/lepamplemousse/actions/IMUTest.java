@@ -12,6 +12,8 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.AccelSe
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.Gyro;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.MagneticSensor;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
@@ -36,9 +38,20 @@ public class IMUTest extends LinearOpMode{
     @Override
     public void runOpMode() throws InterruptedException {
 
-        //kalmanConfig = new Config("/IMUtest", )
+        kalmanConfig = new Config("/IMUtest", "kalman.yml", telemetry, "Kal");
+
+        if (kalmanConfig.read() == Config.State.DEFAULT_EXISTS) {
+            kalmanConfig.create(true);
+            //read without creating file if it still fails.
+            if (kalmanConfig.read() == Config.State.DEFAULT_EXISTS)
+                kalmanConfig.read(true);
+        }
+
+        Config.ParsedData parsedKalman = kalmanConfig.getParsedData();
+
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);
+        imuHandler.createAccelerationIntegrator(parsedKalman);
         imuHandler.imuInit(); //possible null pointer here; if there is, check parameters at method
         //imu.initialize();
 
@@ -69,10 +82,11 @@ public class IMUTest extends LinearOpMode{
         waitForStart();
 
         //start accel integrator
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 100);
-        imu.getLinearAcceleration();
-
+        //imuHandler.parameters.accelerationIntegrationAlgorithm.initialize(imuHandler.parameters, new Position(), new Velocity());
+        imuHandler.getImu().startAccelerationIntegration(new Position(), new Velocity(), 100);
         while(opModeIsActive()){
+            //imuHandler.parameters.accelerationIntegrationAlgorithm.update(new Acceleration(DistanceUnit.METER,
+                   // accelSensor.getAbsoluteAcceleration(X), accelSensor.getAbsoluteAcceleration(Y), 0.0, 100));
             //telemetry.addData("GyroX", (int)gyroOutput.convertAngletoSemiPossibleRange(X, gyroOutput.getOrientation(X)));
             //telemetry.addData("GyroY", (int)gyroOutput.convertAngletoSemiPossibleRange(Y, gyroOutput.getOrientation(Y)));
             //telemetry.addData("GyroZ", (int)gyroOutput.convertAngletoSemiPossibleRange(Z, gyroOutput.getOrientation(Z)));
@@ -81,9 +95,9 @@ public class IMUTest extends LinearOpMode{
             telemetry.addData("AbsX", (int)accelSensor.getAbsoluteAcceleration(X));
             telemetry.addData("Absy", (int)accelSensor.getAbsoluteAcceleration(Y));
             telemetry.addData("======", "========");
-            telemetry.addData("AccelX", (int)accelSensor.getAcceleration(X));
-            telemetry.addData("AccelY", (int)accelSensor.getAcceleration(Y));
-            //telemetry.addData("AccelZ", (int)accelSensor.getAcceleration(Z));
+            telemetry.addData("AccelX", accelSensor.getAcceleration(X));
+            telemetry.addData("AccelY", accelSensor.getAcceleration(Y));
+            telemetry.addData("AccelZ", accelSensor.getAcceleration(Z));
             telemetry.addData("======", "========");
             telemetry.addData("Velox", (int)accelSensor.getVelocity(X));
             telemetry.addData("Veloy", (int)accelSensor.getVelocity(Y));
@@ -92,7 +106,7 @@ public class IMUTest extends LinearOpMode{
             telemetry.addData("Position", (int)accelSensor.getPosition(X));
             telemetry.addData("Position", (int)accelSensor.getPosition(Y));
             telemetry.addData("Position", (int)accelSensor.getPosition(Z));
-
+            telemetry.addData("======", "========");
 
 
             //If telemetry does not get data, use this
