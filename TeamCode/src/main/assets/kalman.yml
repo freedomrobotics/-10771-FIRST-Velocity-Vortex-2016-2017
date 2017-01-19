@@ -1,0 +1,6 @@
+initial_error:
+   x: 10
+   y: 10
+   z: 10
+process_noise: 19283.2
+sensor_noise: 123.2

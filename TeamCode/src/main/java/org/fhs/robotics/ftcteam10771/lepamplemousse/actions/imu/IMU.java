@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.*;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.calculations.KalmanFilterAccelerationIntegrator;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -78,7 +79,7 @@ public class IMU {
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.accelerationIntegrationAlgorithm = new NaiveAccelerationIntegrator();
+        parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator();
         if (initialize){
             imuInitialized = this.imu.initialize(parameters);
         }

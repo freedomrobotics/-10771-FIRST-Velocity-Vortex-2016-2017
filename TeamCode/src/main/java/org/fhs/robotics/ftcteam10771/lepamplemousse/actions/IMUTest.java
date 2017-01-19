@@ -11,6 +11,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.Magnetometer;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.AccelSensor;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.Gyro;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imuInterface.MagneticSensor;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
@@ -30,10 +31,12 @@ public class IMUTest extends LinearOpMode{
     Gyrometer gyrometer;
     Accelerometer accelerometer;
     Magnetometer magnetometer;
+    Config kalmanConfig;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
+        //kalmanConfig = new Config("/IMUtest", )
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);
         imuHandler.imuInit(); //possible null pointer here; if there is, check parameters at method

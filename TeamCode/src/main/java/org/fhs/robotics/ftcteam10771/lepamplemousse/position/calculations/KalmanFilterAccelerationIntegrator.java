@@ -83,7 +83,7 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
     // Construction
     //------------------------------------------------------------------------------------------
 
-    KalmanFilterAccelerationIntegrator(Config.ParsedData kalmanConfig) {
+    public KalmanFilterAccelerationIntegrator(Config.ParsedData kalmanConfig) {
         this.parameters = null;
         this.position = null;
         this.velocity = null;
