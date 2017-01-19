@@ -79,7 +79,7 @@ public class IMU {
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator();
+        //parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator();
         if (initialize){
             imuInitialized = this.imu.initialize(parameters);
         }
