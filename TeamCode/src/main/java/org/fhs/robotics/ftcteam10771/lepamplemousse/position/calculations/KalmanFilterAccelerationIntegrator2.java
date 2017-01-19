@@ -46,11 +46,11 @@ import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
 import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.scale;
 
 /**
- * {@link KalmanFilterAccelerationIntegrator} is based on the
+ * {@link KalmanFilterAccelerationIntegrator2} is based on the
  * {@link com.qualcomm.hardware.adafruit.NaiveAccelerationIntegrator}.
  * It uses the Kalman filter to filter noise.
  */
-public class KalmanFilterAccelerationIntegrator implements BNO055IMU.AccelerationIntegrator {
+public class KalmanFilterAccelerationIntegrator2 implements BNO055IMU.AccelerationIntegrator {
     //------------------------------------------------------------------------------------------
     // State
     //------------------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
     // Construction
     //------------------------------------------------------------------------------------------
 
-    KalmanFilterAccelerationIntegrator(Config.ParsedData kalmanConfig) {
+    KalmanFilterAccelerationIntegrator2(Config.ParsedData kalmanConfig) {
         this.parameters = null;
         this.position = null;
         this.velocity = null;
@@ -132,35 +132,12 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
                 acceleration = plus(accelPrev,scale(minus(acceleration, accelPrev), accelGain));
 
                 if (accelPrev.acquisitionTime != 0) {
-                    velocityError = velocityError + processNoise;
-
-                    float kalmanGain = velocityError/(velocityError+sensorNoise);
-                    velocityError = (1.0f - kalmanGain) * velocityError;
-
                     Velocity gainVelocity = meanIntegrate(acceleration, accelPrev);
-                    gainVelocity = scale(gainVelocity, kalmanGain);
                     velocity = plus(velocity, gainVelocity);
                 }
 
                 if (velocityPrev.acquisitionTime != 0) {
-                    positionError.x = positionError.x + processNoise;
-                    positionError.y = positionError.y + processNoise;
-                    positionError.z = positionError.z + processNoise;
-
-                    Position kalmanGain = positionError;
-                    kalmanGain.x = positionError.x / (positionError.x + sensorNoise);
-                    kalmanGain.y = positionError.y / (positionError.y + sensorNoise);
-                    kalmanGain.z = positionError.z / (positionError.z + sensorNoise);
-
                     Position gainPosition = meanIntegrate(velocity, velocityPrev);
-                    gainPosition.x = gainPosition.x * kalmanGain.x;
-                    gainPosition.y = gainPosition.y * kalmanGain.y;
-                    gainPosition.z = gainPosition.z * kalmanGain.z;
-
-                    positionError.x = (1.0f - kalmanGain.x) * positionError.x;
-                    positionError.y = (1.0f - kalmanGain.y) * positionError.y;
-                    positionError.z = (1.0f - kalmanGain.z) * positionError.z;
-
                     position = plus(position, gainPosition);
                 }
 

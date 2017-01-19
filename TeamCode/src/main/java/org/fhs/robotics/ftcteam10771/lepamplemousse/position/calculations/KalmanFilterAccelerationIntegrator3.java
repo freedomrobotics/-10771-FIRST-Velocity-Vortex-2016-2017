@@ -46,11 +46,11 @@ import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
 import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.scale;
 
 /**
- * {@link KalmanFilterAccelerationIntegrator} is based on the
+ * {@link KalmanFilterAccelerationIntegrator3} is based on the
  * {@link com.qualcomm.hardware.adafruit.NaiveAccelerationIntegrator}.
  * It uses the Kalman filter to filter noise.
  */
-public class KalmanFilterAccelerationIntegrator implements BNO055IMU.AccelerationIntegrator {
+public class KalmanFilterAccelerationIntegrator3 implements BNO055IMU.AccelerationIntegrator {
     //------------------------------------------------------------------------------------------
     // State
     //------------------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
     // Construction
     //------------------------------------------------------------------------------------------
 
-    KalmanFilterAccelerationIntegrator(Config.ParsedData kalmanConfig) {
+    KalmanFilterAccelerationIntegrator3(Config.ParsedData kalmanConfig) {
         this.parameters = null;
         this.position = null;
         this.velocity = null;
@@ -125,12 +125,6 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
 
                 acceleration = linearAcceleration;
 
-                // filter acceleration
-                accelerationError += processNoise;
-                float accelGain = accelerationError / (accelerationError + sensorNoise);
-                accelerationError = (1.0f - accelGain) * accelerationError;
-                acceleration = plus(accelPrev,scale(minus(acceleration, accelPrev), accelGain));
-
                 if (accelPrev.acquisitionTime != 0) {
                     velocityError = velocityError + processNoise;
 
@@ -163,6 +157,12 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
 
                     position = plus(position, gainPosition);
                 }
+
+                // filter acceleration
+                accelerationError += processNoise;
+                float accelGain = accelerationError / (accelerationError + sensorNoise);
+                accelerationError = (1.0f - accelGain) * accelerationError;
+                acceleration = plus(accelPrev,scale(minus(acceleration, accelPrev), accelGain));
 
                 if (parameters.loggingEnabled) {
                     RobotLog.vv(parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", (acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1e-9, acceleration, velocity, position);
