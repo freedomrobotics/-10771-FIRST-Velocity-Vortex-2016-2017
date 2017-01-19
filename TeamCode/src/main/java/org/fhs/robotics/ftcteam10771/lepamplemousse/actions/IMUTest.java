@@ -70,10 +70,11 @@ public class IMUTest extends LinearOpMode{
         imu.getLinearAcceleration();
 
         while(opModeIsActive()){
-            telemetry.addData("GyroX", gyroOutput.getOrientation(X));
-            telemetry.addData("GyroY", gyroOutput.getOrientation(Y));
-            telemetry.addData("GyroZ", gyroOutput.getOrientation(Z));
+            telemetry.addData("GyroX", (int)gyroOutput.getOrientation(X));
+            telemetry.addData("GyroY", (int)gyroOutput.getOrientation(Y));
+            telemetry.addData("GyroZ", (int)gyroOutput.getOrientation(Z));
             telemetry.addData("Gyro", gyroOutput.getOrientation());
+            telemetry.addData("GyroE", gyroOutput.getExtrinsicOrientation());
             telemetry.addData("Velo", gyroOutput.getAngularVelocity());
 
 

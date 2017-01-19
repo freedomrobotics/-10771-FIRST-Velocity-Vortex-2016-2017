@@ -18,6 +18,9 @@ import org.firstinspires.ftc.robotcore.internal.AppUtil;
 
 import java.io.File;
 
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.X;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.Y;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.Z;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 
 
@@ -29,7 +32,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 public class IMU {
 
     public BNO055IMU imu;
-    //todo if nullptr comes on for imu.initialize(), check out parameters first
     private BNO055IMU.Parameters parameters = null;
     boolean imuInitialized = false;
     private String calibrationFileName = "IMU.json";
@@ -242,7 +244,7 @@ public class IMU {
     public class Gyrometer implements Gyro{
 
         private final AxesOrder axesOrder = XYZ;
-        private final AxesReference reference = AxesReference.INTRINSIC;
+        private final AxesReference reference = AxesReference.EXTRINSIC;
 
         /*
             Default constructor
@@ -299,8 +301,9 @@ public class IMU {
          * @return the angle in parameter's set angle unit
          */
         public float getOrientation(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
-            Orientation vectorToUse = useRunnable ? orientation.toAxesReference(AxesReference.EXTRINSIC).toAxesOrder(XYZ)
-                    : imu.getAngularOrientation().toAxesReference(AxesReference.EXTRINSIC).toAxesOrder(XYZ);
+            Orientation vectorToUse = useRunnable ? orientation.toAxesReference(reference).toAxesOrder(axesOrder)
+                    : imu.getAngularOrientation().toAxesReference(reference).toAxesOrder(axesOrder);
+            vectorToUse = convertRange(vectorToUse);
             switch(axis){
                 case X:
                     return vectorToUse.firstAngle;
@@ -407,6 +410,46 @@ public class IMU {
 
         public Orientation getOrientation(){
             return imu.getAngularOrientation();
+        }
+
+        public Orientation getExtrinsicOrientation(){
+            return imu.getAngularOrientation().toAxesReference(AxesReference.EXTRINSIC);
+        }
+
+        public Orientation convertRange(Orientation orientation){
+            orientation = orientation.toAxesReference(reference).toAxesOrder(XYZ);
+            orientation.firstAngle = convert(X, orientation.firstAngle);
+            orientation.secondAngle = convert(Y, orientation.secondAngle);
+            orientation.thirdAngle = convert(Z, orientation.thirdAngle);
+            return orientation;
+        }
+
+        public float convert(Axis axis, float value){
+            float degrees = 360f;
+            float radians = (float)(2 * Math.PI);
+            float parameter = (parameters.angleUnit== BNO055IMU.AngleUnit.RADIANS) ? radians : degrees;
+            switch (axis) {
+                case X:
+                    if (value < 0) value += parameter;
+                    break;
+                case Y:
+                    if (value < 0) {
+                        if (Math.abs(imu.getAngularOrientation().toAxesOrder(axesOrder).firstAngle) > parameter / 4f) {
+                            value = (parameter / 2f) - value;
+                        } else value += parameter;
+                    } else {
+                        if (Math.abs(imu.getAngularOrientation().toAxesOrder(axesOrder).firstAngle) > parameter / 4f) {
+                            value = (parameter / 2f) - value;
+                        }
+                    }
+                    break;
+                case Z:
+                    value += parameter;
+                    break;
+                default:
+                    return value;
+            }
+            return value;
         }
     }
 
