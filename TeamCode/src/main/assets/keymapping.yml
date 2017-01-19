@@ -1,39 +1,34 @@
 # Gamepad mappings
 # Function List:
-# drivetrain_left       = the left motor on the drivetrain      - analog(-1, 1)   - float
-# drivetrain_right      = the right motor on the drivetrain     - analog(-1, 1)   - float
-# winch_extend_retract  = the winch motor to extend and retract - analog(-1, 1)   - float
-# winch_angle           = the angle of the winch assembly       - analog(-1, 1)   - float
-# trigger_arm           = directly mapped to the trigger arm    - analog(0, 1)    - float
-# arm_vert              = The verticle part of the robot arm    - analog (-1, 1)  - float
-# arm_sweep             = The horizontal part of the robot arm  - analog (-1, 1)  - float
-# winch_preset          = sets the winch angle to the preset    - digital         - boolean
-# servos_off            = turns off the servos                  - digital         - boolean
-# arm_toggle            = toggles arm controls                  - digital         - boolean
-# arm_toggle_on         = Single toggle arm controls on         - digital         - boolean
-# arm_toggle_off        = Single toggle arm controls off        - digital         - boolean
-# all_clear             = toggle the all clear servo            - digital         - boolean
-# all_clear_down        = all clear servo down                  - digital         - boolean
-# all_clear_up          = all clear servo up                    - digital         - boolean
-# log_cat               = enable logging; checked on init       - digital         - boolean
+# drivetrain_x          = the x axis of the drivetrain          - analog(-1, 1)   - float
+# drivetrain_y          = the y axis of the drivetrain          - analog(-1, 1)   - float
+# drivetrain_rotate     = the rotation for the drivetrain       - analog(-1, 1)   - float
+# drivetrain_l_rotate   = the rotation for the drivetrain (ccw) - analog(0, 1)    - float
+# drivetrain_r_rotate   = the rotation for the drivetrain (cw)  - analog(0, 1)    - float
+# intake_speed          = the speed control of the intake mech  - analog(-1, 1)   - float
+# intake_in             = toggle for inwards intake             - digital         - boolean
+# intake_out            = toggle for outwards in(out)take       - digital         - boolean
+# flywheel_on           = toggle the flywheel on                - digital         - boolean
+# flywheel_speed        = adjust the flywheel speed             - analog(-1, 1)   - float
+# bumper_angle          = adjust the bumper angle               - analog(-1, 1)   - float
 gamepad1:
   left_stick_x:
-    function: null
+    function: drivetrain_x
     inverted: false
     digital: false
 
   left_stick_y:
-    function: drivetrain_left
-    inverted: true
+    function: drivetrain_y
+    inverted: false # because it's already inverted in code
     digital: false
 
   right_stick_x:
-    function: null
+    function: drivetrain_rotate
     inverted: false
     digital: false
 
   right_stick_y:
-    function: drivetrain_right
+    function: null
     inverted: true
     digital: false
 
@@ -58,12 +53,12 @@ gamepad1:
     digital: true
 
   a_button:
-    function: all_clear_down
+    function: null
     inverted: false
     digital: true
 
   b_button:
-    function: all_clear_up
+    function: null
     inverted: false
     digital: true
 
@@ -118,7 +113,7 @@ gamepad1:
     digital: false
 
   right_trigger:
-    function: trigger_arm
+    function: null
     inverted: false
     digital: false
 
@@ -126,12 +121,12 @@ gamepad1:
 
 gamepad2:
   left_stick_x:
-    function: arm_sweep
+    function: null
     inverted: false
     digital: false
 
   left_stick_y:
-    function: winch_extend_retract arm_vert
+    function: null
     inverted: false
     digital: false
 
@@ -141,7 +136,7 @@ gamepad2:
     digital: false
 
   right_stick_y:
-    function: winch_angle
+    function: null
     inverted: false
     digital: false
 
@@ -201,12 +196,12 @@ gamepad2:
     digital: true
 
   left_bumper:
-    function: winch_preset
+    function: null
     inverted: false
     digital: true
 
   right_bumper:
-    function: servos_off
+    function: null
     inverted: false
     digital: true
 
