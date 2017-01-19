@@ -26,12 +26,15 @@ encoder:
 
 # The drivetrain's settings.
 drivetrain:
-  motor_max_power: 1
-  gear_ratio: 2.5
+  motor_scale: .778
+  gear_ratio: 1
   motion:
     max_velocity: 100 # mm/s
     max_acceleration: 100 # mm^2/s
     max_jerk: 100 # mm^3/s
+  positional:
+    speed: .67
+    rotation: .25
   motor:
     front_left:
       map_name: drive_front_left

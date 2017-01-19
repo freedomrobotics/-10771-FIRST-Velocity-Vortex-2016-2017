@@ -63,11 +63,12 @@ public class VectorDrive {
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();
                     float vectorY = vectorR.getY() - robot.getVectorR().getY();
                     robotTheta = (float) Math.atan2(vectorY, vectorX);
-                    joystickRadius = .667f;
+                    joystickRadius = driveSettings.subData("positional").getFloat("speed");
+                    float rotationalMagnitude = driveSettings.subData("positional").getFloat("rotation");
                     if (vectorR.getRad() > robot.getVectorR().getRad()){
-                        rotationalPower = 0.25f;
+                        rotationalPower = rotationalMagnitude;
                     } else if (vectorR.getRad() < robot.getVectorR().getRad()){
-                        rotationalPower = -0.25f;
+                        rotationalPower = (-1) * rotationalMagnitude;
                     } else {
                         rotationalPower = 0;
                     }
