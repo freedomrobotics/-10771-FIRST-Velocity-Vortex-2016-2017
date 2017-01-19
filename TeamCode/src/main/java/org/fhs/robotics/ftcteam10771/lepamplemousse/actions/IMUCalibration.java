@@ -18,7 +18,7 @@ public class IMUCalibration extends LinearOpMode{
     @Override
     public void runOpMode() throws InterruptedException {
         bno055IMU = hardwareMap.get(BNO055IMU.class, "imu");
-        imu = new IMU(bno055IMU, false);
+        imu = new IMU(bno055IMU, true, false);
         imu.imuInit();
         waitForStart();
         while (opModeIsActive()){

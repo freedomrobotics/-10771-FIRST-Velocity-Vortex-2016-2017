@@ -67,20 +67,20 @@ public class IMU {
         After seeing how much (true) damage "true" has done :P
      */
     public IMU(BNO055IMU imu){
-        this(imu, false);
+        this(imu, false, false);
     }
 
     /*
         Constructor that requires user to indicate both IMU
         and whether to initialize the IMU instantly
      */
-    public IMU(BNO055IMU imu, boolean initialize){
+    public IMU(BNO055IMU imu, boolean calibrating, boolean initialize){
         this.imu = imu;
         parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.calibrationDataFile = calibrationFileName;
+        if (!calibrating) parameters.calibrationDataFile = calibrationFileName;
         //parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator();
         if (initialize){
             imuInitialized = this.imu.initialize(parameters);
