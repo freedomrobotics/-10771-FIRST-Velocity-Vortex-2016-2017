@@ -684,6 +684,11 @@ public class IMU {
             return getPosition(axis, false);
         }
 
+        /**
+         * Returns an acceeration in respect to field coordinates
+         * @param axis the chosen axis
+         * @return the converted vector value
+         */
         public double getAbsoluteAcceleration(Axis axis){
             IMU.Gyrometer gyrometer = getGyrometer();
             double intrinsicAccelX = imu.getAcceleration().xAccel;
