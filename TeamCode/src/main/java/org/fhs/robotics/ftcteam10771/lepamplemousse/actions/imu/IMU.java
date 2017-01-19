@@ -75,7 +75,7 @@ public class IMU {
     public IMU(BNO055IMU imu, boolean initialize){
         this.imu = imu;
         parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.accelerationIntegrationAlgorithm = new NaiveAccelerationIntegrator();
@@ -245,6 +245,8 @@ public class IMU {
 
         private final AxesOrder axesOrder = XYZ;
         private final AxesReference reference = AxesReference.EXTRINSIC;
+        private final float degrees = 360f;
+        private final float radians = (float)(2 * Math.PI);
 
         /*
             Default constructor
@@ -303,7 +305,6 @@ public class IMU {
         public float getOrientation(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
             Orientation vectorToUse = useRunnable ? orientation.toAxesReference(reference).toAxesOrder(axesOrder)
                     : imu.getAngularOrientation().toAxesReference(reference).toAxesOrder(axesOrder);
-            vectorToUse = convertRange(vectorToUse);
             switch(axis){
                 case X:
                     return vectorToUse.firstAngle;
@@ -404,30 +405,46 @@ public class IMU {
             return getAngularVelocity(axis, false, false);
         }
 
+        /**
+         * Getter for angular velocity
+         * @return the angular velocity
+         */
         public AngularVelocity getAngularVelocity(){
             return imu.getAngularVelocity();
         }
 
+        /**
+         * Getter for orientation
+         * @return the orientation
+         */
         public Orientation getOrientation(){
             return imu.getAngularOrientation();
         }
 
+        /**
+         * Getter for extrinsic orientation
+         * @return the extrinsic orientatino
+         */
         public Orientation getExtrinsicOrientation(){
             return imu.getAngularOrientation().toAxesReference(AxesReference.EXTRINSIC);
         }
 
-        public Orientation convertRange(Orientation orientation){
-            orientation = orientation.toAxesReference(reference).toAxesOrder(XYZ);
-            orientation.firstAngle = convert(X, orientation.firstAngle);
-            orientation.secondAngle = convert(Y, orientation.secondAngle);
-            orientation.thirdAngle = convert(Z, orientation.thirdAngle);
-            return orientation;
+        /**
+         * Get the parameter range to use
+         * @return the range depending on the IMU's current unit
+         */
+        private float angleParam(){
+            return (parameters.angleUnit==BNO055IMU.AngleUnit.RADIANS) ? radians : degrees;
         }
 
+        /**
+         * Convert the chosen axis angle to range 0 to 360 or 2pi
+         * @param axis the chosen axis to convert
+         * @param value the angle to convert
+         * @return the converted angle
+         */
         public float convert(Axis axis, float value){
-            float degrees = 360f;
-            float radians = (float)(2 * Math.PI);
-            float parameter = (parameters.angleUnit== BNO055IMU.AngleUnit.RADIANS) ? radians : degrees;
+            float parameter = angleParam();
             switch (axis) {
                 case X:
                     if (value < 0) value += parameter;
@@ -450,6 +467,45 @@ public class IMU {
                     return value;
             }
             return value;
+        }
+
+        /**
+         * Converts orientation to range 0 to 360 or 2pi
+         * @param orientation the orientation to convert
+         * @return the converted orientation
+         */
+        public Orientation convertOrientation(Orientation orientation){
+            orientation = orientation.toAxesReference(reference).toAxesOrder(XYZ);
+            orientation.firstAngle = convert(X, orientation.firstAngle);
+            orientation.secondAngle = convert(Y, orientation.secondAngle);
+            orientation.thirdAngle = convert(Z, orientation.thirdAngle);
+            return orientation;
+        }
+
+        /**
+         * Converts an angle to range -180 to 180 or -pi to pi
+         * @param value the angle to convert
+         * @return the converted angle
+         */
+        public float convertAngletoSemiPossibleRange(Axis axis, float value){
+            float parameter = angleParam();
+            value = convert(axis, value);
+            return (value > (parameter/2f) && value < (parameter)) ?
+                    value - parameter : value;
+        }
+
+        /**
+         * Converts the orientation to range -180 to 180 or -pi to pi
+         * @param orientation the orientation to convert
+         * @return the converted orientation
+         */
+        public Orientation convertToSemiPossibleRange(Orientation orientation){
+            float parameter = angleParam();
+            orientation = convertOrientation(orientation);
+            orientation.firstAngle = convertAngletoSemiPossibleRange(X, orientation.firstAngle);
+            orientation.secondAngle = convertAngletoSemiPossibleRange(Y, orientation.secondAngle);
+            orientation.thirdAngle = convertAngletoSemiPossibleRange(Z, orientation.thirdAngle);
+            return orientation;
         }
     }
 
