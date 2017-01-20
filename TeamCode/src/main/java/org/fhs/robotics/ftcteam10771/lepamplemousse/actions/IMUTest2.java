@@ -75,7 +75,7 @@ public class IMUTest2 extends LinearOpMode{
         IMU.MagneticSensor magneticSensor = imuHandler.new IMU.MagneticSensor();
         */
         waitForStart();
-
+        imuHandler.imuThread.start();
         //start accel integrator
         //imuHandler.parameters.accelerationIntegrationAlgorithm.initialize(imuHandler.parameters, new Position(), new Velocity());
         imuHandler.getImu().startAccelerationIntegration(new Position(), new Velocity(), 50);
@@ -125,6 +125,7 @@ public class IMUTest2 extends LinearOpMode{
             
             telemetry.update();
         }
+        imuHandler.imuThread.interrupt();
     }
 
 
