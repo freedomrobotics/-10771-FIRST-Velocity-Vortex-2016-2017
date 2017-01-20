@@ -35,6 +35,8 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.position.calculations;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import java.util.Vector;
+
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -73,16 +75,76 @@ public class KalmanFilterAccelerationIntegrator4 implements BNO055IMU.Accelerati
     /**
      * todo: Move into own class later
      */
-    class Matrix {
-        //Object
-        Matrix(int rows, int columns){
-            
+    class Matrix<E> {
+        Vector<Vector<E>> matrix;
+        int vectorSize;
+        int vectorCount;
+        
+        Matrix(int vectorSize, int vectorCount){
+            matrix = new Vector<Vector<E>>(vectorCount);
+            for (int i = 0; i < vectorCount; i++){
+                matrix.add(i, new Vector<E>(vectorSize));
+            }
+            this.vectorSize = vectorSize;
+            this.vectorCount = vectorCount;
         }
         Matrix(Matrix matrix){
+            this.matrix = matrix.get2dVector();
+            vectorSize = matrix.getRowCount();
+            vectorCount = matrix.getColumnCount();
+        }
+        
+        E getEntry(int row, int column){
+            return matrix.get(column).get(row);
+        }
+        
+        void setEntry(E e, int row, int column){
+            matrix.get(column).get(row) = e;
+        
+        Matrix getTranspose(){
+            Vector<Vector<E>> transpose = new Vector<Vector<E>>(vectorSize);
+            for (int i = 0; i < vectorSize; i++){
+                transpose.add(i, new Vector<E>(vectorCount));
+                for (int j = 0; j < vectorCount; j++){
+                    transpose.get(i).add(j, getEntry(i, j));
+                }
+            }
+        }
+        
+        void add(Matrix matrixToAdd){
+            if (matrixToAdd.getRowSize() != getRowSize() && matrixToAdd.getColumnSize() != getColumnSize())
+                throw new RuntimeException("Illegal matrix operation.");
+            //E e = matrix.getEntry(i, j);
+        }
+        
+        Matrix add(Matrix matrix1, Matrix matrix2){
             
         }
+        
+        Vector<E> getVector(int column){
+            return matrix.get(position);
+        }
+        
+        int getRowSize(){
+            return vectorCount;
+        }
+        
+        int getRowCount(){
+            return vectorSize;
+        }
+        
+        int getColumnSize(){
+            return vectorSize;
+        }
+        
+        int getColumnCount(){
+            return vectorCount;
+        }
+        
+        Vector<Vector<E>> get2dVector(){
+            return matrix;
+        }
     }
-    
 
     public Position getPosition() {
         return this.position;
