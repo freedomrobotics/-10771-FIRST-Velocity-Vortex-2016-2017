@@ -71,6 +71,7 @@ public class IMUTest extends LinearOpMode{
         IMU.Gyrometer gyroOutput = imuHandler.getGyrometer();
         IMU.Accelerometer accelSensor = imuHandler.getAccelerometer();
         IMU.Magnetometer magneticSensor = imuHandler.getMagnetometer();
+        gyroOutput.enableStream(true);
 
 
         /*
@@ -80,7 +81,7 @@ public class IMUTest extends LinearOpMode{
         IMU.MagneticSensor magneticSensor = imuHandler.new IMU.MagneticSensor();
         */
         waitForStart();
-
+        imuHandler.imuThread.start();
         //start accel integrator
         //imuHandler.parameters.accelerationIntegrationAlgorithm.initialize(imuHandler.parameters, new Position(), new Velocity());
         imuHandler.getImu().startAccelerationIntegration(new Position(), new Velocity(), 50);
@@ -90,7 +91,7 @@ public class IMUTest extends LinearOpMode{
             //telemetry.addData("GyroX", (int)gyroOutput.convertAngletoSemiPossibleRange(X, gyroOutput.getOrientation(X)));
             //telemetry.addData("GyroY", (int)gyroOutput.convertAngletoSemiPossibleRange(Y, gyroOutput.getOrientation(Y)));
             //telemetry.addData("GyroZ", (int)gyroOutput.convertAngletoSemiPossibleRange(Z, gyroOutput.getOrientation(Z)));
-            telemetry.addData("GyroZ", gyroOutput.getOrientation(Z));
+            telemetry.addData("GyroZ", gyroOutput.getOrientation(Z)); //todo: see if change took place
             telemetry.addData("======", "========");
             telemetry.addData("AbsX", (int)accelSensor.getAbsoluteAcceleration(X));
             telemetry.addData("Absy", (int)accelSensor.getAbsoluteAcceleration(Y));
@@ -130,6 +131,7 @@ public class IMUTest extends LinearOpMode{
             
             telemetry.update();
         }
+        imuHandler.imuThread.interrupt();
     }
 
 

@@ -52,9 +52,9 @@ public class IMU {
 
 
     //Stream flags that can be toggled on or off
-    private boolean gyroStreamEnabled = true;
-    private boolean accelStreamEnabled = true;
-    private boolean magnetStreamEnabled = true;
+    private boolean gyroStreamEnabled = false;
+    private boolean accelStreamEnabled = false;
+    private boolean magnetStreamEnabled = false;
 
     /*
         Default constructor
@@ -216,7 +216,7 @@ public class IMU {
     public void streamIMUData(){
         if (gyroStreamEnabled){
             orientation = imu.getAngularOrientation();
-            angularVelocity = imu.getAngularVelocity();
+            //angularVelocity = imu.getAngularVelocity();
         }
         if (accelStreamEnabled){
             acceleration = imu.getLinearAcceleration();
@@ -411,7 +411,7 @@ public class IMU {
          * @return the orienatation
          */
         public float getOrientation(IMU.Axis axis){
-            return getOrientation(axis, false, false);
+            return getOrientation(axis, false, true);
         }
 
         /**
