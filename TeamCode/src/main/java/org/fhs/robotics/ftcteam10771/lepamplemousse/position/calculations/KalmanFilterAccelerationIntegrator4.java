@@ -69,6 +69,20 @@ public class KalmanFilterAccelerationIntegrator4 implements BNO055IMU.Accelerati
     float processNoise;
     float sensorNoise;
     private float lowPassAlpha;
+    
+    /**
+     * todo: Move into own class later
+     */
+    class Matrix {
+        //Object
+        Matrix(int rows, int columns){
+            
+        }
+        Matrix(Matrix matrix){
+            
+        }
+    }
+    
 
     public Position getPosition() {
         return this.position;
