@@ -52,7 +52,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.scale;
  * {@link com.qualcomm.hardware.adafruit.NaiveAccelerationIntegrator}.
  * It uses the Kalman filter to filter noise.
  */
-public class KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator {
+public class
+KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator {
     //------------------------------------------------------------------------------------------
     // State
     //------------------------------------------------------------------------------------------
@@ -65,7 +66,7 @@ public class KalmanFilterAccelerationIntegrator4 implements BNO055IMU.Accelerati
     Config.ParsedData kalmanConfig;
 
     Position positionError;
-    float velocityError;0
+    float velocityError;
     float accelerationError;
 
     float processNoise;
@@ -75,15 +76,15 @@ public class KalmanFilterAccelerationIntegrator4 implements BNO055IMU.Accelerati
     /**
      * todo: Move into own class later
      */
-    class Matrix<E> {
-        Vector<Vector<E>> matrix;
+    class Matrix {
+        Vector<Vector<Float>> matrix;
         int vectorSize;
         int vectorCount;
         
         Matrix(int vectorSize, int vectorCount){
-            matrix = new Vector<Vector<E>>(vectorCount);
+            matrix = new Vector<>(vectorCount);
             for (int i = 0; i < vectorCount; i++){
-                matrix.add(i, new Vector<E>(vectorSize));
+                matrix.add(i, new Vector<Float>(vectorSize));
             }
             this.vectorSize = vectorSize;
             this.vectorCount = vectorCount;
@@ -93,36 +94,55 @@ public class KalmanFilterAccelerationIntegrator4 implements BNO055IMU.Accelerati
             vectorSize = matrix.getRowCount();
             vectorCount = matrix.getColumnCount();
         }
-        
-        E getEntry(int row, int column){
+        Matrix(Vector<Vector<Float>> matrix){
+            this.matrix = matrix;
+            vectorCount = matrix.get(0).size();
+            vectorSize = matrix.size();
+        }
+
+        Float getEntry(int row, int column){
             return matrix.get(column).get(row);
         }
         
-        void setEntry(E e, int row, int column){
-            matrix.get(column).get(row) = e;
-        
+        void setEntry(Float n, int row, int column) {
+            matrix.get(column).set(row, n);
+        }
+
         Matrix getTranspose(){
-            Vector<Vector<E>> transpose = new Vector<Vector<E>>(vectorSize);
+            Vector<Vector<Float>> transpose = new Vector<>(vectorSize);
             for (int i = 0; i < vectorSize; i++){
-                transpose.add(i, new Vector<E>(vectorCount));
+                transpose.add(i, new Vector<Float>(vectorCount));
+                for (int j = 0; j < vectorCount; j++){
+                    transpose.get(i).add(j, getEntry(i, j));
+                }
+            }
+            return new Matrix(transpose);
+        }
+        
+        void add(Matrix matrixToAdd){
+            if (matrixToAdd.getRowSize() != getRowSize() && matrixToAdd.getColumnSize() != getColumnSize())
+                throw new RuntimeException("Illegal matrix operation.");
+            for (int i = 0; i < vectorSize; i++){
                 for (int j = 0; j < vectorCount; j++){
                     transpose.get(i).add(j, getEntry(i, j));
                 }
             }
         }
         
-        void add(Matrix matrixToAdd){
-            if (matrixToAdd.getRowSize() != getRowSize() && matrixToAdd.getColumnSize() != getColumnSize())
-                throw new RuntimeException("Illegal matrix operation.");
-            //E e = matrix.getEntry(i, j);
-        }
-        
         Matrix add(Matrix matrix1, Matrix matrix2){
-            
+            int vectorSize, vectorCount;
+            if ((vectorCount = matrix1.getRowSize()) != matrix2.getRowSize() && (vectorSize = matrix1.getColumnSize()) != matrix2.getColumnSize())
+                throw new RuntimeException("Illegal matrix operation.");
+            Matrix matrix = new Matrix(vectorSize, vectorCount);
+            for (int i = 0; i < vectorSize; i++){
+                for (int j = 0; j < vectorCount; j++){
+                    matrix.setEntry(matrix1.getEntry(j, i) + matrix2.getEntry(j,i)), j, i);
+                }
+            }
         }
         
-        Vector<E> getVector(int column){
-            return matrix.get(position);
+        Vector<Float> getVector(int column){
+            return matrix.get(column);
         }
         
         int getRowSize(){
@@ -141,7 +161,7 @@ public class KalmanFilterAccelerationIntegrator4 implements BNO055IMU.Accelerati
             return vectorCount;
         }
         
-        Vector<Vector<E>> get2dVector(){
+        Vector<Vector<Float>> get2dVector(){
             return matrix;
         }
     }
