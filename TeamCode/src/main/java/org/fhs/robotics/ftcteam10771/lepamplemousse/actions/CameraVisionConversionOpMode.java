@@ -18,7 +18,29 @@ public class CameraVisionConversionOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         cameraVision = new CameraVision();
-        //range = new UltrasonicRange(hardwareMap.analogInput.get("range"), hardwareMap.digitalChannel.get("switch"));
-
+        range = new UltrasonicRange(hardwareMap.analogInput.get("range"), hardwareMap.digitalChannel.get("switch"));
+        Thread opThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!Thread.interrupted()){
+                    cameraVision.runImageTracking();
+                    range.streamDistance();
+                }
+            }
+        });
+        waitForStart();
+        opThread.start();
+        while (opModeIsActive()){
+            if (cameraVision.countTrackedImages()==1){
+                cameraVision.setADetectedImageAsTarget();
+            }
+            telemetry.addData("Ultrasonic Distance", range.getDistance());
+            telemetry.addData("Camera Vision Distance", cameraVision.getZ(cameraVision.getTargetedImage()));
+            if (cameraVision.getZ(cameraVision.getTargetedImage())!=0f){
+                telemetry.addData("U:C Distance Ratio", range.getDistance() / cameraVision.getZ(cameraVision.getTargetedImage()));
+            }
+            telemetry.update();
+        }
+        opThread.interrupt();
     }
 }
