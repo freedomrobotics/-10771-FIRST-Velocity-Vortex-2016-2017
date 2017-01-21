@@ -40,6 +40,8 @@ auto:
   power: .778
   power_ratio: .778
 
+intake_divisor: 5000
+
 # The drivetrain's settings.
 drivetrain:
   motor_max_power: 1

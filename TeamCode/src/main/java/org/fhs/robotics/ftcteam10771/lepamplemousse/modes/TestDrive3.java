@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -39,6 +40,9 @@ public class TestDrive3 extends LinearOpMode{
     private Controllers controls;
 
     private static final String TAG = "TestDrive3Debug";
+    private float bumperPos;
+
+    private long lastTime;
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -138,15 +142,32 @@ public class TestDrive3 extends LinearOpMode{
 
         Log.d(TAG, "motor setup 4");
 
+        Config.ParsedData bumpers = settings.subData("bumper");
+
+        float bumperRange = bumpers.getFloat("full_rotate");
+        float bumperPreset = bumpers.getFloat("preset");
+        float bumperVel = bumpers.getFloat("max_ang_vel");
+        float bumperMax = bumpers.getFloat("max_rotate");
+
+        Servo bumperLeft = Aliases.servoMap.get(bumpers.subData("left_servo").getString("map_name"));
+        Servo bumperRight = Aliases.servoMap.get(bumpers.subData("right_servo").getString("map_name"));
+        if (bumpers.subData("left_servo").getBool("reversed"))
+            bumperLeft.setDirection(Servo.Direction.REVERSE);
+        if (bumpers.subData("right_servo").getBool("reversed"))
+            bumperRight.setDirection(Servo.Direction.REVERSE);
+
+
+        lastTime = System.currentTimeMillis();
         waitForStart();
         while(opModeIsActive()){
-
+            long changeTime = System.currentTimeMillis() - lastTime;
+            lastTime += changeTime;
             if (intakePower < 0){
                 intakePower = 0;
             } if (intakePower > 1){
                 intakePower = 1;
             }
-            intakePower += gamepad1.right_stick_y / 5000;
+            intakePower += gamepad1.right_stick_y / settings.getInt("intake_divisor");
 
             double joystickTheta = Math.atan2((controls.getAnalog("drivetrain_y")),(controls.getAnalog("drivetrain_x"))); //declares the angle of joystick position in standard polar coordinates
             double joystickRadius = Math.sqrt((controls.getAnalog("drivetrain_x"))*(controls.getAnalog("drivetrain_x"))+(controls.getAnalog("drivetrain_y"))*(controls.getAnalog("drivetrain_y"))); //declares the magnitude of the radius of the joystick position
@@ -208,6 +229,23 @@ public class TestDrive3 extends LinearOpMode{
             } else {
                 intakeMotor.setPower(0);
             }
+
+            //servo
+
+
+            bumperPos += controls.getAnalog("bumper_angle") * (bumperVel / bumperRange) * ((float) changeTime / 1000.0f);
+
+            if (bumperPos > bumperMax / bumperRange){
+                bumperPos = bumperMax / bumperRange;
+            }
+            if (bumperPos < 0) {
+                bumperPos = 0;
+            }
+            if (controls.getDigital("bumper_preset"))
+                bumperPos = bumperPreset / bumperRange;
+            bumperLeft.setPosition(bumperPos + bumpers.subData("left_servo").getFloat("offset") / bumperRange);
+            bumperRight.setPosition(bumperPos + bumpers.subData("right_servo").getFloat("offset") / bumperRange);
+
 
             telemetry.update();
 

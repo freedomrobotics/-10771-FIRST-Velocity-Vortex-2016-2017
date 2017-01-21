@@ -21,7 +21,7 @@ import java.util.List;
  * Created by Matthew on 11/14/2016.
  */
 
-@Autonomous(name = "TestDrive3")
+@Autonomous(name = "cheap_auto")
 public class auto extends LinearOpMode{
 
     //initializes motors in order of standard graph quadrants
@@ -142,14 +142,16 @@ public class auto extends LinearOpMode{
 
         sleep(settings.subData("auto").getInt("delay"));
 
-        double powerA = settings.subData("auto").getInt("power");
-        double powerB = settings.subData("auto").getInt("power");
-        double powerC = settings.subData("auto").getInt("power");
-        double powerD = settings.subData("auto").getInt("power");
-        motorFR.setPower(Range.scale(powerA, -1, 1, -settings.subData("auto").getInt("power_ratio"), settings.subData("auto").getInt("power_ratio")));
-        motorFL.setPower(Range.scale(powerB, -1, 1, -settings.subData("auto").getInt("power_ratio"), settings.subData("auto").getInt("power_ratio")));
-        motorBL.setPower(Range.scale(powerC, -1, 1, -settings.subData("auto").getInt("power_ratio"), settings.subData("auto").getInt("power_ratio")));
-        motorBR.setPower(Range.scale(powerD, -1, 1, -settings.subData("auto").getInt("power_ratio"), settings.subData("auto").getInt("power_ratio")));
+        double powerA = settings.subData("auto").getFloat("power");
+        double powerB = settings.subData("auto").getFloat("power");
+        double powerC = settings.subData("auto").getFloat("power");
+        double powerD = settings.subData("auto").getFloat("power");
+        motorFR.setPower(powerA);
+        motorFL.setPower(powerB);
+        motorBL.setPower(powerC);
+        motorBR.setPower(powerD);
+
+        waitForNextHardwareCycle();
 
         sleep(settings.subData("auto").getInt("drive"));
 
