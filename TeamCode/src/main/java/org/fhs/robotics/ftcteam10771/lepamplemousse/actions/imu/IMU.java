@@ -732,7 +732,7 @@ public class IMU {
             double intrinsicAccelX = imu.getAcceleration().xAccel;
             double intrinsicAccelY = imu.getAcceleration().yAccel;
             double robotRotation = (double)gyrometer.convert(Z, imu.getAngularOrientation().toAxesOrder(XYZ).thirdAngle);
-            double intrinsicVectorAngle = Math.atan2(intrinsicAccelY, intrinsicAccelX);
+            double intrinsicVectorAngle = Math.atan2(intrinsicAccelY, intrinsicAccelX) - (gyrometer.angleParam()/4.0);
             if (intrinsicVectorAngle<0){
                 intrinsicVectorAngle += gyrometer.angleParam();
             }
@@ -750,6 +750,18 @@ public class IMU {
                 default:
                     return 0.0;
             }
+        }
+
+        /**
+         * Absolute converter for the acceleration object
+         * @param acceleration with respect to the sensor
+         * @return the absolute acceleration
+         */
+        public Acceleration getAbsoluteAcceleration(Acceleration acceleration){
+            acceleration.xAccel = getAbsoluteAcceleration(X);
+            acceleration.yAccel = getAbsoluteAcceleration(Y);
+            acceleration.zAccel = getAbsoluteAcceleration(Z);
+            return acceleration;
         }
     }
 
