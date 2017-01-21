@@ -51,6 +51,12 @@ drivetrain:
   wheel:
     diameter: 101.6 # 4 inches
 
+# Intake
+intake:
+  map_name: intake
+  reversed: true
+  increments_per_second: .2
+
 # Front Bumper-thing Settings
 bumper:
   enabled: true
@@ -98,6 +104,10 @@ beacon:
       red: 2
       green: 2
       blue: 2
+
+auto:
+  time:
+  encoder:
 
 autonomous:
   red_alliance:

@@ -79,6 +79,8 @@ public class BasicNotBasicDrive extends OpMode {
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
                 settings, telemetry);
 
+        intake = hardwareMap.dcMotor.get()
+
         this.lastTime = System.currentTimeMillis();
     }
 
@@ -100,6 +102,7 @@ public class BasicNotBasicDrive extends OpMode {
         telemetry.addData("drive_x", driveVector.getX());
         telemetry.addData("drive_y", driveVector.getY());
         telemetry.addData("drive_rot", driveVector.getRawR());
+
     }
 
     @Override
