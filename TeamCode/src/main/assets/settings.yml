@@ -34,6 +34,12 @@ encoder:
   output_pulses: 1440
   encoder_pulses: 28
 
+auto:
+  delay: 2000
+  drive: 5000
+  power: .778
+  power_ratio: .778
+
 # The drivetrain's settings.
 drivetrain:
   motor_max_power: 1
