@@ -102,6 +102,7 @@ public class UltrasonicRange {
      */
     public void streamDistance(){
         if (rangeStreamEnabled) distance = distance();
+        else distance = 0.0;
     }
 
     /**
