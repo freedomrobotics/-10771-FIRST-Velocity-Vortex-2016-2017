@@ -156,19 +156,20 @@ public class IMU {
      * Store the calibration data of the IMU into a file
      */
     public void storeCalibration(LinearOpMode opMode, Boolean teleopUsed, boolean buttonPressed){
-        boolean beginSave;
         if (opMode != null){
+            opMode.telemetry.addLine(imu.getCalibrationStatus().toString());
             opMode.telemetry.addData("GyroCalib", imu.isGyroCalibrated());
             opMode.telemetry.addData("AccelCalib", imu.isAccelerometerCalibrated());
-            opMode.telemetry.addData("MagnetCalib", imu.isMagnetometerCalibrated());
-            opMode.telemetry.addData("SystemCalib", imu.isSystemCalibrated());
-            opMode.telemetry.update();
         }
-        beginSave = teleopUsed ? buttonPressed : getIMUCalibrationStatus();
+        boolean beginSave = teleopUsed ? buttonPressed : getIMUCalibrationStatus();
         if (beginSave){
             BNO055IMU.CalibrationData calibrationData = imu.readCalibrationData();
             File calibFile = AppUtil.getInstance().getSettingsFile(calibrationFileName);
             ReadWriteFile.writeFile(calibFile, calibrationData.serialize());
+            opMode.telemetry.addLine("saved to " + calibrationFileName);
+        }
+        if (opMode!=null) opMode.telemetry.update();
+        if (beginSave && !teleopUsed){
             opMode.stop();
         }
     }
@@ -732,7 +733,7 @@ public class IMU {
             double intrinsicAccelX = imu.getAcceleration().xAccel;
             double intrinsicAccelY = imu.getAcceleration().yAccel;
             double robotRotation = (double)gyrometer.convert(Z, imu.getAngularOrientation().toAxesOrder(XYZ).thirdAngle);
-            double intrinsicVectorAngle = Math.atan2(intrinsicAccelY, intrinsicAccelX) - (gyrometer.angleParam()/4.0);
+            double intrinsicVectorAngle = Math.atan2(intrinsicAccelY, intrinsicAccelX);
             if (intrinsicVectorAngle<0){
                 intrinsicVectorAngle += gyrometer.angleParam();
             }
