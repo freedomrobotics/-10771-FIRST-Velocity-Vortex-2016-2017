@@ -16,9 +16,11 @@ public class Launcher {
 
     //Power to set the launch motor at
     private double launchPower = 0.5;
-    private final double intakePower = 1.0;
+    private double intakePower = 1.0;
     private final double launchIncrement = 0.01;
     private final double MAX_REV_PER_SEC = 152.0 / 60.0;
+    private boolean intakeOn=false;
+    private boolean launchOn=false;
 
     /*
         Default constructor
@@ -175,6 +177,44 @@ public class Launcher {
      */
     public double getLaunchPower(){
         return launchPower;
+    }
+
+    /**
+     * Setter for intake power
+     * @param power the float between -1 and 1(not analog input)
+     */
+    public void setIntakePower(double power){
+        intakePower = power;
+    }
+
+    /**
+     * Getter for intake power
+     * @return the intake power
+     */
+    public double getIntakePowr(){
+        return intakePower;
+    }
+
+    /**
+     * Toggles intake motor on or off
+     * @param button to toggle the intake on or off
+     */
+    public void toggleIntake(boolean button){
+        if (button){
+            intakeOn = !intakeOn;
+        }
+        intake.setPower(intakeOn ? intakePower : 0.0);
+    }
+
+    /**
+     * Toggles launch on or off
+     * @param button the button to toggle the motor
+     */
+    public void toggleLaunch(boolean button){
+        if (button){
+            launchOn = !launchOn;
+        }
+        launch.setPower(launchOn ? launchPower : 0.0);
     }
 
     /**
