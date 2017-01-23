@@ -22,7 +22,7 @@ public class UltrasonicRange {
     /*
         Default constructors
      */
-    UltrasonicRange() {
+    public UltrasonicRange() {
 
     }
 
@@ -32,7 +32,7 @@ public class UltrasonicRange {
      * @param analogInput    the device which gives voltage inputs
      * @param digitalChannel the output that gives boolean state
      */
-    UltrasonicRange(AnalogInput analogInput, DigitalChannel digitalChannel) {
+    public UltrasonicRange(AnalogInput analogInput, DigitalChannel digitalChannel) {
         rangeSensor = analogInput;
         toggler = digitalChannel;
         //todo test to see if it works
@@ -102,6 +102,7 @@ public class UltrasonicRange {
      */
     public void streamDistance(){
         if (rangeStreamEnabled) distance = distance();
+        else distance = 0.0;
     }
 
     /**

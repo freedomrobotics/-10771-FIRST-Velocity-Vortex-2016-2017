@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.LED;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
+
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.BOTH;
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.LEFT;
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.RIGHT;
@@ -94,10 +96,28 @@ public class RGB {
         BOTH
     };
 
-    public enum Color{
+    private enum Color{
         RED,
         GREEN,
         BLUE,
+    }
+
+    /**
+     * Converts the alliance enumeration
+     * to team color enumeration
+     * @param alliance status of the robot
+     * @return the team color it is in
+     */
+    private Color convertAllianceStatus(Alliance alliance){
+        if (alliance==Alliance.RED_ALLIANCE || alliance==Alliance.RED_ALLIANCE_INSIDE
+                || alliance==Alliance.RED_ALLIANCE_OUTSIDE){
+            return Color.RED;
+        }
+        else if (alliance==Alliance.BLUE_ALLIANCE || alliance==Alliance.BLUE_ALLIANCE_INSIDE
+                || alliance==Alliance.BLUE_ALLIANCE_OUTSIDE){
+            return Color.BLUE;
+        }
+        return null;
     }
 
     /**
@@ -108,7 +128,7 @@ public class RGB {
      * @param direction of the color sensor with respect to the robot
      * @return whether or not the side of beacon is correct color
      */
-    public boolean isSide(Color teamColor, Direction direction){
+    private boolean isSide(Color teamColor, Direction direction){
         if (teamColor == Color.RED){
             return (red(direction) > blue(direction));
         }
@@ -119,8 +139,34 @@ public class RGB {
     }
 
     //Chooses left sensor by default
-    public boolean isSide(Color teamColor){
+    private boolean isSide(Color teamColor){
         return isSide(teamColor, LEFT);
+    }
+
+    /**
+     * Method to determine if beacon side is correct using alliance enum
+     * @param alliance the status of alliance
+     * @param direction LEFT or RIGHT sensor
+     * @return whether beacon side matches team color
+     */
+    public boolean isSide(Alliance alliance, Direction direction){
+        if (convertAllianceStatus(alliance) != null){
+            return isSide(convertAllianceStatus(alliance), direction);
+        }
+        else return false;
+    }
+
+    /**
+     * Method to determine if beacon side is correct using alliance enum
+     * Default sensor: LEFT
+     * @param alliance the status of alliance
+     * @return whether beacon side matches team color
+     */
+    public boolean isSide(Alliance alliance){
+        if (convertAllianceStatus(alliance) != null){
+            return isSide(convertAllianceStatus(alliance));
+        }
+        else return false;
     }
 
     /**
@@ -153,8 +199,19 @@ public class RGB {
         switchLED(LEFT, true);
     }
 
-    public void indicateCorrect(Direction direction, Color teamColor){
+    private void indicateCorrect(Direction direction, Color teamColor){
         switchLED(direction, isSide(teamColor, direction));
+    }
+
+    /**
+     * Turns the led on after determining that the beacon side matches
+     * @param direction which sensor to use
+     * @param alliace the alliance status of the robot
+     */
+    public void indicateCorrcect(Direction direction, Alliance alliace){
+        if (convertAllianceStatus(alliace) != null){
+            indicateCorrect(direction, convertAllianceStatus(alliace));
+        }
     }
 
     /**
@@ -267,16 +324,21 @@ public class RGB {
      * @param direction which RGB sensor
      * @param opMode the op mode used to test
      */
-    public void testRGB(Direction direction, LinearOpMode opMode){
+    public void testRGB(Direction direction, LinearOpMode opMode, boolean updateTelemetry){
         opMode.telemetry.addData("red", red(direction));
         opMode.telemetry.addData("green", green(direction));
         opMode.telemetry.addData("blue", blue(direction));
-        opMode.telemetry.update();
+        if (updateTelemetry) opMode.telemetry.update();
     }
 
-    //Chooses left RGB sensor by default
+    //Chooses left RGB sensor by default and not to update the telemetry imediately
     public void testRGB(LinearOpMode opMode){
-        testRGB(LEFT, opMode);
+        testRGB(LEFT, opMode, false);
+    }
+
+    //Chooses left sensor by default
+    public void testRGB(LinearOpMode opMode, boolean updateTelemetry){
+        testRGB(LEFT, opMode, updateTelemetry);
     }
 
     /**
