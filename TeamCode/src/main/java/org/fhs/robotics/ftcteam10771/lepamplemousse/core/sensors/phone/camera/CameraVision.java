@@ -379,6 +379,7 @@ public class CameraVision {
         if (countTrackedImages()==1){
             setADetectedImageAsTarget();
         }
+        else setTargetImage(Image.NULL);
     }
 
     /**
