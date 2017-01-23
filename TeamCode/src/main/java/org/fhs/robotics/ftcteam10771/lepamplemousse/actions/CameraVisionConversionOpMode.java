@@ -28,6 +28,7 @@ public class CameraVisionConversionOpMode extends LinearOpMode {
                 }
             }
         });
+        cameraVision.setUnitToRadians(false);
         waitForStart();
         opThread.start();
         while (opModeIsActive()){
@@ -40,6 +41,7 @@ public class CameraVisionConversionOpMode extends LinearOpMode {
                 telemetry.addData("U:C Distance Ratio", getCameraConverted());
                 telemetry.addData("Base", getBase());
             }
+            telemetry.addData("Angle To Turn", cameraVision.getAngleToTurn(cameraVision.getTargetedImage()));
             telemetry.update();
         }
         opThread.interrupt();

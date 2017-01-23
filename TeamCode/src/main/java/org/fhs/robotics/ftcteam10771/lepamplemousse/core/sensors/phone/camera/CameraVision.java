@@ -145,7 +145,7 @@ public class CameraVision {
         String imageName;
         OpenGLMatrix matrix;
         VectorF translation;
-        float angleToTurn;
+        double angleToTurn;
     }
 
     //The thread loop code
@@ -195,8 +195,10 @@ public class CameraVision {
                 imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
                 if (imageData[i].matrix != null) {
                     imageData[i].translation = imageData[i].matrix.getTranslation();
-                    imageData[i].angleToTurn = useRadians ? (imageData[i].matrix.getData()[8] * (float)Math.PI / 2) :
-                            (imageData[i].matrix.getData()[8] * 90.0f);
+                    imageData[i].angleToTurn = Math.asin((double)imageData[i].matrix.getData()[8]);
+                    if (!useRadians){
+                        imageData[i].angleToTurn = Math.toDegrees(imageData[i].angleToTurn);
+                    }
                 }
                 else {
                     imageData[i].translation = new VectorF(0f, 0f, 0f);
@@ -306,7 +308,7 @@ public class CameraVision {
      * @param image enum id
      * @return the image's degrees to turn
      */
-    public float getAngleToTurn(Image image){
+    public double getAngleToTurn(Image image){
         return imageData[image.index].angleToTurn;
     }
 
