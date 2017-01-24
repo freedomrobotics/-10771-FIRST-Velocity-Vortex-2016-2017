@@ -31,15 +31,23 @@ public class CameraVisionConversionOpMode extends LinearOpMode {
         cameraVision.setUnitToRadians(false);
         waitForStart();
         opThread.start();
+        double totalBase = 0.0;
+        double totalRatio = 0.0;
+        int iterations = 0;
         while (opModeIsActive()){
+            iterations++;
             if (cameraVision.countTrackedImages()==1){
                 cameraVision.setADetectedImageAsTarget();
             }
             telemetry.addData("Ultrasonic Distance", range.getDistance());
             telemetry.addData("Camera Vision Distance", cameraVision.getZ(cameraVision.getTargetedImage()));
             if (cameraVision.getTargetedImage() != CameraVision.Image.NULL && cameraVision.getZ(cameraVision.getTargetedImage())!=0f){
+                totalRatio += getCameraConverted();
+                totalBase  += getBase();
                 telemetry.addData("U:C Distance Ratio", getCameraConverted());
+                telemetry.addData("Average Ratio", totalRatio / iterations);
                 telemetry.addData("Base", getBase());
+                telemetry.addData("Average Base", totalBase / iterations);
             }
             telemetry.addData("Angle To Turn", cameraVision.getAngleToTurn(cameraVision.getTargetedImage()));
             telemetry.update();
