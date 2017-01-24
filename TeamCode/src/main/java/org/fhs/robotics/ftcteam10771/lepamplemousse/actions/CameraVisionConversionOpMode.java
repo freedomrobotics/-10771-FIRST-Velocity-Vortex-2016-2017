@@ -35,10 +35,12 @@ public class CameraVisionConversionOpMode extends LinearOpMode {
         double totalRatio = 0.0;
         int iterations = 0;
         while (opModeIsActive()){
-            iterations++;
             if (cameraVision.countTrackedImages()==1){
                 cameraVision.setADetectedImageAsTarget();
+                iterations++;
             }
+            else cameraVision.setTargetImage(CameraVision.Image.NULL);
+            telemetry.addData("Image", cameraVision.getTargetedImage().getName());
             telemetry.addData("Ultrasonic Distance", range.getDistance());
             telemetry.addData("Camera Vision Distance", cameraVision.getZ(cameraVision.getTargetedImage()));
             if (cameraVision.getTargetedImage() != CameraVision.Image.NULL && cameraVision.getZ(cameraVision.getTargetedImage())!=0f){
