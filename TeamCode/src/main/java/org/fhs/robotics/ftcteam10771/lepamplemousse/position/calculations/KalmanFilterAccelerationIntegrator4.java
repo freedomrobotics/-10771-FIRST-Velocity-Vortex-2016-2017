@@ -65,106 +65,11 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
 
     Config.ParsedData kalmanConfig;
 
-    Position positionError;
-    float velocityError;
-    float accelerationError;
-
-    float processNoise;
-    float sensorNoise;
-    private float lowPassAlpha;
-    
-    /**
-     * todo: Move into own class later
-     */
-    class Matrix {
-        Vector<Vector<Float>> matrix;
-        int vectorSize;
-        int vectorCount;
-        
-        Matrix(int vectorSize, int vectorCount){
-            matrix = new Vector<>(vectorCount);
-            for (int i = 0; i < vectorCount; i++){
-                matrix.add(i, new Vector<Float>(vectorSize));
-            }
-            this.vectorSize = vectorSize;
-            this.vectorCount = vectorCount;
-        }
-        Matrix(Matrix matrix){
-            this.matrix = matrix.get2dVector();
-            vectorSize = matrix.getRowCount();
-            vectorCount = matrix.getColumnCount();
-        }
-        Matrix(Vector<Vector<Float>> matrix){
-            this.matrix = matrix;
-            vectorCount = matrix.get(0).size();
-            vectorSize = matrix.size();
-        }
-
-        Float getEntry(int row, int column){
-            return matrix.get(column).get(row);
-        }
-        
-        void setEntry(Float n, int row, int column) {
-            matrix.get(column).set(row, n);
-        }
-
-        Matrix getTranspose(){
-            Vector<Vector<Float>> transpose = new Vector<>(vectorSize);
-            for (int i = 0; i < vectorSize; i++){
-                transpose.add(i, new Vector<Float>(vectorCount));
-                for (int j = 0; j < vectorCount; j++){
-                    transpose.get(i).add(j, getEntry(i, j));
-                }
-            }
-            return new Matrix(transpose);
-        }
-        
-        void add(Matrix matrixToAdd){
-            if (matrixToAdd.getRowSize() != getRowSize() && matrixToAdd.getColumnSize() != getColumnSize())
-                throw new RuntimeException("Illegal matrix operation.");
-            for (int i = 0; i < vectorSize; i++){
-                for (int j = 0; j < vectorCount; j++){
-                    transpose.get(i).add(j, getEntry(i, j));
-                }
-            }
-        }
-        
-        Matrix add(Matrix matrix1, Matrix matrix2){
-            int vectorSize, vectorCount;
-            if ((vectorCount = matrix1.getRowSize()) != matrix2.getRowSize() && (vectorSize = matrix1.getColumnSize()) != matrix2.getColumnSize())
-                throw new RuntimeException("Illegal matrix operation.");
-            Matrix matrix = new Matrix(vectorSize, vectorCount);
-            for (int i = 0; i < vectorSize; i++){
-                for (int j = 0; j < vectorCount; j++){
-                    matrix.setEntry(matrix1.getEntry(j, i) + matrix2.getEntry(j,i)), j, i);
-                }
-            }
-        }
-        
-        Vector<Float> getVector(int column){
-            return matrix.get(column);
-        }
-        
-        int getRowSize(){
-            return vectorCount;
-        }
-        
-        int getRowCount(){
-            return vectorSize;
-        }
-        
-        int getColumnSize(){
-            return vectorSize;
-        }
-        
-        int getColumnCount(){
-            return vectorCount;
-        }
-        
-        Vector<Vector<Float>> get2dVector(){
-            return matrix;
-        }
-    }
+    //Persistent Matrices
+    float[] currentState;
+    float[] currentUncertainty; //also a covariance
+    float[] modelCovariance;
+    float[] sensorCovariance;
 
     public Position getPosition() {
         return this.position;
@@ -188,6 +93,11 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         this.velocity = null;
         this.acceleration = null;
         this.kalmanConfig = kalmanConfig;
+
+        this.currentState = new float[4];
+        this.currentUncertainty = new float[16];
+        this.modelCovariance = new float[16];
+        this.sensorCovariance = new float[16];
     }
 
     //------------------------------------------------------------------------------------------
@@ -200,15 +110,36 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         this.position = initialPosition;
         this.velocity = initialVelocity;
         this.acceleration = null;
-        this.positionError = new Position();
-        positionError.x = kalmanConfig.subData("initial_error").getFloat("x");
-        positionError.y = kalmanConfig.subData("initial_error").getFloat("y");
-        positionError.z = kalmanConfig.subData("initial_error").getFloat("z");
-        velocityError = kalmanConfig.getFloat("initial_velocity_error");
-        processNoise = kalmanConfig.getFloat("process_noise");
-        sensorNoise = kalmanConfig.getFloat("sensor_noise");
-        accelerationError = kalmanConfig.getFloat("initial_acceleration_error");
-        lowPassAlpha = kalmanConfig.getFloat("low_pass_alpha");
+
+        //Refer to my notes - Adam Li
+        this.currentState[0] = (float) position.x;
+        this.currentState[1] = (float) position.y;
+        this.currentState[2] = (float) velocity.xVeloc;
+        this.currentState[3] = (float) velocity.yVeloc;
+
+        float[] modelNoise = new float[4];
+        float[] sensorNoise = new float[4];
+        float[] initialError = new float[4];
+
+        modelNoise[0] = kalmanConfig.subData("model_noise").getFloat("x");
+        modelNoise[1] = kalmanConfig.subData("model_noise").getFloat("y");
+        modelNoise[2] = kalmanConfig.subData("model_noise").getFloat("x_vel");
+        modelNoise[3] = kalmanConfig.subData("model_noise").getFloat("y_vel");
+
+        //have to derive from the noise of the acceleration
+        sensorNoise[0] = kalmanConfig.subData("sensor_noise").getFloat("x");
+        sensorNoise[1] = kalmanConfig.subData("sensor_noise").getFloat("y");
+        sensorNoise[2] = kalmanConfig.subData("sensor_noise").getFloat("x_vel");
+        sensorNoise[3] = kalmanConfig.subData("sensor_noise").getFloat("y_vel");
+
+        initialError[0] = kalmanConfig.subData("initial_error").getFloat("x");
+        initialError[1] = kalmanConfig.subData("initial_error").getFloat("y");
+        initialError[2] = kalmanConfig.subData("initial_error").getFloat("x_vel");
+        initialError[3] = kalmanConfig.subData("initial_error").getFloat("y_vel");
+
+        sToCov(modelCovariance, modelNoise);
+        sToCov(sensorCovariance, sensorNoise);
+        sToCov(currentUncertainty, initialError);
     }
 
     //This is where to perform the actual math
@@ -220,34 +151,32 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
             if (acceleration != null) {
                 Acceleration accelPrev = acceleration;
                 Velocity velocityPrev = velocity;
-
-                acceleration = plus(accelPrev, scale(minus(linearAcceleration, accelPrev), lowPassAlpha));
-
-                // filter acceleration
-                accelerationError += processNoise;
-                float accelGain = accelerationError / (accelerationError + sensorNoise);
-                accelerationError = (1.0f - accelGain) * accelerationError;
-                acceleration = plus(accelPrev,scale(minus(acceleration, accelPrev), accelGain));
-
-                if (accelPrev.acquisitionTime != 0) {
-                    Velocity gainVelocity = meanIntegrate(acceleration, accelPrev);
-                    velocity = plus(velocity, gainVelocity);
-                }
-
-                if (velocityPrev.acquisitionTime != 0) {
-                    Position gainPosition = meanIntegrate(velocity, velocityPrev);
-                    position = plus(position, gainPosition);
-                }
-
                 if (parameters.loggingEnabled) {
                     RobotLog.vv(parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", (acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1e-9, acceleration, velocity, position);
                 }
-            } else
-                accelerationError += processNoise;
-                float accelGain = accelerationError / (accelerationError + sensorNoise);
-                accelerationError = (1.0f - accelGain) * accelerationError;
-
-                acceleration = scale(linearAcceleration, accelGain);
+            } else {
+            }
         }
     }
+
+//region matrix maths
+    //m1+m2 = out
+    private void add(float[] out, float[] m1, float[] m2){
+        for (int i = 0; i < 16; i++){
+            out[i] = m1[i] + m2[i];
+        }
+    }
+    //m1-m2 = out
+    private void sub(float[] out, float[] m1, float[] m2){
+        for (int i = 0; i < 16; i++){
+            out[i] = m1[i] - m2[i];
+        }
+    }
+    //cov(s) = out
+    private void sToCov(float[] out, float[] s){
+        for (int i = 0; i < 16; i++){
+            out[i] = s[i/4] * s[i%4];
+        }
+    }
+//endregion
 }
