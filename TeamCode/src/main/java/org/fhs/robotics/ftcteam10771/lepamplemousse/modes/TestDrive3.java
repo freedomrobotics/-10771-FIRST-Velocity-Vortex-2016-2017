@@ -156,6 +156,7 @@ public class TestDrive3 extends LinearOpMode{
         if (bumpers.subData("right_servo").getBool("reversed"))
             bumperRight.setDirection(Servo.Direction.REVERSE);
 
+        float power = settings.subData("drivetrain").getFloat("power");
 
         lastTime = System.currentTimeMillis();
         waitForStart();
@@ -192,10 +193,10 @@ public class TestDrive3 extends LinearOpMode{
             double powerB = (BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
             double powerC = (ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
             double powerD = (-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
-            motorFR.setPower(Range.scale(powerA, -1, 1, -.778, .778));
-            motorFL.setPower(Range.scale(powerB, -1, 1, -.778, .778));
-            motorBL.setPower(Range.scale(powerC, -1, 1, -.778, .778));
-            motorBR.setPower(Range.scale(powerD, -1, 1, -.778, .778));
+            motorFR.setPower(Range.scale(powerA, -1, 1, -power, power));
+            motorFL.setPower(Range.scale(powerB, -1, 1, -power, power));
+            motorBL.setPower(Range.scale(powerC, -1, 1, -power, power));
+            motorBR.setPower(Range.scale(powerD, -1, 1, -power, power));
 
             telemetry.addData("Speed-FR", powerA);
             telemetry.addData("Speed-FL", powerB);
