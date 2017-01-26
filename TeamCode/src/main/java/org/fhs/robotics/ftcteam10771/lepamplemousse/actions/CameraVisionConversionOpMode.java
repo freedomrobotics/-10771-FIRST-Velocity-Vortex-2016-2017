@@ -63,6 +63,6 @@ public class CameraVisionConversionOpMode extends LinearOpMode {
     }
 
     public double getBase(){
-        return Math.pow(cameraVision.getX(cameraVision.getTargetedImage()), cameraVision.getZ(cameraVision.getTargetedImage()));
+        return Math.pow(cameraVision.getX(cameraVision.getTargetedImage()), 1.0 / (cameraVision.getZ(cameraVision.getTargetedImage())));
     }
 }
