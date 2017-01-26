@@ -1,5 +1,6 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
@@ -9,7 +10,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.Ca
 /**
  * Created by joelv on 1/20/2017.
  */
-
+@Autonomous(name="Blahe")
 public class CameraVisionConversionOpMode extends LinearOpMode {
 
     UltrasonicRange range;

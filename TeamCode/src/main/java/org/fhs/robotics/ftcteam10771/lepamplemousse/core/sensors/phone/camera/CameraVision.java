@@ -15,6 +15,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.R;
 
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision.Image.NULL;
+
 /**
  * Class that handles camera vision targeting
  * for the four images under the beacons
@@ -105,10 +107,13 @@ public class CameraVision {
     boolean vuforiaRunning = true;
 
     //Variables that indicate the targeted image
-    private Image targetedImage = Image.NULL;
+    private Image targetedImage = NULL;
 
     //Flag on whether to use Radians(Degrees if false)
     private boolean useRadians = true;
+
+    //Null vector
+    private final VectorF none = new VectorF(0f, 0f, 0f);
 
     //Paramters for Vuforia initializtion to be used
     private VuforiaLocalizer.Parameters params = null;
@@ -269,7 +274,10 @@ public class CameraVision {
      * @return the image's translation
      */
     public VectorF getTranslation(Image image){
-        return imageData[image.index].translation;
+        if (imageInSight(image)){
+            return imageData[image.index].translation;
+        }
+        return none;
     }
 
     /**
@@ -309,7 +317,10 @@ public class CameraVision {
      * @return the image's degrees to turn
      */
     public double getAngleToTurn(Image image){
-        return imageData[image.index].angleToTurn;
+        if (imageInSight(image)){
+            return imageData[image.index].angleToTurn;
+        }
+        else return 0.0;
     }
 
     /**
@@ -322,18 +333,21 @@ public class CameraVision {
     }
 
     /**
-     * Determines whether the name exists in a trackable image
+     * Determines whether the name exists as a trackable image
      * @param image enum id
      * @return the state of image name's existence
      */
     private boolean imageExists(Image image){
-        int match = -1;
-        for (int i=0; i<beacons.size(); i++){
-            if (imageData[i].imageName.equals(image.name)){
-                match = i;
+        if (!imageNull(image)){
+            int match = -1;
+            for (int i=0; i<beacons.size(); i++){
+                if (imageData[i].imageName.equals(image.name)){
+                    match = i;
+                }
             }
+            return (!(match<0));
         }
-        return (!(match<0));
+        else return false;
     }
 
     /**
@@ -370,7 +384,7 @@ public class CameraVision {
         if (target != null){
             setTargetImage(target);
         }
-        else setTargetImage(Image.NULL);
+        else setTargetImage(NULL);
     }
 
     /**
@@ -381,7 +395,7 @@ public class CameraVision {
         if (countTrackedImages()==1){
             setADetectedImageAsTarget();
         }
-        else setTargetImage(Image.NULL);
+        else setTargetImage(NULL);
     }
 
     /**
@@ -404,5 +418,14 @@ public class CameraVision {
             } else linearOpMode.telemetry.addData(imageData[i].imageName, "null");
         }
         //toggleVuforia(false) todo: see if this is necessary or not
+    }
+
+    /**
+     * Whether or not the image enumeration is null
+     * @param image the target image
+     * @return if it is null or not
+     */
+    private boolean imageNull(Image image){
+        return image==NULL || image==null;
     }
 }
