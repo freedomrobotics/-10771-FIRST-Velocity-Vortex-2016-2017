@@ -32,11 +32,14 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.fhs.robotics.ftcteam10771.lepamplemousse.position.calculations;
 
+import android.opengl.Matrix;
+
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import java.util.Vector;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.UltrasonicRange;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -70,6 +73,8 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
     float[] currentUncertainty; //also a covariance
     float[] modelCovariance;
     float[] sensorCovariance;
+    float[] transformationPrediction;
+    float[] matrixIdentity;
 
     public Position getPosition() {
         return this.position;
@@ -98,6 +103,10 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         this.currentUncertainty = new float[16];
         this.modelCovariance = new float[16];
         this.sensorCovariance = new float[16];
+        this.transformationPrediction = new float[16];
+        this.matrixIdentity = new float[16];
+        // Generate a 4x4 identity matrix
+        Matrix.setIdentityM(this.matrixIdentity, 0);
     }
 
     //------------------------------------------------------------------------------------------
@@ -140,6 +149,10 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         sToCov(modelCovariance, modelNoise);
         sToCov(sensorCovariance, sensorNoise);
         sToCov(currentUncertainty, initialError);
+
+        // Make the transformation matrix for the prediction
+        // based off of the previous state. It's the identity matrix + some
+        Matrix.setIdentityM(transformationPrediction, 0);
     }
 
     //This is where to perform the actual math
@@ -159,6 +172,126 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         }
     }
 
+    public void maths(){
+        //Z = Current Uncertainty
+        //Z1 = Previous Uncertainty
+
+        //S = Current State
+        //P = Previous State
+
+        //Q = Model Noise
+        //R = Sensor Noise
+
+        //C = Control
+
+        //X = Predicted State
+        //M = Measured State
+
+        //E = Measured Uncertainty
+
+        //K = Kalman Gain
+
+        //I = Identity Matrix
+        //F = Temporary Matrix
+
+        //A = Prediction Transformation of Previous State
+        //B = Transformation dependent on form/structure of C
+        //D = Acceleration Transformation Matrix
+
+        //a = Acceleration vector
+
+        /*
+        Structure of Vector: [X Y vX vY]
+         */
+        /*
+        Model:
+        X = AP + BC
+        Z = A Z1 A^t + Q
+
+        Measurements:
+        M = AP + Da
+        E = A Z1 A^t + R
+
+        Filter:
+        K = Z(Z+E)^-1
+        S = X+K(M-X)
+
+        Uncertainty:
+        F = I-K
+        Z = FZF^t + KRK^t
+         */
+
+        //model
+        // X = AP + BC
+        float time = 0;
+        float[] predictedState = new float[4];
+        float[] controlState = new float[4];
+        // transformation prediction
+        // 1 0 t 0
+        // 0 1 0 t
+        // 0 0 1 0
+        // 0 0 0 1
+        transformationPrediction[2] = transformationPrediction[7] = time;
+        Matrix.multiplyMV(predictedState, 0, transformationPrediction, 0, currentState, 0);
+        addV(currentState, predictedState, controlState);
+
+        //Z = A Z1 A^t + Q
+        float[] transformationPredictionTranspose = new float[16];
+        Matrix.transposeM(transformationPredictionTranspose, 0, transformationPrediction, 0);
+        Matrix.multiplyMM(currentUncertainty, 0, transformationPrediction, 0, currentUncertainty, 0);
+        Matrix.multiplyMM(currentUncertainty, 0, currentUncertainty, 0, transformationPredictionTranspose, 0);
+        // refer to measurement error. Here, currentUncertainty represents the shard beginning of both now
+        float[] measuredUncertainty = new float[16];
+        add(measuredUncertainty, currentUncertainty, sensorCovariance);
+        //back to the model.
+        add(currentUncertainty, currentUncertainty, modelCovariance);
+
+
+        //measurements
+        // M = AP + Ba
+        float[] transformedAcceleration = new float[4];
+        float[] measuredState = new float[4];
+        transformedAcceleration[0] = (float)(.5 * time * time * acceleration.xAccel);
+        transformedAcceleration[1] = (float)(.5 * time * time * acceleration.yAccel);
+        transformedAcceleration[2] = (float)(time * acceleration.xAccel);
+        transformedAcceleration[3] = (float)(time * acceleration.yAccel);
+        // taking shared start of equation from model
+        addV(measuredState, predictedState, transformedAcceleration);
+
+        // E = A Z1 A^t + R
+        // refer to model error (merged in for optimization)
+
+
+        //filter
+        //K = Z(Z + E)^-1
+        float[] kalmanGain = new float[16];
+        add(kalmanGain, currentUncertainty, measuredUncertainty);
+        Matrix.invertM(kalmanGain, 0, kalmanGain, 0);
+        Matrix.multiplyMM(kalmanGain, 0, currentUncertainty, 0, kalmanGain, 0);
+
+        //S = X + K(M-X)
+        //because current state is actually the predicted and predicted state is just the shard start
+        sub(measuredState, measuredState, currentState);
+        Matrix.multiplyMM(measuredState, 0, kalmanGain, 0, measuredState, 0);
+        add(currentState, currentState, measuredState);
+
+
+        //Uncertainty
+        //F = I - K
+        float[] temp = new float[16];
+        sub(temp, matrixIdentity, kalmanGain);
+
+        //FZF^t + KRK^t
+        float[] transposes = new float[16];
+        Matrix.transposeM(transposes, 0, temp, 0);
+        Matrix.multiplyMM(temp, 0, temp, 0, currentUncertainty, 0);
+        Matrix.multiplyMM(temp, 0, temp, 0, transposes, 0);
+        Matrix.transposeM(transposes, 0, kalmanGain, 0);
+        Matrix.multiplyMM(kalmanGain, 0, kalmanGain, 0, sensorCovariance, 0);
+        Matrix.multiplyMM(kalmanGain, 0, kalmanGain, 0, transposes, 0);
+        add(currentUncertainty, temp, kalmanGain);
+    }
+
 //region matrix maths
     //m1+m2 = out
     private void add(float[] out, float[] m1, float[] m2){
@@ -170,6 +303,18 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
     private void sub(float[] out, float[] m1, float[] m2){
         for (int i = 0; i < 16; i++){
             out[i] = m1[i] - m2[i];
+        }
+    }
+    //v1+v2 = out
+    private void addV(float[] out, float[] v1, float[] v2){
+        for (int i = 0; i < 4; i++){
+            out[i] = v1[i] + v2[i];
+        }
+    }
+    //v1-v2 = out
+    private void subV(float[] out, float[] v1, float[] v2){
+        for (int i = 0; i < 4; i++){
+            out[i] = v1[i] - v2[i];
         }
     }
     //cov(s) = out
