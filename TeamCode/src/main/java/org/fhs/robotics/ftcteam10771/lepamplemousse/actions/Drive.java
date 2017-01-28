@@ -66,12 +66,26 @@ public class Drive {
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();
                     float vectorY = vectorR.getY() - robot.getVectorR().getY();
                     robotTheta = (float) Math.atan2(vectorY, vectorX);
+
+                    if(Math.abs(robotTheta) < Math.PI*2*(driveSettings.subData("positional").getFloat("rotational_tolerance")/360)){
+                        //at position
+                        Thread.currentThread().interrupt();
+                    }
+
                     robotVelocity = driveSettings.subData("positional").getFloat("speed");
                     float rotationalMagnitude = driveSettings.subData("positional").getFloat("rotation");
                     if (vectorR.getRad() > robot.getVectorR().getRad()){
-                        rotationalPower = rotationalMagnitude;
+                        if(Math.abs(vectorR.getRad()-robot.getVectorR().getRad())<(Math.PI/4)){
+                            rotationalPower = (float) (rotationalMagnitude * (Math.PI/4 - Math.abs(vectorR.getRad()-robot.getVectorR().getRad())));
+                        }else{
+                            rotationalPower = rotationalMagnitude;
+                        }
                     } else if (vectorR.getRad() < robot.getVectorR().getRad()){
-                        rotationalPower = -rotationalMagnitude;
+                        if(Math.abs(vectorR.getRad()-robot.getVectorR().getRad())<(Math.PI/4)){
+                            rotationalPower = (float) (-rotationalMagnitude * (Math.PI/4 - Math.abs(vectorR.getRad()-robot.getVectorR().getRad())));
+                        }else{
+                            rotationalPower = -rotationalMagnitude;
+                        }
                     } else {
                         rotationalPower = 0;
                     }

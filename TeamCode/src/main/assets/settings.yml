@@ -35,6 +35,8 @@ drivetrain:
   positional:
     speed: .67
     rotation: .25
+    rotational_tolerance: 3 #degrees
+    translational_tolerance: 10 #mm
   motor:
     front_left:
       map_name: drive_front_left
