@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.UltrasonicRange;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.UltrasonicRange2;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 
 /**
@@ -13,24 +14,29 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.Ca
 @Autonomous(name="Blahe")
 public class CameraVisionConversionOpMode extends LinearOpMode {
 
-    UltrasonicRange range;
+    UltrasonicRange2 range;
     CameraVision cameraVision;
 
     @Override
     public void runOpMode() throws InterruptedException {
         cameraVision = new CameraVision();
-        range = new UltrasonicRange(hardwareMap.analogInput.get("range"), hardwareMap.digitalChannel.get("switch"));
+        range = new UltrasonicRange2(hardwareMap.analogInput.get("range"), hardwareMap.digitalChannel.get("switch"));
         Thread opThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (!Thread.interrupted()){
                     cameraVision.runImageTracking();
-                    range.streamDistance();
+                    //range.streamDistance();
                 }
             }
         });
         cameraVision.setUnitToRadians(false);
         waitForStart();
+
+        //demo of feature I added that does what I think you hoped for the stream to do.
+        //range.toggleStream(true);
+        //range.setAveragingTime(100);
+
         opThread.start();
         double totalBase = 0.0;
         double totalRatio = 0.0;
