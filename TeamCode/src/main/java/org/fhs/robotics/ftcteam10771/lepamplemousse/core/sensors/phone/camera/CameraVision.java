@@ -15,8 +15,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.R;
 
-import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision.Image.NULL;
-
 /**
  * Class that handles camera vision targeting
  * for the four images under the beacons
@@ -67,9 +65,7 @@ public class CameraVision {
         WHEELS("Wheels", 0, -182.9f, Coordinate.convertTo(3.0f, Coordinate.UNIT.FT_TO_UNIT)),
         TOOLS("Tools", 1, Coordinate.convertTo(-3.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f),
         LEGOS("Legos", 2, -182.9f, Coordinate.convertTo(-1.0f, Coordinate.UNIT.FT_TO_UNIT)),
-        GEARS("Gears", 3, Coordinate.convertTo(1.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f),
-        NULL("Null", 4, 0f, 0f);
-
+        GEARS("Gears", 3, Coordinate.convertTo(1.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f);
         private String name;
         private int index;
         private float xCoordinate;
@@ -107,7 +103,7 @@ public class CameraVision {
     boolean vuforiaRunning = true;
 
     //Variables that indicate the targeted image
-    private Image targetedImage = NULL;
+    private Image targetedImage = null;
 
     //Flag on whether to use Radians(Degrees if false)
     private boolean useRadians = true;
@@ -384,7 +380,7 @@ public class CameraVision {
         if (target != null){
             setTargetImage(target);
         }
-        else setTargetImage(NULL);
+        else setTargetImage(null);
     }
 
     /**
@@ -395,7 +391,7 @@ public class CameraVision {
         if (countTrackedImages()==1){
             setADetectedImageAsTarget();
         }
-        else setTargetImage(NULL);
+        else setTargetImage(null);
     }
 
     /**
@@ -426,6 +422,6 @@ public class CameraVision {
      * @return if it is null or not
      */
     private boolean imageNull(Image image){
-        return image==NULL || image==null;
+        return image==null;
     }
 }

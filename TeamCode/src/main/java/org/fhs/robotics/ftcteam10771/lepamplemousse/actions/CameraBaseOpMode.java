@@ -2,20 +2,17 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.UltrasonicRange;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.UltrasonicRange2;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 
 /**
- * Created by joelv on 1/20/2017.
+ * Created by joelv on 1/28/2017.
  */
-@Autonomous(name="Blahe")
-public class CameraVisionConversionOpMode extends LinearOpMode {
+@Autonomous(name="BaseFinder")
+public class CameraBaseOpMode extends LinearOpMode {
 
-    UltrasonicRange2 range;
     CameraVision cameraVision;
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -48,13 +45,9 @@ public class CameraVisionConversionOpMode extends LinearOpMode {
             }
             else cameraVision.setTargetImage(null);
             telemetry.addData("Image", cameraVision.getTargetedImage().getName());
-            telemetry.addData("Ultrasonic Distance", range.getDistance());
             telemetry.addData("Camera Vision Distance", cameraVision.getZ(cameraVision.getTargetedImage()));
-            if (cameraVision.getTargetedImage() != null && cameraVision.getZ(cameraVision.getTargetedImage())!=0f){
-                totalRatio += getCameraConverted();
+            if (cameraVision.imageInSight(cameraVision.getTargetedImage()) && cameraVision.getZ(cameraVision.getTargetedImage())!=0f){
                 totalBase  += getBase();
-                telemetry.addData("U:C Distance Ratio", getCameraConverted());
-                telemetry.addData("Average Ratio", totalRatio / iterations);
                 telemetry.addData("Base", getBase());
                 telemetry.addData("Average Base", totalBase / iterations);
             }
@@ -62,10 +55,6 @@ public class CameraVisionConversionOpMode extends LinearOpMode {
             telemetry.update();
         }
         opThread.interrupt();
-    }
-
-    public double getCameraConverted(){
-        return range.getDistance() / cameraVision.getZ(cameraVision.getTargetedImage());
     }
 
     public double getBase(){
