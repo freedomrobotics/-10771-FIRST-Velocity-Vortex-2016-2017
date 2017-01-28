@@ -26,7 +26,7 @@ encoder:
 
 # The drivetrain's settings.
 drivetrain:
-  motor_scale: .778
+  motor_scale: .85
   gear_ratio: 1
   motion:
     max_velocity: 100 # mm/s
@@ -44,7 +44,7 @@ drivetrain:
       reversed: false
     back_right:
       map_name: drive_back_left
-      reversed: false
+      reversed: true
     back_left:
       map_name: drive_back_right
       reversed: false
@@ -60,15 +60,15 @@ intake:
 # Front Bumper-thing Settings
 bumper:
   enabled: true
-  max_ang_vel: 20.0
+  max_ang_vel: 80.0
   full_rotate: 180.0  #180 degree servo
-  max_rotate: 60.0    #programmed limit
-  preset: 15.0
+  max_rotate: 65.0    #programmed limit
+  preset: 45.0
   start_pos: 0.0
   left_servo:
     map_name: bumper_left
     reversed: true
-    offset: 15.75
+    offset: 18.0
   right_servo:
     map_name: bumper_right
     reversed: false

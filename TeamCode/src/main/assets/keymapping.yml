@@ -6,11 +6,11 @@
 # drive_l_rotate        = the rotation for the drivetrain (ccw) - analog(0, 1)    - float
 # drive_r_rotate        = the rotation for the drivetrain (cw)  - analog(0, 1)    - float
 # intake_speed          = the speed control of the intake mech  - analog(-1, 1)   - float
-# intake_in             = toggle for inwards intake             - digital         - boolean
-# intake_out            = toggle for outwards in(out)take       - digital         - boolean
+# intake_toggle         = toggle for intake                     - digital         - boolean
 # flywheel_on           = toggle the flywheel on                - digital         - boolean
 # flywheel_speed        = adjust the flywheel speed             - analog(-1, 1)   - float
 # bumper_angle          = adjust the bumper angle               - analog(-1, 1)   - float
+# bumper_preset         = adjust the bumper angle               - analog(-1, 1)   - float
 gamepad1:
   left_stick_x:
     function: drive_x
@@ -24,7 +24,7 @@ gamepad1:
 
   right_stick_x:
     function: drive_rotate
-    inverted: false
+    inverted: true  #because counterclockwise is a positive rotation and the stick to the left is negative
     digital: false
 
   right_stick_y:
@@ -126,7 +126,7 @@ gamepad2:
     digital: false
 
   left_stick_y:
-    function: null
+    function: bumper_angle
     inverted: false
     digital: false
 
@@ -136,8 +136,8 @@ gamepad2:
     digital: false
 
   right_stick_y:
-    function: null
-    inverted: false
+    function: intake_speed
+    inverted: true
     digital: false
 
   dpad_up:
@@ -161,7 +161,7 @@ gamepad2:
     digital: true
 
   a_button:
-    function: null
+    function: intake_toggle
     inverted: false
     digital: true
 
@@ -201,7 +201,7 @@ gamepad2:
     digital: true
 
   right_bumper:
-    function: null
+    function: bumper_preset
     inverted: false
     digital: true
 

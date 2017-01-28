@@ -40,12 +40,12 @@ dc_motors:
 # Servos
 servos:
   servo1:
-    enabled: false
+    enabled: true
     map_name: bumper_left
     alias:
       - bumperLeft
   servo2:
-    enabled: false
+    enabled: true
     map_name: bumper_right
     alias:
       - bumperRight

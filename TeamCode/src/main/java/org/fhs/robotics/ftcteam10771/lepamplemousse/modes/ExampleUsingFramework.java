@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.VectorDrive;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
@@ -25,7 +25,7 @@ public class ExampleUsingFramework extends OpMode {
     private Config rawSettings;
     private Config.ParsedData settings;
     private Components components;
-    private VectorDrive drive;
+    private Drive drive;
     private Config.ParsedData otherComponents;
 
     @Override

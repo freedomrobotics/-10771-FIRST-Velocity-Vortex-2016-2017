@@ -3,7 +3,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.VectorDrive;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
@@ -13,7 +13,6 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * Created by Adam Li on 1/12/2017.
@@ -26,7 +25,7 @@ public class BasicNotBasicDrive extends OpMode {
     private Config rawSettings;
     private Config.ParsedData settings;
     private Components components;
-    private VectorDrive drive;
+    private Drive drive;
     private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
 
     /**
@@ -72,14 +71,14 @@ public class BasicNotBasicDrive extends OpMode {
 
         Aliases.motorMap.get(drivetrainMotors.subData("front_right").getString("map_name"));
 
-        drive = new VectorDrive(driveVector, new Robot(),
+        drive = new Drive(driveVector, new Robot(),
                 Aliases.motorMap.get(drivetrainMotors.subData("front_right").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
                 settings, telemetry);
 
-        intake = hardwareMap.dcMotor.get()
+        //intake = hardwareMap.dcMotor.get()
 
         this.lastTime = System.currentTimeMillis();
     }
@@ -102,7 +101,10 @@ public class BasicNotBasicDrive extends OpMode {
         telemetry.addData("drive_x", driveVector.getX());
         telemetry.addData("drive_y", driveVector.getY());
         telemetry.addData("drive_rot", driveVector.getRawR());
-
+        // the beauty of this is that the driveVector references a vectorR object
+        // with the controllor values, and the drive class's input vectorR is a
+        // reference to the same object, so updates out here apply to the vectorR
+        // in the drive thread
     }
 
     @Override
