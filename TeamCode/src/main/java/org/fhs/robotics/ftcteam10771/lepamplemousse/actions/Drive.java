@@ -30,6 +30,9 @@ public class Drive {
     float motorScale;
     boolean driveThreadActive = false;
 
+    int pastPosition;
+    int pastPositionTime;
+
     Runnable driveRunnable = new Runnable() {
         @Override
         public void run() {
@@ -109,6 +112,15 @@ public class Drive {
                 flMotor.setPower(Range.scale(fl, -1, 1, -motorScale, motorScale));
                 blMotor.setPower(Range.scale(bl, -1, 1, -motorScale, motorScale));
                 brMotor.setPower(Range.scale(br, -1, 1, -motorScale, motorScale));
+
+                int currentVelocity = (blMotor.getCurrentPosition()-pastPosition)*(/*time**/pastPositionTime);
+                pastPositionTime =
+                if(){
+                    velocityFeedback.setX((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
+                    velocityFeedback.setY((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
+                }
+
+                pastPosition = blMotor.getCurrentPosition();
 
                 /* spams the console
                 telemetry.addData("Speed-FR", fr);
@@ -197,5 +209,11 @@ public class Drive {
      */
     public void setRelative(boolean isRelative){
         relativeDrive = isRelative;
+    }
+
+    VectorR velocityFeedback = new VectorR();
+
+    VectorR returnVelocityFeedback(){
+        return velocityFeedback;
     }
 }
