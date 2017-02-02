@@ -8,7 +8,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.Ca
 /**
  * Created by joelv on 1/28/2017.
  */
-@Autonomous(name="BaseFinder")
+@Autonomous(name="CamCalc")
 public class CameraBaseOpMode extends LinearOpMode {
 
     CameraVision cameraVision;
@@ -25,11 +25,11 @@ public class CameraBaseOpMode extends LinearOpMode {
         int iterations = 0;
         while (opModeIsActive()){
             if (cameraVision.countTrackedImages()==1){
-                cameraVision.setADetectedImageAsTarget();
+                cameraVision.setHighestIndexedImageAsTarget();
             }
             else cameraVision.setTargetImage(null);
-            if (cameraVision.imageInSight(cameraVision.getTargetedImage())){
-                telemetry.addData("Image", cameraVision.getTargetedImage().getName());
+            if (cameraVision.imageInSight()){
+                telemetry.addData("Image", cameraVision.target().getName());
                 telemetry.addData("Overall Distance", hypotenuse());
                 telemetry.addData("Overall Angle", angle());
             }
@@ -42,15 +42,15 @@ public class CameraBaseOpMode extends LinearOpMode {
     }
 
     public double hypotenuse(){
-        double x = cameraVision.getX(cameraVision.getTargetedImage());
-        double z = cameraVision.getZ(cameraVision.getTargetedImage());
+        double x = cameraVision.getX();
+        double z = cameraVision.getZ();
         return Math.sqrt((x*x)+(z*z));
     }
 
     public double angle(){
-        double wallAngle = -cameraVision.getAngleToTurn(cameraVision.getTargetedImage());
-        double z = -cameraVision.getZ(cameraVision.getTargetedImage());
-        double x = -cameraVision.getX(cameraVision.getTargetedImage());
+        double wallAngle = -cameraVision.getAngleToTurn();
+        double z = -cameraVision.getZ();
+        double x = -cameraVision.getX();
         double imageAngle = Math.atan2(x, z);
         return 90.0 + wallAngle + imageAngle;
     }

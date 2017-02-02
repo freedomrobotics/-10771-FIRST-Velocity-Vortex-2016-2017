@@ -1,13 +1,12 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera;
 
-import android.provider.ContactsContract;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -108,6 +107,9 @@ public class CameraVision {
     //Flag on whether to use Radians(Degrees if false)
     private boolean useRadians = true;
 
+    //Flag on whether or not to auto target image
+    private boolean autoTarget = true;
+
     //Null vector
     private final VectorF none = new VectorF(0f, 0f, 0f);
 
@@ -206,6 +208,9 @@ public class CameraVision {
                     imageData[i].angleToTurn = 0f;
                 }
             }
+            if (autoTarget){
+                setSingleImageFoundAsTarget();
+            }
         }
     }
 
@@ -269,7 +274,7 @@ public class CameraVision {
      * @param image enum id
      * @return the image's translation
      */
-    public VectorF getTranslation(Image image){
+    private VectorF getTranslation(Image image){
         if (imageInSight(image)){
             return imageData[image.index].translation;
         }
@@ -371,7 +376,7 @@ public class CameraVision {
      * Sets the highest indexed detected image as a target by assigning its index
      * and its string id to the public variables
      */
-    public void setADetectedImageAsTarget(){
+    public void setHighestIndexedImageAsTarget(){
         Image target = null;
         target = (imageInSight(Image.WHEELS)) ? Image.WHEELS : target;
         target = (imageInSight(Image.TOOLS)) ? Image.TOOLS : target;
@@ -389,7 +394,7 @@ public class CameraVision {
      */
     public void setSingleImageFoundAsTarget(){
         if (countTrackedImages()==1){
-            setADetectedImageAsTarget();
+            setHighestIndexedImageAsTarget();
         }
         else setTargetImage(null);
     }
@@ -398,7 +403,7 @@ public class CameraVision {
      * Getter for the targeted image enumeration
      * @return
      */
-    public Image getTargetedImage(){
+    public Image target(){
         return targetedImage;
     }
 
@@ -423,5 +428,69 @@ public class CameraVision {
      */
     private boolean imageNull(Image image){
         return image==null;
+    }
+
+    /**
+     * Set the image to auto target or not
+     * @param state
+     */
+    public void setAutoTarget(boolean state){
+        autoTarget = state;
+    }
+
+    /**
+     * State of auto target use
+     * @return auto target state
+     */
+    public boolean isAutoTarget(){
+        return autoTarget;
+    }
+
+    /**
+     * Get target image X translation
+     * @return the target's X translation
+     */
+    public double getX(){
+        return getX(targetedImage);
+    }
+
+    /**
+     * Get target image Y translation
+     * @return the target's Y translation
+     */
+    public double getY(){
+        return getY(targetedImage);
+    }
+
+    /**
+     * Get target image Z translation
+     * @return the target's Z translation
+     */
+    public double getZ(){
+        return getZ(targetedImage);
+    }
+
+    /**
+     * Get target image orientation
+     * @return the target's orientation
+     */
+    public double getAngleToTurn(){
+        return getAngleToTurn(targetedImage);
+    }
+
+    /**
+     * Get target image matrix
+     * @return the target's matrix
+     */
+    public OpenGLMatrix matrix(){
+        return getMatrix(targetedImage);
+    }
+
+    /**
+     * Is target image on sight?
+     * @return state of target image
+     */
+    public boolean imageInSight(){
+        return imageInSight(targetedImage);
     }
 }
