@@ -44,6 +44,7 @@ intake_divisor: 5000
 
 # The drivetrain's settings.
 drivetrain:
+  motor_angle: 60.0
   motor_max_power: 1
   gear_ratio: 2.5
   motion:

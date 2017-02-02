@@ -247,12 +247,35 @@ public class TestDrive3 extends LinearOpMode{
             bumperLeft.setPosition(bumperPos + bumpers.subData("left_servo").getFloat("offset") / bumperRange);
             bumperRight.setPosition(bumperPos + bumpers.subData("right_servo").getFloat("offset") / bumperRange);
 
-
+            telemetry.addData("X inches", getX());
+            telemetry.addData("Y inches", getY());
             telemetry.update();
 
             //idle();
 
         }
         Aliases.clearAll();
+    }
+
+    private float getX(){
+        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("encoder_pulses");
+        float motorAngle = settings.subData("drivetrain").getFloat("motor_angle");
+        float A = -motorFR.getCurrentPosition()*inch_per_pulse;
+        float B = -motorFL.getCurrentPosition()*inch_per_pulse;
+        float C = -motorBL.getCurrentPosition()*inch_per_pulse;
+        float D = -motorFR.getCurrentPosition()*inch_per_pulse;
+        return (-1f*A*(float)Math.cos(motorAngle)) + (B*(float)Math.cos(motorAngle))
+                + (-1f*C*(float)Math.cos(motorAngle)) + (D*(float)Math.cos(motorAngle));
+    }
+
+    private float getY(){
+        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("encoder_pulses");
+        float motorAngle = settings.subData("drivetrain").getFloat("motor_angle");
+        float A = -motorFR.getCurrentPosition()*inch_per_pulse;
+        float B = -motorFL.getCurrentPosition()*inch_per_pulse;
+        float C = -motorBL.getCurrentPosition()*inch_per_pulse;
+        float D = -motorFR.getCurrentPosition()*inch_per_pulse;
+        return (A*(float)Math.sin(motorAngle)) + (B*(float)Math.sin(motorAngle))
+                + (C*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle));
     }
 }
