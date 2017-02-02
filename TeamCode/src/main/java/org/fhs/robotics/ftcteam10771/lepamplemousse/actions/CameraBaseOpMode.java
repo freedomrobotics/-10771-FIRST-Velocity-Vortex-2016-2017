@@ -26,31 +26,32 @@ public class CameraBaseOpMode extends LinearOpMode {
         while (opModeIsActive()){
             if (cameraVision.countTrackedImages()==1){
                 cameraVision.setADetectedImageAsTarget();
-                iterations++;
             }
             else cameraVision.setTargetImage(null);
             if (cameraVision.imageInSight(cameraVision.getTargetedImage())){
-                totalBase  += getBase();
-                telemetry.addData("Base", getBase());
-                telemetry.addData("Average Base", totalBase / iterations);
                 telemetry.addData("Image", cameraVision.getTargetedImage().getName());
-                telemetry.addData("Camera Vision Distance", cameraVision.getZ(cameraVision.getTargetedImage()));
-            
+                telemetry.addData("Overall Distance", hypotenuse());
+                telemetry.addData("Overall Angle", angle());
             }
             else{
-                totalBase  += getBase();
-                telemetry.addData("Base", "null");
-                telemetry.addData("Average Base", "null");
-                telemetry.addData("Image", "null");
-                telemetry.addData("Camera Vision Distance", "null");
+                telemetry.addData("Image", "NULL");
             }
             telemetry.update();
         }
         cameraVision.cameraThread.interrupt();
     }
 
-    public double getBase(){
-        return cameraVision.getZ(cameraVision.getTargetedImage())!=0f ? Math.pow(cameraVision.getX(cameraVision.getTargetedImage()), 1.0 / (cameraVision.getZ(cameraVision.getTargetedImage()))) :
-                0.0;
+    public double hypotenuse(){
+        double x = cameraVision.getX(cameraVision.getTargetedImage());
+        double z = cameraVision.getZ(cameraVision.getTargetedImage());
+        return Math.sqrt((x*x)+(z*z));
+    }
+
+    public double angle(){
+        double wallAngle = -cameraVision.getAngleToTurn(cameraVision.getTargetedImage());
+        double z = -cameraVision.getZ(cameraVision.getTargetedImage());
+        double x = -cameraVision.getX(cameraVision.getTargetedImage());
+        double imageAngle = Math.atan2(x, z);
+        return 90.0 + wallAngle + imageAngle;
     }
 }
