@@ -114,12 +114,14 @@ public class Drive {
                 brMotor.setPower(Range.scale(br, -1, 1, -motorScale, motorScale));
 
                 int currentVelocity = (blMotor.getCurrentPosition()-pastPosition)*(/*time**/pastPositionTime);
-                pastPositionTime =
+                //TODO: Continue work here(uncomment first)
+                //pastPositionTime =
+                /*
                 if(){
                     velocityFeedback.setX((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
                     velocityFeedback.setY((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
                 }
-
+                */
                 pastPosition = blMotor.getCurrentPosition();
 
                 /* spams the console
@@ -176,7 +178,7 @@ public class Drive {
     public void startVelocity(){
         vectorDriveActive = true;
         driveThreadActive = true;
-        driveThread.start();
+        if (!driveThread.isAlive())driveThread.start();
     }
 
     /**
@@ -187,7 +189,7 @@ public class Drive {
         // position can be gained from getVectorR and the vectorR provided is the aim position.
         vectorDriveActive = false;
         driveThreadActive = true;
-        driveThread.start();
+        if (!driveThread.isAlive())driveThread.start();
     }
 
     /**
@@ -215,5 +217,23 @@ public class Drive {
 
     VectorR returnVelocityFeedback(){
         return velocityFeedback;
+    }
+
+    public void setVelocity(float radius, float theta){
+        this.vectorR.setRadius(radius);
+        this.vectorR.setTheta(theta);
+        startVelocity();
+    }
+
+    public void setPosition(float x, float y){
+        this.vectorR.setX(x);
+        this.vectorR.setY(y);
+        startPosition();
+    }
+
+    public void setRoation(float rotation){
+        this.vectorR.setRad(rotation);
+        if (vectorDriveActive) startVelocity();
+        else startPosition();
     }
 }
