@@ -1,13 +1,12 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera;
 
-import android.provider.ContactsContract;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -65,9 +64,7 @@ public class CameraVision {
         WHEELS("Wheels", 0, -182.9f, Coordinate.convertTo(3.0f, Coordinate.UNIT.FT_TO_UNIT)),
         TOOLS("Tools", 1, Coordinate.convertTo(-3.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f),
         LEGOS("Legos", 2, -182.9f, Coordinate.convertTo(-1.0f, Coordinate.UNIT.FT_TO_UNIT)),
-        GEARS("Gears", 3, Coordinate.convertTo(1.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f),
-        NULL("Null", 4, 0f, 0f);
-
+        GEARS("Gears", 3, Coordinate.convertTo(1.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f);
         private String name;
         private int index;
         private float xCoordinate;
@@ -105,10 +102,16 @@ public class CameraVision {
     boolean vuforiaRunning = true;
 
     //Variables that indicate the targeted image
-    private Image targetedImage = Image.NULL;
+    private Image targetedImage = null;
 
     //Flag on whether to use Radians(Degrees if false)
     private boolean useRadians = true;
+
+    //Flag on whether or not to auto target image
+    private boolean autoTarget = true;
+
+    //Null vector
+    private final VectorF none = new VectorF(0f, 0f, 0f);
 
     //Paramters for Vuforia initializtion to be used
     private VuforiaLocalizer.Parameters params = null;
@@ -145,7 +148,7 @@ public class CameraVision {
         String imageName;
         OpenGLMatrix matrix;
         VectorF translation;
-        float angleToTurn;
+        double angleToTurn;
     }
 
     //The thread loop code
@@ -195,13 +198,18 @@ public class CameraVision {
                 imageData[i].matrix = ((VuforiaTrackableDefaultListener) beacons.get(i).getListener()).getPose();
                 if (imageData[i].matrix != null) {
                     imageData[i].translation = imageData[i].matrix.getTranslation();
-                    imageData[i].angleToTurn = useRadians ? (imageData[i].matrix.getData()[8] * (float)Math.PI / 2) :
-                            (imageData[i].matrix.getData()[8] * 90.0f);
+                    imageData[i].angleToTurn = Math.asin((double)imageData[i].matrix.getData()[8]);
+                    if (!useRadians){
+                        imageData[i].angleToTurn = Math.toDegrees(imageData[i].angleToTurn);
+                    }
                 }
                 else {
                     imageData[i].translation = new VectorF(0f, 0f, 0f);
                     imageData[i].angleToTurn = 0f;
                 }
+            }
+            if (autoTarget){
+                setSingleImageFoundAsTarget();
             }
         }
     }
@@ -266,8 +274,11 @@ public class CameraVision {
      * @param image enum id
      * @return the image's translation
      */
-    public VectorF getTranslation(Image image){
-        return imageData[image.index].translation;
+    private VectorF getTranslation(Image image){
+        if (imageInSight(image)){
+            return imageData[image.index].translation;
+        }
+        return none;
     }
 
     /**
@@ -306,8 +317,11 @@ public class CameraVision {
      * @param image enum id
      * @return the image's degrees to turn
      */
-    public float getAngleToTurn(Image image){
-        return imageData[image.index].angleToTurn;
+    public double getAngleToTurn(Image image){
+        if (imageInSight(image)){
+            return imageData[image.index].angleToTurn;
+        }
+        else return 0.0;
     }
 
     /**
@@ -320,18 +334,21 @@ public class CameraVision {
     }
 
     /**
-     * Determines whether the name exists in a trackable image
+     * Determines whether the name exists as a trackable image
      * @param image enum id
      * @return the state of image name's existence
      */
     private boolean imageExists(Image image){
-        int match = -1;
-        for (int i=0; i<beacons.size(); i++){
-            if (imageData[i].imageName.equals(image.name)){
-                match = i;
+        if (!imageNull(image)){
+            int match = -1;
+            for (int i=0; i<beacons.size(); i++){
+                if (imageData[i].imageName.equals(image.name)){
+                    match = i;
+                }
             }
+            return (!(match<0));
         }
-        return (!(match<0));
+        else return false;
     }
 
     /**
@@ -359,7 +376,7 @@ public class CameraVision {
      * Sets the highest indexed detected image as a target by assigning its index
      * and its string id to the public variables
      */
-    public void setADetectedImageAsTarget(){
+    public void setHighestIndexedImageAsTarget(){
         Image target = null;
         target = (imageInSight(Image.WHEELS)) ? Image.WHEELS : target;
         target = (imageInSight(Image.TOOLS)) ? Image.TOOLS : target;
@@ -368,7 +385,7 @@ public class CameraVision {
         if (target != null){
             setTargetImage(target);
         }
-        else setTargetImage(Image.NULL);
+        else setTargetImage(null);
     }
 
     /**
@@ -377,15 +394,16 @@ public class CameraVision {
      */
     public void setSingleImageFoundAsTarget(){
         if (countTrackedImages()==1){
-            setADetectedImageAsTarget();
+            setHighestIndexedImageAsTarget();
         }
+        else setTargetImage(null);
     }
 
     /**
      * Getter for the targeted image enumeration
      * @return
      */
-    public Image getTargetedImage(){
+    public Image target(){
         return targetedImage;
     }
 
@@ -401,5 +419,78 @@ public class CameraVision {
             } else linearOpMode.telemetry.addData(imageData[i].imageName, "null");
         }
         //toggleVuforia(false) todo: see if this is necessary or not
+    }
+
+    /**
+     * Whether or not the image enumeration is null
+     * @param image the target image
+     * @return if it is null or not
+     */
+    private boolean imageNull(Image image){
+        return image==null;
+    }
+
+    /**
+     * Set the image to auto target or not
+     * @param state
+     */
+    public void setAutoTarget(boolean state){
+        autoTarget = state;
+    }
+
+    /**
+     * State of auto target use
+     * @return auto target state
+     */
+    public boolean isAutoTarget(){
+        return autoTarget;
+    }
+
+    /**
+     * Get target image X translation
+     * @return the target's X translation
+     */
+    public double getX(){
+        return getX(targetedImage);
+    }
+
+    /**
+     * Get target image Y translation
+     * @return the target's Y translation
+     */
+    public double getY(){
+        return getY(targetedImage);
+    }
+
+    /**
+     * Get target image Z translation
+     * @return the target's Z translation
+     */
+    public double getZ(){
+        return getZ(targetedImage);
+    }
+
+    /**
+     * Get target image orientation
+     * @return the target's orientation
+     */
+    public double getAngleToTurn(){
+        return getAngleToTurn(targetedImage);
+    }
+
+    /**
+     * Get target image matrix
+     * @return the target's matrix
+     */
+    public OpenGLMatrix matrix(){
+        return getMatrix(targetedImage);
+    }
+
+    /**
+     * Is target image on sight?
+     * @return state of target image
+     */
+    public boolean imageInSight(){
+        return imageInSight(targetedImage);
     }
 }

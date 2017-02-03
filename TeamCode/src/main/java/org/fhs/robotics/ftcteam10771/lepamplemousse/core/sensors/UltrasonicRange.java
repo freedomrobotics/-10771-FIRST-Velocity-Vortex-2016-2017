@@ -37,6 +37,7 @@ public class UltrasonicRange {
         toggler = digitalChannel;
         //todo test to see if it works
         toggler.setMode(DigitalChannelController.Mode.OUTPUT);
+        toggler.setState(rangeStreamEnabled);
     }
 
     //The variable to be used during looping thread
@@ -59,11 +60,17 @@ public class UltrasonicRange {
     public final Thread rangeThread = new Thread(rangeRunnable);
 
     /**
-     * Enable or disable the range sensor
-     * @param state true for on or false for off
+     * Enable the range sensor
      */
-    public void enable(boolean state) {
-        toggler.setState(state);
+    public void enable() {
+        toggler.setState(true);
+    }
+
+    /**
+     * Disable the range sensor
+     */
+    public void disable() {
+        toggler.setState(false);
     }
 
     /**
@@ -73,10 +80,15 @@ public class UltrasonicRange {
      */
     public double distance() {
         if (rangeSensor != null && toggler != null) {
-            if (toggler.getState()) {
-                return rangeSensor.getVoltage() / scaleFactor;
+            if (!toggler.getState()){
+                toggler.setState(true);
+                //try{Thread.sleep(8);}
+                //catch(InterruptedException e){ e.printStackTrace();}
+                double d = rangeSensor.getVoltage() / scaleFactor;
+                toggler.setState(false);
+                return d;
             }
-            return 404;
+            return rangeSensor.getVoltage();
         }
         return 0;
     }
@@ -85,7 +97,7 @@ public class UltrasonicRange {
      * Is range sensor on?
      * @return the state of the range sensor
      */
-    public boolean ultrasonicState(){
+    public boolean state(){
         return toggler.getState();
     }
 
@@ -111,6 +123,7 @@ public class UltrasonicRange {
      */
     public void toggleStream(boolean state){
         rangeStreamEnabled = state;
+        toggler.setState(rangeStreamEnabled);
     }
 
     /**
