@@ -1,4 +1,4 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
