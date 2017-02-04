@@ -80,6 +80,8 @@ public class CameraDriveOp extends LinearOpMode{
 
         drive.setRelative(true);
         drive.startVelocity();
-
+        cameraDrive.rotate();
+        cameraDrive.center();
+        cameraDrive.approach();
     }
 }
