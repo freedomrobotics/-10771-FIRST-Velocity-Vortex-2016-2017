@@ -220,8 +220,7 @@ public class Drive {
     }
 
     public void setVelocity(float radius, float theta){
-        this.vectorR.setRadius(radius);
-        this.vectorR.setTheta(theta);
+        this.vectorR.setPolar(radius, theta);
         startVelocity();
     }
 
