@@ -41,6 +41,8 @@ public class TestDrive3 extends LinearOpMode{
 
     private static final String TAG = "TestDrive3Debug";
     private float bumperPos;
+    private float initialX = 0.0f;
+    private float initialY = 0.0f;
 
     private long lastTime;
 
@@ -258,24 +260,26 @@ public class TestDrive3 extends LinearOpMode{
     }
 
     private float getX(){
-        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("encoder_pulses");
+        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
         double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
         float A = -motorFR.getCurrentPosition()*inch_per_pulse;
         float B = -motorFL.getCurrentPosition()*inch_per_pulse;
         float C = -motorBL.getCurrentPosition()*inch_per_pulse;
         float D = -motorFR.getCurrentPosition()*inch_per_pulse;
-        return (A*(float)Math.cos(Math.PI-motorAngle)) + (B*(float)Math.cos(motorAngle))
-                + (C*(float)Math.cos(Math.PI-motorAngle)) + (D*(float)Math.cos(motorAngle));
+        float AC = ((A*(float)Math.cos(Math.PI-motorAngle)) + (C*(float)Math.cos(Math.PI-motorAngle)))/2.0f;
+        float BD = ((B*(float)Math.cos(motorAngle)) + (D*(float)Math.cos(motorAngle)))/2.0f;
+        return  ((AC + BD) / 2.0f) + initialX;
     }
 
     private float getY(){
-        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("encoder_pulses");
+        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
         double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
         float A = -motorFR.getCurrentPosition()*inch_per_pulse;
         float B = -motorFL.getCurrentPosition()*inch_per_pulse;
         float C = -motorBL.getCurrentPosition()*inch_per_pulse;
         float D = -motorFR.getCurrentPosition()*inch_per_pulse;
-        return (A*(float)Math.sin(Math.PI-motorAngle)) + (B*(float)Math.sin(motorAngle))
-                + (C*(float)Math.sin(Math.PI-motorAngle)) + (D*(float)Math.sin(motorAngle));
+        float AC = ((A*(float)Math.sin(Math.PI-motorAngle)) + (C*(float)Math.sin(Math.PI-motorAngle)))/2.0f;
+        float BD = ((B*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle)))/2.0f;
+        return  ((AC + BD) / 2.0f) + initialY;
     }
 }
