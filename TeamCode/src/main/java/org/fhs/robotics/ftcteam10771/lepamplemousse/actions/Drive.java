@@ -113,11 +113,11 @@ public class Drive {
                 blMotor.setPower(Range.scale(bl, -1, 1, -motorScale, motorScale));
                 brMotor.setPower(Range.scale(br, -1, 1, -motorScale, motorScale));
 
-                int currentVelocity = (blMotor.getCurrentPosition()-pastPosition)*(/*time**/pastPositionTime);
+                double currentVelocity = (blMotor.getCurrentPosition()-pastPosition)*(/*time**/pastPositionTime);
                 //TODO: Continue work here(uncomment first)
                 //pastPositionTime =
                 /*
-                if(){
+                if(outputting){
                     velocityFeedback.setX((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
                     velocityFeedback.setY((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
                 }
