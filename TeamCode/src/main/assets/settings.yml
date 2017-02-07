@@ -116,6 +116,10 @@ camera_settings:
   distance_to_stop: 101.6 #mm
   angle_margin: 5.0 #degrees
 
+positional_drive:
+  x_margin: 4.0 #cm
+  y_margin: 4.0 #cm
+
 autonomous:
   red_alliance:
     starting_pos:

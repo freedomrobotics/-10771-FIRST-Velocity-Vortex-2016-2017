@@ -4,22 +4,46 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Entity;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 
+import java.util.List;
+
 /**
  * Drive class to a position
  * Created by joelv on 2/5/2017.
  */
 public class PositionalDrive {
 
-    Drive drive;
-    float initialX = 0.0f;
-    float initialY = 0.0f;
-    Config.ParsedData settings;
+    private String settingID = "positional_drive";
+    private String team = "red";
+    private String position = "general";
+    private Drive drive;
+    private float initialX = 0.0f;
+    private float initialY = 0.0f;
+    private Config.ParsedData settings;
+    private Config.ParsedData fieldmap;
+    private Config.ParsedData script;
+    private float xMargin = 5.0f;
+    private float yMargin = 5.0f;
+    int scriptLength;
+    List<String> commands;
     //add imu later
 
-    public PositionalDrive(Drive drive, Config.ParsedData settings){
+    public PositionalDrive(Drive drive, Config.ParsedData settings, Config.ParsedData fieldmap, Config.ParsedData script){
         this.drive = drive;
         this.settings = settings;
-        //todo get initial x and initial y in the settings config file
+        this.fieldmap = fieldmap;
+        this.script = script;
+        team = settings.getString("alliance");
+        String position = settings.getString("position");
+        if (((!position.equals("inside"))) && (!position.equals("outside"))){
+            position = "inside";
+        }
+        drive.robot.position.setX(fieldmap.subData(team).subData(position).getFloat("x"));
+        drive.robot.position.setY(fieldmap.subData(team).subData(position).getFloat("y"));
+        //todo get initial x and initial y in the settings config file(completed?)
+        //todo learn how to convert yml list to a list of strings
+        commands = (List<String>) script.subData("script").getObject(team);
+        xMargin = settings.subData(settingID).getFloat("x_margin");
+        yMargin = settings.subData(settingID).getFloat("y_margin");
     }
 
     /*
@@ -62,5 +86,27 @@ public class PositionalDrive {
         float AC = ((A*(float)Math.sin(Math.PI-motorAngle)) + (C*(float)Math.sin(Math.PI-motorAngle)))/2.0f;
         float BD = ((B*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle)))/2.0f;
         return  ((AC + BD) / 2.0f) + initialY;
+    }
+
+    public void setCoordinate(String location){
+        drive.setPosition(fieldmap.subData(team).subData(location).getFloat("x"), fieldmap.subData(team).subData(location).getFloat("y"));
+    }
+
+    private boolean atLocation(){
+        float robotX = drive.robot.position.getX();
+        float robotY = drive.robot.position.getY();
+        float setX = drive.vectorR.getX();
+        float setY = drive.vectorR.getY();
+        return ((xMargin>Math.abs(robotX-setX))&&(yMargin>Math.abs(robotY-setY)));
+    }
+
+    public void startScript(){
+        for (String command : commands){
+            setCoordinate(command);
+            //TODO: PUT SOMETHING THAT PREVENTS THE FOR LOOP FROM HAPPENING IN ONE INSTANCE, LIKE A WHILE LOOP OR SOMETHING
+            while (!atLocation()){
+                drive.startPosition();
+            }
+        }
     }
 }

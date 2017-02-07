@@ -10,12 +10,12 @@ values:
 
 coordinates:
   red:
-    inside_initial:
-      x: 0.0
-      y: 0.0
-    outside_initial:
-      x: 0.0
-      y: 0.0
+    inside:
+      x: -42.00
+      y: -145.00
+    outside:
+      x: 42.00
+      y: -145.00
     wheels:
       x: -150.00 #don't want to hit the wall going there
       y: 91.44
@@ -39,12 +39,12 @@ coordinates:
         x: 0.0
         y: 0.0
   blue:
-    inside_initial:
-      x: 0.0
-      y: 0.0
-    outside_initial:
-      x: 0.0
-      y: 0.0
+    inside:
+      x: 145.00
+      y: -34.00
+    outside:
+      x: 145.00
+      y: 34.00
     gears:
       x: 30.48
       y: 150.00
