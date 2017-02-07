@@ -1,0 +1,69 @@
+# All units in centimeters
+
+values:
+  size_x: 365.76
+  size_y: 365.76
+  map_type: SQUARE
+  rotation: 0.0
+  orgin_x: 182.88
+  origin_y: 182.88
+
+coordinates:
+  red:
+    inside_initial:
+      x: 0.0
+      y: 0.0
+    outside_initial:
+      x: 0.0
+      y: 0.0
+    wheels:
+      x: -150.00 #don't want to hit the wall going there
+      y: 91.44
+    legos:
+      x: -150.00
+      y: -30.48
+    corner:
+      x: -132.00
+      y: -132.00
+    center:
+      x: 28.00
+      y: 28.00
+    custom:
+      1:
+        x: 0.0
+        y: 0.0
+      2:
+        x: 0.0
+        y: 0.0
+      3:
+        x: 0.0
+        y: 0.0
+  blue:
+    inside_initial:
+      x: 0.0
+      y: 0.0
+    outside_initial:
+      x: 0.0
+      y: 0.0
+    gears:
+      x: 30.48
+      y: 150.00
+    tools:
+      x: -91.44
+      y: 150.00
+    corner:
+      x: 132.00
+      y: 132.00
+    center:
+      x: -28.00
+      y: -28.00
+    custom:
+      1:
+        x: 0.0
+        y: 0.0
+      2:
+        x: 0.0
+        y: 0.0
+      3:
+        x: 0.0
+        y: 0.0
