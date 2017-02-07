@@ -493,4 +493,12 @@ public class CameraVision {
     public boolean imageInSight(){
         return imageInSight(targetedImage);
     }
+
+    /**
+     * Getter for the camera direction
+     * @return
+     */
+    public VuforiaLocalizer.CameraDirection getCameraDirection(){
+        return cameraDirection;
+    }
 }
