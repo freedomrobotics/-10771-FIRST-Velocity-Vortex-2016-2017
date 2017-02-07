@@ -14,7 +14,7 @@ public class PositionalDrive {
 
     private String settingID = "positional_drive";
     private String team = "red";
-    private String position = "general";
+    private String initial_position = "general";
     private Drive drive;
     private float initialX = 0.0f;
     private float initialY = 0.0f;
@@ -31,12 +31,12 @@ public class PositionalDrive {
         this.settings = settings;
         this.fieldmap = fieldmap;
         team = settings.getString("alliance");
-        String position = settings.getString("position");
-        if (((!position.equals("inside"))) && (!position.equals("outside"))){
-            position = "inside";
+        initial_position = settings.getString("position");
+        if (((!initial_position.equals("inside"))) && (!initial_position.equals("outside"))){
+            initial_position = "inside";
         }
-        drive.robot.position.setX(fieldmap.subData(team).subData(position).getFloat("x"));
-        drive.robot.position.setY(fieldmap.subData(team).subData(position).getFloat("y"));
+        drive.robot.position.setX(fieldmap.subData(team).subData(initial_position).getFloat("x"));
+        drive.robot.position.setY(fieldmap.subData(team).subData(initial_position).getFloat("y"));
         //todo get initial x and initial y in the settings config file(completed?)
         //todo learn how to convert yml list to a list of strings
         commands = (List<String>) fieldmap.subData(team).getObject("script");
