@@ -26,7 +26,7 @@ public class CameraDrive {
     }
 
     public void center() {
-        float marginofError = settings.subData("camera_settings").getFloat("centering_margin");
+        float marginofError = settings.subData("drive").subData("camera_settings").getFloat("centering_margin");
         if (targeted()){
             while(Math.abs(cameraVision.getX())>marginofError) {
                 boolean left = backCamera ? (cameraVision.getX()>0.0) : (cameraVision.getX()<0.0);
@@ -39,7 +39,7 @@ public class CameraDrive {
     }
 
     public void approach(){
-        float distance_to_stop = settings.subData("camera_settings").getFloat("distance_to_stop");
+        float distance_to_stop = settings.subData("drive").subData("camera_settings").getFloat("distance_to_stop");
         if (targeted()){
             while(Math.abs(cameraVision.getZ())>distance_to_stop){
                 float theta = backCamera ? 3.0f*(float)Math.PI/2.0f : (float)Math.PI/2.0f;
@@ -51,7 +51,7 @@ public class CameraDrive {
     }
 
     public void rotate(){
-        float rotate_margin = settings.subData("camera_settings").getFloat("angle_margin");
+        float rotate_margin = settings.subData("drive").subData("camera_settings").getFloat("angle_margin");
         if (targeted()){
             while(Math.abs(cameraVision.getAngleToTurn())>rotate_margin){
                 autoDrive.setRoation((float)cameraVision.getAngleToTurn());

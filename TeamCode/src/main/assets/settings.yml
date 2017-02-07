@@ -111,14 +111,15 @@ auto:
   time:
   encoder:
 
-camera_settings:
-  centering_margin: 5.0 #mm
-  distance_to_stop: 101.6 #mm
-  angle_margin: 5.0 #degrees
-
-positional_drive:
+drive:
+  update_using: encoders
+  init_with_fieldmap: false
   x_margin: 4.0 #cm
   y_margin: 4.0 #cm
+  camera_settings:
+    centering_margin: 5.0 #mm
+    distance_to_stop: 101.6 #mm
+    angle_margin: 5.0 #degrees
 
 autonomous:
   red_alliance:

@@ -1,5 +1,6 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -14,9 +15,10 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import org.firstinspires.ftc.robotcore.internal.opengl.AutoConfigGLSurfaceView;
 
 /**
+ * Op mode to test out the drive class and the fieldmap file
  * Created by joelv on 2/6/2017.
  */
-
+@Autonomous(name="PositionalTest")
 public class PositionalOpMode extends LinearOpMode {
 
          // The time at the last time check (using System.currentTimeMillis())
@@ -27,7 +29,6 @@ public class PositionalOpMode extends LinearOpMode {
     private Components components;
     private Drive drive;
     private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
-    private PositionalDrive positionalDrive;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -70,14 +71,12 @@ public class PositionalOpMode extends LinearOpMode {
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, telemetry);
-
-        positionalDrive = new PositionalDrive(drive, settings, parsedField);
+                settings, parsedField, telemetry);
 
         waitForStart();
         drive.setRelative(true);
         //FIXME: I don't know how to deal with thread starts, runs, and stops
-        positionalDrive.startScript();
+        drive.startScript();
         drive.driveThread.interrupt();
     }
 }

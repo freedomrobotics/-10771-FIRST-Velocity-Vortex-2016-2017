@@ -9,6 +9,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.lang.Math;
+import java.util.List;
 
 /**
  * Created by Adam Li on 10/27/2016.
@@ -32,6 +33,17 @@ public class Drive {
 
     int pastPosition;
     int pastPositionTime;
+
+    //Positional drive stuff
+    private String team = "red";
+    private String initial_position = "general";
+    private float initialX = 0.0f;
+    private float initialY = 0.0f;
+    private Config.ParsedData settings;
+    private Config.ParsedData fieldmap;
+    private float xMargin = 5.0f;
+    private float yMargin = 5.0f;
+    List<String> commands;
 
     Runnable driveRunnable = new Runnable() {
         @Override
@@ -141,7 +153,7 @@ public class Drive {
      */
     public Drive(VectorR vectorR, Robot robot, DcMotor frMotor,
                  DcMotor flMotor, DcMotor blMotor, DcMotor brMotor,
-                 Config.ParsedData settings, Telemetry telemetry){
+                 Config.ParsedData settings, Config.ParsedData fieldmap, Telemetry telemetry){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -158,6 +170,30 @@ public class Drive {
         if (settings.getString("alliance") == "blue")
             this.blueTeam = true;
         this.relativeDrive = false;
+
+        this.settings = settings;
+        this.fieldmap = fieldmap;
+        team = settings.getString("alliance");
+        initial_position = settings.getString("position");
+        if (((!initial_position.equals("inside"))) && (!initial_position.equals("outside"))){
+            initial_position = "inside";
+        }
+
+        if (settings.subData("drive").getBool("init_with_fieldmap")){
+            robot.position.setX(fieldmap.subData(team).subData(initial_position).getFloat("x"));
+            robot.position.setY(fieldmap.subData(team).subData(initial_position).getFloat("y"));
+            robot.rotation.setRadians(0.0f);
+        }
+
+        else {
+            robot.position.setX(settings.subData("robot").subData("initial_position").getFloat("x"));
+            robot.position.setY(settings.subData("robot").subData("initial_position").getFloat("y"));
+            robot.rotation.setRadians(settings.subData("robot").getFloat("initial_rotation"));
+        }
+        //todo learn how to convert yml list to a list of strings
+        commands = (List<String>) fieldmap.subData(team).getObject("script");
+        xMargin = settings.subData("drive").getFloat("x_margin");
+        yMargin = settings.subData("drive").getFloat("y_margin");
 
         DcMotor.RunMode runMode = DcMotor.RunMode.RUN_USING_ENCODER;
         frMotor.setMode(runMode);
@@ -234,5 +270,79 @@ public class Drive {
         this.vectorR.setRad(rotation);
         if (vectorDriveActive) startVelocity();
         else startPosition();
+    }
+
+    /*
+        I really do not know how the robot object would update its position
+        THIS ONLY THEORETICALLY WORKS WITHOUT ROBOT ROTATION
+        Method is untested but there is a test in the framework_test branch under
+        Test_drive3, where the encoder outputs are calculated into X and Y coordinates
+    */
+    public void updateUsingEncoders(){
+        robot.position.setX(getEncoderX());
+        robot.position.setY(getEncoderY());
+    }
+
+    /*
+        I also do not know the status of the IMU accelerometer(Kalman Filter) whether it is finished or not
+     */
+    public void updateUsingIMU(){
+
+    }
+
+    /**
+     * Gets the x coordinate of the robot using the 4 encoders
+     * assuming that the robot does not rotate
+     * @return the x coordinate
+     */
+    private float getEncoderX(){
+        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
+        double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
+        float A = -frMotor.getCurrentPosition()*inch_per_pulse;
+        float B = -flMotor.getCurrentPosition()*inch_per_pulse;
+        float C = -blMotor.getCurrentPosition()*inch_per_pulse;
+        float D = -brMotor.getCurrentPosition()*inch_per_pulse;
+        float AC = ((A*(float)Math.cos(Math.PI-motorAngle)) + (C*(float)Math.cos(Math.PI-motorAngle)))/2.0f;
+        float BD = ((B*(float)Math.cos(motorAngle)) + (D*(float)Math.cos(motorAngle)))/2.0f;
+        return  ((AC + BD) / 2.0f) + initialX;
+    }
+
+    /**
+     * Gets the y coordinate of the robot using the 4 encoders
+     * assuming that the robot does not rotate
+     * @return the y coordinate
+     */
+    private float getEncoderY(){
+        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
+        double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
+        float A = -frMotor.getCurrentPosition()*inch_per_pulse;
+        float B = -flMotor.getCurrentPosition()*inch_per_pulse;
+        float C = -blMotor.getCurrentPosition()*inch_per_pulse;
+        float D = -brMotor.getCurrentPosition()*inch_per_pulse;
+        float AC = ((A*(float)Math.sin(Math.PI-motorAngle)) + (C*(float)Math.sin(Math.PI-motorAngle)))/2.0f;
+        float BD = ((B*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle)))/2.0f;
+        return  ((AC + BD) / 2.0f) + initialY;
+    }
+
+    public void setCoordinate(String location){
+        setPosition(fieldmap.subData(team).subData(location).getFloat("x"), fieldmap.subData(team).subData(location).getFloat("y"));
+    }
+
+    private boolean atLocation(){
+        float robotX = robot.position.getX();
+        float robotY = robot.position.getY();
+        float setX = vectorR.getX();
+        float setY = vectorR.getY();
+        return ((xMargin>Math.abs(robotX-setX))&&(yMargin>Math.abs(robotY-setY)));
+    }
+
+    public void startScript(){
+        for (String command : commands){
+            setCoordinate(command);
+            //TODO: PUT SOMETHING THAT PREVENTS THE FOR LOOP FROM HAPPENING IN ONE INSTANCE, LIKE A WHILE LOOP OR SOMETHING
+            while (!atLocation()){
+                startPosition();
+            }
+        }
     }
 }
