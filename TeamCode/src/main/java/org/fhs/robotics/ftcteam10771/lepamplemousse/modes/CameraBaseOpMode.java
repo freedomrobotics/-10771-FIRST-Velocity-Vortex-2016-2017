@@ -49,9 +49,9 @@ public class CameraBaseOpMode extends LinearOpMode {
 
     public double angle(){
         double wallAngle = -cameraVision.getAngleToTurn();
-        double z = -cameraVision.getZ();
-        double x = -cameraVision.getX();
-        double imageAngle = Math.atan2(x, z);
-        return 90.0 + wallAngle + imageAngle;
+        double x = Math.abs(cameraVision.getZ());
+        double y = -cameraVision.getX();
+        double imageAngle = Math.toDegrees(Math.atan2(y, x));
+        return 90.0 - wallAngle + imageAngle;
     }
 }
