@@ -10,6 +10,11 @@ values:
 
 coordinates:
   red:
+    script_size: 3.0
+    script:
+      - wheels
+      - custom1
+      - center
     inside:
       x: -42.00
       y: -145.00
@@ -28,17 +33,21 @@ coordinates:
     center:
       x: -28.00
       y: -28.00
-    custom:
-      1:
-        x: 0.0
-        y: 0.0
-      2:
-        x: 0.0
-        y: 0.0
-      3:
-        x: 0.0
-        y: 0.0
+    custom1:
+      x: 0.0
+      y: 0.0
+    custom2:
+      x: 0.0
+      y: 0.0
+    custom3:
+      x: 0.0
+      y: 0.0
   blue:
+    script_size: 3.0
+    script:
+      - gears
+      - custom1
+      - center
     inside:
       x: 145.00
       y: -34.00
@@ -57,13 +66,12 @@ coordinates:
     center:
       x: 28.00
       y: 28.00
-    custom:
-      1:
-        x: 0.0
-        y: 0.0
-      2:
-        x: 0.0
-        y: 0.0
-      3:
-        x: 0.0
-        y: 0.0
+    custom1:
+      x: 0.0
+      y: 0.0
+    custom2:
+      x: 0.0
+      y: 0.0
+    custom3:
+      x: 0.0
+      y: 0.0

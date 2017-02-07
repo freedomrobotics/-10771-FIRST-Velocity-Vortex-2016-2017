@@ -53,15 +53,7 @@ public class PositionalOpMode extends LinearOpMode {
                 fieldMapConfig.read(true);
         }
 
-        scriptConfig = new Config("/Position", "script.yml", telemetry, "script");
-        if (scriptConfig.read()== Config.State.DEFAULT_EXISTS){
-            scriptConfig.create(true);
-            if (scriptConfig.read()== Config.State.DEFAULT_EXISTS)
-                scriptConfig.read(true);
-        }
-
         Config.ParsedData parsedField = fieldMapConfig.getParsedData();
-        Config.ParsedData parsedScript = scriptConfig.getParsedData();
 
         this.settings = rawSettings.getParsedData();
 
@@ -80,7 +72,7 @@ public class PositionalOpMode extends LinearOpMode {
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
                 settings, telemetry);
 
-        positionalDrive = new PositionalDrive(drive, settings, parsedField, parsedScript);
+        positionalDrive = new PositionalDrive(drive, settings, parsedField);
 
         waitForStart();
         drive.setRelative(true);

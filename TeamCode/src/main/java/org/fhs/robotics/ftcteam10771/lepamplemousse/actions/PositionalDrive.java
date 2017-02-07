@@ -20,18 +20,16 @@ public class PositionalDrive {
     private float initialY = 0.0f;
     private Config.ParsedData settings;
     private Config.ParsedData fieldmap;
-    private Config.ParsedData script;
     private float xMargin = 5.0f;
     private float yMargin = 5.0f;
     int scriptLength;
     List<String> commands;
     //add imu later
 
-    public PositionalDrive(Drive drive, Config.ParsedData settings, Config.ParsedData fieldmap, Config.ParsedData script){
+    public PositionalDrive(Drive drive, Config.ParsedData settings, Config.ParsedData fieldmap){
         this.drive = drive;
         this.settings = settings;
         this.fieldmap = fieldmap;
-        this.script = script;
         team = settings.getString("alliance");
         String position = settings.getString("position");
         if (((!position.equals("inside"))) && (!position.equals("outside"))){
@@ -41,7 +39,7 @@ public class PositionalDrive {
         drive.robot.position.setY(fieldmap.subData(team).subData(position).getFloat("y"));
         //todo get initial x and initial y in the settings config file(completed?)
         //todo learn how to convert yml list to a list of strings
-        commands = (List<String>) script.subData("script").getObject(team);
+        commands = (List<String>) fieldmap.subData(team).getObject("script");
         xMargin = settings.subData(settingID).getFloat("x_margin");
         yMargin = settings.subData(settingID).getFloat("y_margin");
     }
