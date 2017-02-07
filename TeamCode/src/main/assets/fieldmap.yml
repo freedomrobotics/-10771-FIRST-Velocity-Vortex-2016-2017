@@ -26,8 +26,8 @@ coordinates:
       x: -132.00
       y: -132.00
     center:
-      x: 28.00
-      y: 28.00
+      x: -28.00
+      y: -28.00
     custom:
       1:
         x: 0.0
@@ -55,8 +55,8 @@ coordinates:
       x: 132.00
       y: 132.00
     center:
-      x: -28.00
-      y: -28.00
+      x: 28.00
+      y: 28.00
     custom:
       1:
         x: 0.0
