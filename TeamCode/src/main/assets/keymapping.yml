@@ -166,7 +166,7 @@ gamepad2:
     digital: true
 
   b_button:
-    function: null
+    function: script
     inverted: false
     digital: true
 
