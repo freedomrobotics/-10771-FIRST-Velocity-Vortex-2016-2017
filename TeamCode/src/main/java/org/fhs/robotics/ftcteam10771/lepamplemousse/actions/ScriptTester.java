@@ -1,0 +1,106 @@
+package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+
+import java.util.List;
+
+/**
+ * Created by joelv on 2/7/2017.
+ */
+@Autonomous(name="Script Test")
+public class ScriptTester extends LinearOpMode {
+
+    Config fieldMapConfig;
+    Config.ParsedData parsedField;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        fieldMapConfig = new Config("/Position", "fieldmap.yml", telemetry, "field");
+        if (fieldMapConfig.read()== Config.State.DEFAULT_EXISTS){
+            fieldMapConfig.create(true);
+            if (fieldMapConfig.read()== Config.State.DEFAULT_EXISTS)
+                fieldMapConfig.read(true);
+        }
+
+        parsedField = fieldMapConfig.getParsedData().subData("coordinates").subData("red");
+        waitForStart();
+        startScript();
+
+
+
+    }
+
+
+    /**
+     * For this format in YML
+     *
+     * script:
+     *  - corner
+     *  - center
+     *  - stuff
+     */
+    public void startScript(){
+        List<String> commands = (List<String>) parsedField.getObject("script");
+        for (String command : commands){
+            telemetry.addData("X", parsedField.subData(command).getFloat("x"));
+            telemetry.addData("Y", parsedField.subData(command).getFloat("y"));
+            telemetry.update();
+            try{
+                wait(10000);
+            } catch (Exception e){
+                break;
+            }
+        }
+    }
+
+    /**
+     * Plan C: Do this format in yml
+     *
+     * command1: center
+     * command2: corner
+     * command3: stuff
+     */
+    public void startCommands() {
+        int script_size = parsedField.getInt("script_size");
+        String location;
+        for (int i = 1; i <= script_size; i++) {
+            location = parsedField.getString("command" + Integer.toString(i));
+            telemetry.addData("X", parsedField.subData(location).getFloat("x"));
+            telemetry.addData("Y", parsedField.subData(location).getFloat("y"));
+            telemetry.update();
+            try {
+                wait(10000);
+            } catch (Exception e) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Plan B: This format
+     *
+     * command:
+     *  1: corner
+     *  2: center
+     *  3: beacon
+     */
+    public void startList(){
+        int script_size = parsedField.getInt("script_size");
+        String location;
+        for (int i = 1; i <= script_size; i++) {
+            location = parsedField.subData("command").getString(Integer.toString(i));
+            telemetry.addData("X", parsedField.subData(location).getFloat("x"));
+            telemetry.addData("Y", parsedField.subData(location).getFloat("y"));
+            telemetry.update();
+            try {
+                wait(10000);
+            } catch (Exception e) {
+                break;
+            }
+        }
+    }
+}
