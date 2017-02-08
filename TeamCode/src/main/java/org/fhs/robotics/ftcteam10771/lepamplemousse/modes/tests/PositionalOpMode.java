@@ -78,6 +78,6 @@ public class PositionalOpMode extends LinearOpMode {
         drive.setRelative(true);
         //FIXME: I don't know how to deal with thread starts, runs, and stops
         drive.startScript();
-        drive.driveThread.interrupt();
+        drive.stop();
     }
 }
