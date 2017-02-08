@@ -34,7 +34,7 @@ dc_motors:
     enabled: true
     map_name: intake
   dc_motor6:
-    enabled: false
+    enabled: false #enable to true after installing motor
     map_name: flywheel
 
 # Servos
@@ -61,7 +61,7 @@ touch_sensors:
 # Light Sensors
 light_sensors:
   light_sensor1:
-    enabled: false
+    enabled: false #enable to true first
     map_name: light_sensor
     alias:
       - mod_rob_light_sensor
