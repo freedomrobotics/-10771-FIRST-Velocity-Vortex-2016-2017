@@ -201,7 +201,7 @@ public class Drive {
         driveThreadActive = false;
         this.relativeDrive = true;
         vectorDriveActive = false;
-        if(driveThread.isAlive()){driveThread.interrupt();}
+        //if(driveThread.isAlive()){driveThread.interrupt();}
     }
 
     /**
