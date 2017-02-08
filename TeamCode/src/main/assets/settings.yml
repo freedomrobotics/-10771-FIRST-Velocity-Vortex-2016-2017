@@ -9,7 +9,7 @@
 
 # flags
 alliance: red
-position: general
+position: inside
 
 robot:
   initial_position:

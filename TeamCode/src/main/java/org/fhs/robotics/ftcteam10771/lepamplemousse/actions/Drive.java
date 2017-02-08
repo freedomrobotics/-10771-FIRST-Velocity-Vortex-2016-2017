@@ -75,6 +75,7 @@ public class Drive {
                     }
                 } else {
                     // TODO: 1/27/2017 work on
+                    updatePosition();
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();
                     float vectorY = vectorR.getY() - robot.getVectorR().getY();
                     robotTheta = (float) Math.atan2(vectorY, vectorX);
