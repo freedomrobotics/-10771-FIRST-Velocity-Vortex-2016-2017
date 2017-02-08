@@ -1,6 +1,5 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -35,15 +34,13 @@ public class Drive {
     int pastPositionTime;
 
     //Positional drive stuff
-    private String team = "red";
-    private String initial_position = "general";
     private float initialX = 0.0f;
     private float initialY = 0.0f;
     private Config.ParsedData settings;
     private Config.ParsedData fieldmap;
-    private float xMargin = 5.0f;
-    private float yMargin = 5.0f;
     List<String> commands;
+
+    SensorHandler sensorHandler;
 
     Runnable driveRunnable = new Runnable() {
         @Override
@@ -82,6 +79,7 @@ public class Drive {
                     float vectorY = vectorR.getY() - robot.getVectorR().getY();
                     robotTheta = (float) Math.atan2(vectorY, vectorX);
 
+                    //FIXME: Confused as to what this does - Joel
                     if(Math.abs(robotTheta) < Math.PI*2*(driveSettings.subData("positional").getFloat("rotational_tolerance")/360)){
                         //at position
                         Thread.currentThread().interrupt();
@@ -172,16 +170,17 @@ public class Drive {
         this.relativeDrive = false;
 
         this.settings = settings;
-        this.fieldmap = fieldmap;
-        team = settings.getString("alliance");
-        initial_position = settings.getString("position");
-        if (((!initial_position.equals("inside"))) && (!initial_position.equals("outside"))){
-            initial_position = "inside";
-        }
+        String team = settings.getString("alliance");
+        this.fieldmap = fieldmap.subData("coordinates").subData(team);
+
 
         if (settings.subData("drive").getBool("init_with_fieldmap")){
-            robot.position.setX(fieldmap.subData(team).subData(initial_position).getFloat("x"));
-            robot.position.setY(fieldmap.subData(team).subData(initial_position).getFloat("y"));
+            String initial_position = settings.getString("position");
+            if (((!initial_position.equals("inside"))) && (!initial_position.equals("outside"))){
+                initial_position = "inside";
+            }
+            robot.position.setX(fieldmap.subData(initial_position).getFloat("x"));
+            robot.position.setY(fieldmap.subData(initial_position).getFloat("y"));
             robot.rotation.setRadians(0.0f);
         }
 
@@ -190,10 +189,8 @@ public class Drive {
             robot.position.setY(settings.subData("robot").subData("initial_position").getFloat("y"));
             robot.rotation.setRadians(settings.subData("robot").getFloat("initial_rotation"));
         }
-        //todo learn how to convert yml list to a list of strings
-        commands = (List<String>) fieldmap.subData(team).getObject("script");
-        xMargin = settings.subData("drive").getFloat("x_margin");
-        yMargin = settings.subData("drive").getFloat("y_margin");
+
+        //sensorHandler =
 
         DcMotor.RunMode runMode = DcMotor.RunMode.RUN_USING_ENCODER;
         frMotor.setMode(runMode);
@@ -278,16 +275,23 @@ public class Drive {
         Method is untested but there is a test in the framework_test branch under
         Test_drive3, where the encoder outputs are calculated into X and Y coordinates
     */
-    public void updateUsingEncoders(){
-        robot.position.setX(getEncoderX());
-        robot.position.setY(getEncoderY());
-    }
-
-    /*
-        I also do not know the status of the IMU accelerometer(Kalman Filter) whether it is finished or not
-     */
-    public void updateUsingIMU(){
-
+    public void updatePosition(){
+        String updateDevice = settings.subData("drive").getString("update_using");
+        switch(updateDevice){
+            case "encoders":
+                robot.position.setX(getEncoderX());
+                robot.position.setY(getEncoderY());
+                break;
+            case "camera":
+                //todo: finish algorithm for gaining position in reference to an image
+                break;
+            case "imu":
+                //todo: check status of imu readiness
+                break;
+            default:
+                robot.position.setX(getEncoderX());
+                robot.position.setY(getEncoderY());
+        }
     }
 
     /**
@@ -297,7 +301,7 @@ public class Drive {
      */
     private float getEncoderX(){
         float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
-        double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
+        double motorAngle = Math.toRadians(driveSettings.getFloat("motor_angle"));
         float A = -frMotor.getCurrentPosition()*inch_per_pulse;
         float B = -flMotor.getCurrentPosition()*inch_per_pulse;
         float C = -blMotor.getCurrentPosition()*inch_per_pulse;
@@ -314,7 +318,7 @@ public class Drive {
      */
     private float getEncoderY(){
         float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
-        double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
+        double motorAngle = Math.toRadians(driveSettings.getFloat("motor_angle"));
         float A = -frMotor.getCurrentPosition()*inch_per_pulse;
         float B = -flMotor.getCurrentPosition()*inch_per_pulse;
         float C = -blMotor.getCurrentPosition()*inch_per_pulse;
@@ -325,10 +329,14 @@ public class Drive {
     }
 
     public void setCoordinate(String location){
-        setPosition(fieldmap.subData(team).subData(location).getFloat("x"), fieldmap.subData(team).subData(location).getFloat("y"));
+        setPosition(fieldmap.subData(location).getFloat("x"),
+                fieldmap.subData(location).getFloat("y"));
     }
 
     private boolean atLocation(){
+        //todo learn how to convert yml list to a list of strings
+        float xMargin = settings.subData("drive").getFloat("x_margin");
+        float yMargin = settings.subData("drive").getFloat("y_margin");
         float robotX = robot.position.getX();
         float robotY = robot.position.getY();
         float setX = vectorR.getX();
@@ -337,6 +345,7 @@ public class Drive {
     }
 
     public void startScript(){
+        List<String> commands = (List<String>) fieldmap.getObject("script");
         for (String command : commands){
             setCoordinate(command);
             //TODO: PUT SOMETHING THAT PREVENTS THE FOR LOOP FROM HAPPENING IN ONE INSTANCE, LIKE A WHILE LOOP OR SOMETHING

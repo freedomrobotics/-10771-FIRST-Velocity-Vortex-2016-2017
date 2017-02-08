@@ -26,6 +26,7 @@ encoder:
 
 # The drivetrain's settings.
 drivetrain:
+  motor_angle: 60.0
   motor_scale: .85
   gear_ratio: 1
   motion:
