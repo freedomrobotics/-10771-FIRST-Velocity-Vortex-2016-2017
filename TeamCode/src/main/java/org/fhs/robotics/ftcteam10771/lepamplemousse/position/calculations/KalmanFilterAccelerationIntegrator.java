@@ -35,11 +35,16 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.position.calculations;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.X;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.Y;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.Z;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.meanIntegrate;
 import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.minus;
 import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
@@ -56,6 +61,7 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
     //------------------------------------------------------------------------------------------
 
     BNO055IMU.Parameters parameters;
+    BNO055IMU imu;
     Position position;
     Velocity velocity;
     Acceleration acceleration;
@@ -85,12 +91,13 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
     // Construction
     //------------------------------------------------------------------------------------------
 
-    public KalmanFilterAccelerationIntegrator(Config.ParsedData kalmanConfig) {
+    public KalmanFilterAccelerationIntegrator(Config.ParsedData kalmanConfig, BNO055IMU imu) {
         this.parameters = null;
         this.position = null;
         this.velocity = null;
         this.acceleration = null;
         this.kalmanConfig = kalmanConfig;
+        this.imu = imu;
     }
 
     //------------------------------------------------------------------------------------------
@@ -123,7 +130,7 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
                 Acceleration accelPrev = acceleration;
                 Velocity velocityPrev = velocity;
 
-                acceleration = linearAcceleration;
+                acceleration = getAbsoluteAcceleration(linearAcceleration);
 
                 // filter acceleration
                 accelerationError += processNoise;
@@ -168,7 +175,50 @@ public class KalmanFilterAccelerationIntegrator implements BNO055IMU.Acceleratio
                     RobotLog.vv(parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", (acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1e-9, acceleration, velocity, position);
                 }
             } else
-                acceleration = linearAcceleration;
+                acceleration = getAbsoluteAcceleration(linearAcceleration);
         }
+    }
+
+    //FIXME: Take this out later
+    /**
+     * Returns an acceeration in respect to field coordinates
+     * @param axis the chosen axis
+     * @return the converted vector value
+     */
+    public double getAbsoluteAcceleration(IMU.Axis axis){
+        final double full_rotation = 2.0 * Math.PI;
+        double intrinsicAccelX = imu.getAcceleration().xAccel;
+        double intrinsicAccelY = imu.getAcceleration().yAccel;
+        double robotRotation = (double)imu.getAngularOrientation().toAxesOrder(XYZ).thirdAngle;
+        double intrinsicVectorAngle = Math.atan2(intrinsicAccelY, intrinsicAccelX);
+        if (intrinsicVectorAngle<0){
+            intrinsicVectorAngle += full_rotation;
+        }
+        double absoluteRotation = intrinsicVectorAngle + robotRotation;
+        if (absoluteRotation > full_rotation){
+            absoluteRotation = absoluteRotation % full_rotation;
+        }
+        double hypothenusLength = Math.sqrt((intrinsicAccelX*intrinsicAccelX)+
+                (intrinsicAccelY*intrinsicAccelY));
+        switch (axis){
+            case X:
+                return hypothenusLength * Math.cos(absoluteRotation);
+            case Y:
+                return hypothenusLength * Math.sin(absoluteRotation);
+            default:
+                return 0.0;
+        }
+    }
+
+    /**
+     * Absolute converter for the acceleration object
+     * @param acceleration with respect to the sensor
+     * @return the absolute acceleration
+     */
+    public Acceleration getAbsoluteAcceleration(Acceleration acceleration){
+        acceleration.xAccel = getAbsoluteAcceleration(X);
+        acceleration.yAccel = getAbsoluteAcceleration(Y);
+        acceleration.zAccel = getAbsoluteAcceleration(Z);
+        return acceleration;
     }
 }

@@ -118,7 +118,8 @@ public class IMU {
      */
     public void createAccelerationIntegrator(Config.ParsedData parsedData, int type){
         if (type == 1)
-            parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator(parsedData);
+            //todo take out the extra parameter
+            parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator(parsedData, imu);
         if (type == 2)
             parameters.accelerationIntegrationAlgorithm = new KalmanFilterAccelerationIntegrator2(parsedData);
         if (type == 3)
