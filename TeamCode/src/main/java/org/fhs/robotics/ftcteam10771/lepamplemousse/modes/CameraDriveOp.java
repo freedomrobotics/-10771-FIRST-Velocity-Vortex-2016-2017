@@ -93,6 +93,7 @@ public class CameraDriveOp extends LinearOpMode{
             telemetry.addData("Side", "right");
             telemetry.update();
         }
+        idle();
     }
 
     public void center() {
