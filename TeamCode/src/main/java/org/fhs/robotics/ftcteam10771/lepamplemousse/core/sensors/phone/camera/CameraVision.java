@@ -498,7 +498,7 @@ public class CameraVision {
      * Getter for the camera direction
      * @return
      */
-    public VuforiaLocalizer.CameraDirection getCameraDirection(){
-        return cameraDirection;
+    public boolean usingBackCamera(){
+        return (cameraDirection== VuforiaLocalizer.CameraDirection.BACK);
     }
 }

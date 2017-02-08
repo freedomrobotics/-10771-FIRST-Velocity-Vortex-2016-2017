@@ -79,7 +79,6 @@ public class Drive {
                     float vectorY = vectorR.getY() - robot.getVectorR().getY();
                     robotTheta = (float) Math.atan2(vectorY, vectorX);
 
-                    //FIXME: Confused as to what this does - Joel
                     if(Math.abs(robotTheta) < Math.PI*2*(driveSettings.subData("positional").getFloat("rotational_tolerance")/360)){
                         //at position
                         Thread.currentThread().interrupt();
