@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 
 import java.util.List;
 
@@ -15,9 +17,23 @@ public class ScriptTester extends LinearOpMode {
 
     Config fieldMapConfig;
     Config.ParsedData parsedField;
+    Controllers controls;
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        Config keymapping = new Config(Static.configPath, Static.configControlFileName + Static.configFileSufffix, telemetry, "keymapping");
+        // should catch other errors, but oh well
+        // add data logging
+        if (keymapping.read() == Config.State.DEFAULT_EXISTS) {
+            keymapping.create(true);
+            //read without creating file if it still fails.
+            if (keymapping.read() == Config.State.DEFAULT_EXISTS)
+                keymapping.read(true);
+        }
+
+        this.controls = new Controllers(gamepad1, gamepad2, keymapping);
+        this.controls.initialize();
 
         fieldMapConfig = new Config("/Position", "fieldmap.yml", telemetry, "field");
         if (fieldMapConfig.read()== Config.State.DEFAULT_EXISTS){
@@ -46,13 +62,11 @@ public class ScriptTester extends LinearOpMode {
     public void startScript(){
         List<String> commands = (List<String>) parsedField.getObject("script");
         for (String command : commands){
-            telemetry.addData("X", parsedField.subData(command).getFloat("x"));
-            telemetry.addData("Y", parsedField.subData(command).getFloat("y"));
-            telemetry.update();
-            try{
-                wait(10000);
-            } catch (Exception e){
-                break;
+            while(!controls.getDigital("script")){
+                telemetry.addData("Location", command);
+                telemetry.addData("X", parsedField.subData(command).getFloat("x"));
+                telemetry.addData("Y", parsedField.subData(command).getFloat("y"));
+                telemetry.update();
             }
         }
     }
