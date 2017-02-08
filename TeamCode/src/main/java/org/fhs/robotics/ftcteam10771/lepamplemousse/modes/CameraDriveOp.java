@@ -32,6 +32,7 @@ public class CameraDriveOp extends LinearOpMode{
     private RGB rgb;
     private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
     private boolean backCamera = true;
+    Alliance alliance;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -68,6 +69,7 @@ public class CameraDriveOp extends LinearOpMode{
                 settings, null, telemetry);
 
         //FIXME: I forgot how the aliases work - Joel
+        alliance = (settings.getString("alliance")=="red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
         rgb = new RGB(Aliases.colorSensorMap.get("color_sensor_left"), Aliases.colorSensorMap.get("color_sensor_right"));
 
         cameraVision = new CameraVision();
@@ -83,6 +85,14 @@ public class CameraDriveOp extends LinearOpMode{
         rotate();
         center();
         approach();
+        if ((checkBeaconSide(RGB.Direction.LEFT))){
+            telemetry.addData("Side", "left");
+            telemetry.update();
+        }
+        else if (checkBeaconSide(RGB.Direction.RIGHT)){
+            telemetry.addData("Side", "right");
+            telemetry.update();
+        }
     }
 
     public void center() {
@@ -123,7 +133,7 @@ public class CameraDriveOp extends LinearOpMode{
         }
     }
 
-    public void checkBeaconSide(RGB.Direction direction){
+    public boolean checkBeaconSide(RGB.Direction direction){
         if (targeted()){
             float distance = settings.subData("drive").subData("camera_settings").getFloat("beacon_check_distance");
             float theta = 0.0f;
@@ -137,9 +147,6 @@ public class CameraDriveOp extends LinearOpMode{
                 default:
                     theta = 0.0f;
             }
-            Alliance alliance;
-            String color = settings.getString("alliance");
-            alliance = (color=="red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
             while (Math.abs(cameraVision.getX())<distance){
                 float radius = distance - (float)Math.abs(cameraVision.getX());
                 //todo put power cutback ratio in settings config
@@ -147,8 +154,9 @@ public class CameraDriveOp extends LinearOpMode{
                 drive.setVelocity(radius, theta);
             }
             drive.stop();
-            rgb.isSide(alliance, direction);
+            return rgb.isSide(alliance, direction);
         }
+        else return false;
     }
 
     private boolean targeted(){
