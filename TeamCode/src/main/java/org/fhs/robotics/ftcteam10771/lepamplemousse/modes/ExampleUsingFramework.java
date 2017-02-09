@@ -25,8 +25,8 @@ public class ExampleUsingFramework extends OpMode {
     private Config rawSettings;
     private Config.ParsedData settings;
     private Components components;
-    private Config.ParsedData otherComponents;
     private Drive drive;
+    private Config.ParsedData otherComponents;
 
     @Override
     public void init() {

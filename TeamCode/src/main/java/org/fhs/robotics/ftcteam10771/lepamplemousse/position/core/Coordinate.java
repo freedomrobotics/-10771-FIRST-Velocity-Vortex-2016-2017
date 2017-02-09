@@ -44,27 +44,27 @@ public class Coordinate {
     public static float getConversionFactor(UNIT convert){
         switch (convert){
             case MM_TO_UNIT:
-                return 10f * cmConversionFactor;
+                return 0.1f * cmConversionFactor;
             case CM_TO_UNIT:
                 return cmConversionFactor;
             case IN_TO_UNIT:
                 return 2.54f * cmConversionFactor;
             case DM_TO_UNIT:
-                return .1f * cmConversionFactor;
+                return 10f * cmConversionFactor;
             case M_TO_UNIT:
-                return .01f * cmConversionFactor;
+                return 100f * cmConversionFactor;
             case FT_TO_UNIT:
                 return 30.48f * cmConversionFactor;
             case UNIT_TO_MM:
-                return 1f/(10f * cmConversionFactor);
+                return 1f/(0.1f * cmConversionFactor);
             case UNIT_TO_CM:
                 return 1f/cmConversionFactor;
             case UNIT_TO_IN:
                 return 1f/(2.54f * cmConversionFactor);
             case UNIT_TO_DM:
-                return 1f/(.1f * cmConversionFactor);
+                return 1f/(10f * cmConversionFactor);
             case UNIT_TO_M:
-                return 1f/(.01f * cmConversionFactor);
+                return 1f/(100f * cmConversionFactor);
             case UNIT_TO_FT:
                 return 1f/(30.48f * cmConversionFactor);
             default:
