@@ -76,7 +76,6 @@ public class PositionalOpMode extends LinearOpMode {
 
         waitForStart();
         drive.setRelative(true);
-        //FIXME: I don't know how to deal with thread starts, runs, and stops
         drive.driveTo("custom1");
         drive.driveTo("custom2");
         drive.driveTo("custom3");
