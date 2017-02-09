@@ -31,6 +31,8 @@ public class CameraBaseOpMode extends LinearOpMode {
             if (cameraVision.imageInSight()){
                 telemetry.addData("Image", cameraVision.target().getName());
                 telemetry.addData("Overall Distance", hypotenuse());
+                telemetry.addData("Wall Angle", wallAngle());
+                telemetry.addData("Image Angle", imageAngle());
                 telemetry.addData("Overall Angle", angle());
             }
             else{
@@ -49,9 +51,17 @@ public class CameraBaseOpMode extends LinearOpMode {
 
     public double angle(){
         double wallAngle = -cameraVision.getAngleToTurn();
-        double z = -cameraVision.getZ();
+        double z = Math.abs(cameraVision.getZ());
         double x = -cameraVision.getX();
-        double imageAngle = Math.atan2(x, z);
-        return 90.0 + wallAngle + imageAngle;
+        return 90.0 + wallAngle + imageAngle();
+    }
+
+    public double wallAngle(){
+        return -cameraVision.getAngleToTurn();
+    }
+
+    public double imageAngle(){
+
+        return Math.toDegrees(Math.atan(-cameraVision.getX()/Math.abs(cameraVision.getZ())));
     }
 }
