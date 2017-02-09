@@ -508,7 +508,7 @@ public class CameraVision {
      */
     public double absoluteAngle(){
         double init_angle = useRadians ? Math.PI/2.0 : 90.0;
-        if ((targetedImage==Image.WHEELS) || (targetedImage==Image.LEGOS){
+        if ((targetedImage==Image.WHEELS) || (targetedImage==Image.LEGOS)){
             init_angle += init_angle;
         }
         double z = Math.abs(getZ());
@@ -517,7 +517,4 @@ public class CameraVision {
         return init_angle - getAngleToTurn() + imageAngle;
     }
 
-    public double distance_from_image(){
-
-    }
 }

@@ -2,6 +2,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsAnalogOpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -19,6 +20,7 @@ public class Catapult {
     private float motorPower=0.0f;
     private Controllers controllers;
     public Thread catapultThread;
+    private boolean buttonPressed = false;
     Config.ParsedData settings;
 
     public Catapult(DcMotor motor, OpticalDistanceSensor opticalDistanceSensor,
@@ -27,6 +29,7 @@ public class Catapult {
         stopSensor = opticalDistanceSensor;
         this.controllers = controllers;
         this.settings = settings.subData("catapult");
+        rotator.setDirection(DcMotorSimple.Direction.REVERSE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         catapultThread = this.settings.getBool("use_encoder") ? new Thread(runEncoder) : new Thread(runCatapult);
@@ -55,10 +58,14 @@ public class Catapult {
         public void run() {
             while (!Thread.interrupted()){
                 if (encoderReady()){
+                    buttonPressed = false;
                     while(!button()){
                         oscillate();
                     }
-                    launchCatapult();
+                    buttonPressed = true;
+                    while(encoderReady() && buttonPressed){
+                        launchCatapult();
+                    }
                 }
                 returnToReady();
             }
@@ -97,27 +104,34 @@ public class Catapult {
     }
 
     public void launchCatapult(){
-        rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setTargetPosition(settings.getInt("target_position"));//put config
         motorPower = 1.0f;
-        rotator.setPower(1.0f);
+        rotator.setPower(motorPower);
     }
 
     private void returnToReady(){
         int targetPosition = settings.getInt("target_position");
         motorPower = (targetPosition-rotator.getCurrentPosition()/targetPosition);
+        rotator.setTargetPosition(targetPosition);
         rotator.setPower(motorPower);
     }
 
     public boolean encoderReady(){
+        int modular;
         int targetPosition = settings.getInt("target_position");
         int margin = settings.getInt("position_margin");
-        return Math.abs(targetPosition-rotator.getCurrentPosition())<margin;
+        modular = rotator.getCurrentPosition() % targetPosition;
+        if (modular>targetPosition-margin && modular > margin) return false;
+        else return true;
     }
 
     public int getCatapultPosition(){
         return rotator.getCurrentPosition();
+    }
+
+    public int getTargetPosition(){
+        return settings.getInt("target_position");
     }
 
     //TODO: Put catapult power and light tolerance in settings
