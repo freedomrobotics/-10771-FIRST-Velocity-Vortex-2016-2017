@@ -1,4 +1,4 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -21,7 +21,7 @@ import java.util.List;
  * Created by joelv on 2/9/2017.
  */
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous
-public class Autonomous extends OpMode {
+public class PamplemouseAuto extends OpMode {
 
     private Config rawSettings;
     private Config.ParsedData settings;
