@@ -1,9 +1,10 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 
 /**
  * Created by joelv on 1/28/2017.
@@ -35,27 +36,5 @@ public class CameraBaseOpMode extends LinearOpMode {
             telemetry.update();
         }
         cameraVision.cameraThread.interrupt();
-    }
-
-    public double hypotenuse(){
-        double x = cameraVision.getX();
-        double z = cameraVision.getZ();
-        return Math.sqrt((x*x)+(z*z));
-    }
-
-    public double angle(){
-        double wallAngle = -cameraVision.getAngleToTurn();
-        double z = Math.abs(cameraVision.getZ());
-        double x = -cameraVision.getX();
-        return 90.0 + wallAngle + imageAngle();
-    }
-
-    public double wallAngle(){
-        return -cameraVision.getAngleToTurn();
-    }
-
-    public double imageAngle(){
-
-        return Math.toDegrees(Math.atan(-cameraVision.getX()/Math.abs(cameraVision.getZ())));
     }
 }

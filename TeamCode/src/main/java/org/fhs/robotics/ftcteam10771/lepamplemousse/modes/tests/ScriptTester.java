@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by joelv on 2/7/2017.
  */
-@Autonomous(name="Script Test")
+@Autonomous(name="Script Test", group = "Test")
 public class ScriptTester extends LinearOpMode {
 
     Config fieldMapConfig;

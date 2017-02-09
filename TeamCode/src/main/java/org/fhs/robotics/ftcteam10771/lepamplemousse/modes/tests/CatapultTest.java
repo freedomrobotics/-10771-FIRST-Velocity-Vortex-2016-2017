@@ -1,4 +1,4 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
 
 import android.util.Log;
 
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Created by joelv on 2/7/2017.
  */
-@TeleOp(name="Catapult Test")
+@TeleOp(name="Catapult Test", group = "Test")
 public class CatapultTest extends OpMode{
 
     private List<String> toggle = new LinkedList<>();

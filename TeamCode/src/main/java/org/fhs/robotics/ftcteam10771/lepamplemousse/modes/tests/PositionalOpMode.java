@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.internal.opengl.AutoConfigGLSurfaceView;
  * Op mode to test out the drive class and the fieldmap file
  * Created by joelv on 2/6/2017.
  */
-@Autonomous(name="PositionalTest")
+@Autonomous(name="PositionalTest", group = "Test")
 public class PositionalOpMode extends LinearOpMode {
 
          // The time at the last time check (using System.currentTimeMillis())

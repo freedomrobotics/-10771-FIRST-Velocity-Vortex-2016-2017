@@ -20,7 +20,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
  * Tests the camera drive class
  * Created by joelv on 2/3/2017.
  */
-@Autonomous(name="Camera Drive", group="Not So Basic Stuff")
+@Autonomous(name="Camera Drive", group="Test")
 public class CameraDriveOp extends LinearOpMode{
 
     private long lastTime;

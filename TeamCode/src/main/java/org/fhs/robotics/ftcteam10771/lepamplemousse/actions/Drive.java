@@ -149,7 +149,7 @@ public class Drive {
      */
     public Drive(VectorR vectorR, Robot robot, DcMotor frMotor,
                  DcMotor flMotor, DcMotor blMotor, DcMotor brMotor,
-                 Config.ParsedData settings, Telemetry telemetry){
+                 Config.ParsedData settings, Config.ParsedData fieldmap, Telemetry telemetry){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -176,8 +176,8 @@ public class Drive {
             if (((!initial_position.equals("inside"))) && (!initial_position.equals("outside"))){
                 initial_position = "inside";
             }
-            robot.position.setX(fieldmap.subData(initial_position).getFloat("x"));
-            robot.position.setY(fieldmap.subData(initial_position).getFloat("y"));
+            robot.position.setX(this.fieldmap.subData(initial_position).getFloat("x"));
+            robot.position.setY(this.fieldmap.subData(initial_position).getFloat("y"));
             robot.rotation.setRadians(0.0f);
         }
 

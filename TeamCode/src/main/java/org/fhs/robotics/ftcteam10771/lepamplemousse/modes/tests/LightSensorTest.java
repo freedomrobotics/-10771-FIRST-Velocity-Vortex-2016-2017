@@ -1,4 +1,4 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 /**
  * Created by joelv on 2/8/2017.
  */
-@Autonomous (name="Light Sensor Test")
+@Autonomous (name="Light Sensor Test", group = "Test")
 public class LightSensorTest extends LinearOpMode {
 
     OpticalDistanceSensor sensor;
