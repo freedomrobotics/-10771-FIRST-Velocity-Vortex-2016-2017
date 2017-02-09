@@ -41,6 +41,7 @@ import java.util.Vector;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.UltrasonicRange;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
@@ -68,12 +69,34 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
 
     Config.ParsedData kalmanConfig;
 
+    //Constant Matrices
+    public static int CONST_IDENTITY = 0;
+    public static int CONST_SENSOR_COV = 16;
+    public static int CONST_MODEL_COV = 32;
+
+    //Uncertainty Matrices
+    public static int UNC_CURRENT = 0;
+    public static int UNC_MEASURED = 16;
+
+    //State Matrices
+    public static int STATE_CURRENT = 0;
+    public static int STATE_PREDICT = 4;
+    public static int STATE_CONTROL = 8;
+    public static int STATE_MEASURE = 12;
+
+    float[] constantMatrices;
+    float[] uncertaintyMatrices;
+    float[] transformationPrediction;
+    float[] workingMatrices;
+    float[] stateMatrices;
+
+    VectorR joystickControl; //Velocity vector derived from the joystick expected value.
+
     //Persistent Matrices
     float[] currentState;
     float[] currentUncertainty; //also a covariance
     float[] modelCovariance;
     float[] sensorCovariance;
-    float[] transformationPrediction;
     float[] matrixIdentity;
 
     public Position getPosition() {
@@ -99,6 +122,12 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         this.acceleration = null;
         this.kalmanConfig = kalmanConfig;
 
+        this.constantMatrices = new float[48];
+        this.uncertaintyMatrices = new float[32];
+        this.transformationPrediction = new float[16];
+        this.workingMatrices = new float[20];
+        this.stateMatrices =  new float[16];
+
         this.currentState = new float[4];
         this.currentUncertainty = new float[16];
         this.modelCovariance = new float[16];
@@ -106,7 +135,8 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         this.transformationPrediction = new float[16];
         this.matrixIdentity = new float[16];
         // Generate a 4x4 identity matrix
-        Matrix.setIdentityM(this.matrixIdentity, 0);
+        //Matrix.setIdentityM(this.matrixIdentity, 0);
+        Matrix.setIdentityM(constantMatrices, CONST_IDENTITY);
     }
 
     //------------------------------------------------------------------------------------------
@@ -121,10 +151,14 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         this.acceleration = null;
 
         //Refer to my notes - Adam Li
-        this.currentState[0] = (float) position.x;
+        /*this.currentState[0] = (float) position.x;
         this.currentState[1] = (float) position.y;
         this.currentState[2] = (float) velocity.xVeloc;
-        this.currentState[3] = (float) velocity.yVeloc;
+        this.currentState[3] = (float) velocity.yVeloc;*/
+        this.stateMatrices[STATE_CURRENT] = (float) position.x;
+        this.stateMatrices[STATE_CURRENT+1] = (float) position.y;
+        this.stateMatrices[STATE_CURRENT+2] = (float) velocity.xVeloc;
+        this.stateMatrices[STATE_CURRENT+3] = (float) velocity.yVeloc;
 
         float[] modelNoise = new float[4];
         float[] sensorNoise = new float[4];
@@ -146,9 +180,13 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         initialError[2] = kalmanConfig.subData("initial_error").getFloat("x_vel");
         initialError[3] = kalmanConfig.subData("initial_error").getFloat("y_vel");
 
-        sToCov(modelCovariance, modelNoise);
+        /*sToCov(modelCovariance, modelNoise);
         sToCov(sensorCovariance, sensorNoise);
-        sToCov(currentUncertainty, initialError);
+        sToCov(currentUncertainty, initialError);*/
+        sToCov(constantMatrices, CONST_MODEL_COV, modelNoise, 0);
+        sToCov(constantMatrices, CONST_SENSOR_COV, sensorNoise, 0);
+        sToCov(uncertaintyMatrices, UNC_CURRENT, initialError, 0);
+
 
         // Make the transformation matrix for the prediction
         // based off of the previous state. It's the identity matrix + some
@@ -160,12 +198,22 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
     public void update(Acceleration linearAcceleration) {
         // We should always be given a timestamp here
         if (linearAcceleration.acquisitionTime != 0) {
+            Acceleration accelPrev = acceleration;
+
+            float changeTime = (float) ((acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1e-9);
+
+            // Model Prediction X = AP + BC
+            // Transformation Matrix
+            transformationPrediction[2] = transformationPrediction[7] = changeTime;
+            Matrix.multiplyMV(stateMatrices, STATE_PREDICT, transformationPrediction, 0, stateMatrices, STATE_CURRENT);
+            addV(stateMatrices, STATE_CURRENT, stateMatrices, STATE_PREDICT, stateMatrices, STATE_CONTROL);
+            // TODO: 2/8/2017 add control
+
+            
             // We can only integrate if we have a previous acceleration to baseline from
             if (acceleration != null) {
-                Acceleration accelPrev = acceleration;
-                Velocity velocityPrev = velocity;
                 if (parameters.loggingEnabled) {
-                    RobotLog.vv(parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", (acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1e-9, acceleration, velocity, position);
+                    RobotLog.vv(parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", changeTime, acceleration, velocity, position);
                 }
             } else {
             }
@@ -293,6 +341,36 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
     }
 
 //region matrix maths
+//m1+m2 = out
+    private void add(float[] out, int offsetOut, float[] m1, int offsetM1, float[] m2, int offsetM2){
+    for (int i = 0; i < 16; i++){
+        out[i] = m1[i] + m2[i];
+    }
+}
+    //m1-m2 = out
+    private void sub(float[] out, int offsetOut, float[] m1, int offsetM1, float[] m2, int offsetM2){
+        for (int i = 0; i < 16; i++){
+            out[i] = m1[i] - m2[i];
+        }
+    }
+    //v1+v2 = out
+    private void addV(float[] out, int offsetOut, float[] v1, int offsetV1, float[] v2, int offsetV2){
+        for (int i = 0; i < 4; i++){
+            out[i] = v1[i] + v2[i];
+        }
+    }
+    //v1-v2 = out
+    private void subV(float[] out, int offsetOut, float[] v1, int offsetV1, float[] v2, int offsetV2){
+        for (int i = 0; i < 4; i++){
+            out[i] = v1[i] - v2[i];
+        }
+    }
+    //cov(s) = out
+    private void sToCov(float[] out, int offsetOut, float[] s, int offsetS){
+        for (int i = 0; i < 16; i++){
+            out[i] = s[i/4] * s[i%4];
+        }
+    }
     //m1+m2 = out
     private void add(float[] out, float[] m1, float[] m2){
         for (int i = 0; i < 16; i++){
