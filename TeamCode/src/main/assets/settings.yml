@@ -9,7 +9,7 @@
 
 # flags
 alliance: red
-position: general
+position: inside
 
 catapult:
   light_tolerance: 0.2 #put in settings(test first)
@@ -37,6 +37,7 @@ encoder:
 
 # The drivetrain's settings.
 drivetrain:
+  motor_angle: 60.0
   motor_scale: .85
   gear_ratio: 1
   motion:
@@ -122,14 +123,16 @@ auto:
   time:
   encoder:
 
-camera_settings:
-  centering_margin: 5.0 #mm
-  distance_to_stop: 101.6 #mm
-  angle_margin: 5.0 #degrees
-
-positional_drive:
+drive:
+  update_using: encoders
+  init_with_fieldmap: false
   x_margin: 4.0 #cm
   y_margin: 4.0 #cm
+  camera_settings:
+    centering_margin: 5.0 #mm
+    distance_to_stop: 101.6 #mm
+    angle_margin: 5.0 #degrees
+    beacon_check_distance: 100.0 #mm
 
 autonomous:
   red_alliance:

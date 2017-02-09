@@ -34,14 +34,14 @@ coordinates:
       x: -28.00
       y: -28.00
     custom1:
-      x: 0.0
+      x: 50.0
       y: 0.0
     custom2:
-      x: 0.0
-      y: 0.0
+      x: 50.0
+      y: 50.0
     custom3:
       x: 0.0
-      y: 0.0
+      y: 50.0
   blue:
     script_size: 3.0
     script:

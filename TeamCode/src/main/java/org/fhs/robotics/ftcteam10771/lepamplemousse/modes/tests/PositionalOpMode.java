@@ -1,38 +1,34 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.CameraDrive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
+import org.firstinspires.ftc.robotcore.internal.opengl.AutoConfigGLSurfaceView;
 
 /**
- * Tests the camera drive class
- * Created by joelv on 2/3/2017.
+ * Op mode to test out the drive class and the fieldmap file
+ * Created by joelv on 2/6/2017.
  */
-@Autonomous(name="Camera Drive", group="Not So Basic Stuff")
-public class CameraDriveOp extends LinearOpMode{
+@Autonomous(name="PositionalTest")
+public class PositionalOpMode extends LinearOpMode {
 
-    Controllers controls;
-    private long lastTime;      // The time at the last time check (using System.currentTimeMillis())
+         // The time at the last time check (using System.currentTimeMillis())
     private Config rawSettings;
     private Config.ParsedData settings;
+    private Config scriptConfig;
+    private Config fieldMapConfig;
     private Components components;
     private Drive drive;
-    private CameraDrive cameraDrive;
-    private CameraVision cameraVision;
     private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
 
     @Override
@@ -52,6 +48,15 @@ public class CameraDriveOp extends LinearOpMode{
                 rawSettings.read(true);
         }
 
+        fieldMapConfig = new Config("/Position", "fieldmap.yml", telemetry, "field");
+        if (fieldMapConfig.read()== Config.State.DEFAULT_EXISTS){
+            fieldMapConfig.create(true);
+            if (fieldMapConfig.read()== Config.State.DEFAULT_EXISTS)
+                fieldMapConfig.read(true);
+        }
+
+        Config.ParsedData parsedField = fieldMapConfig.getParsedData();
+
         this.settings = rawSettings.getParsedData();
 
 
@@ -67,21 +72,14 @@ public class CameraDriveOp extends LinearOpMode{
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, telemetry);
-
-        cameraVision = new CameraVision();
-        //todo handle the
-        cameraVision.cameraThread.start();
-        cameraDrive = new CameraDrive(cameraVision, drive, settings);
-
-        this.lastTime = System.currentTimeMillis();
+                settings, parsedField, telemetry);
 
         waitForStart();
-
         drive.setRelative(true);
-        drive.startVelocity();
-        cameraDrive.rotate();
-        cameraDrive.center();
-        cameraDrive.approach();
+        drive.driveTo("custom1");
+        drive.driveTo("custom2");
+        drive.driveTo("custom3");
+        //drive.startScript();
+        drive.stop();
     }
 }
