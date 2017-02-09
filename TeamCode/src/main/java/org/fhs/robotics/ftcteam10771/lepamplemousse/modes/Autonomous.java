@@ -25,7 +25,7 @@ public class Autonomous extends OpMode {
 
     private Config rawSettings;
     private Config.ParsedData settings;
-    Config.ParsedData parsedField
+    Config.ParsedData parsedField;
     private Config fieldMapConfig;
     private Components components;
     private Drive drive;
