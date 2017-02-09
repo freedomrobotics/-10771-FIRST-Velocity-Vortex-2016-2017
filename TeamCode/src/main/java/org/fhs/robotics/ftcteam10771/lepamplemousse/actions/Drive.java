@@ -144,7 +144,7 @@ public class Drive {
         }
     };
 
-    Thread driveThread = new Thread(driveRunnable); //initializes driveThread based on driveRunnable
+    public Thread driveThread = new Thread(driveRunnable); //initializes driveThread based on driveRunnable
 
     /**
      * Constructor
