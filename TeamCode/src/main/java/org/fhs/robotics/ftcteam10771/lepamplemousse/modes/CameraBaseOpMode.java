@@ -24,16 +24,10 @@ public class CameraBaseOpMode extends LinearOpMode {
         double totalRatio = 0.0;
         int iterations = 0;
         while (opModeIsActive()){
-            if (cameraVision.countTrackedImages()==1){
-                cameraVision.setHighestIndexedImageAsTarget();
-            }
-            else cameraVision.setTargetImage(null);
             if (cameraVision.imageInSight()){
                 telemetry.addData("Image", cameraVision.target().getName());
-                telemetry.addData("Overall Distance", hypotenuse());
-                telemetry.addData("Wall Angle", wallAngle());
-                telemetry.addData("Image Angle", imageAngle());
-                telemetry.addData("Overall Angle", angle());
+                telemetry.addData("X", cameraVision.updateCoordinates().getX());
+                telemetry.addData("Y", cameraVision.updateCoordinates().getY());
             }
             else{
                 telemetry.addData("Image", "NULL");

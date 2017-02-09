@@ -9,6 +9,7 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
@@ -504,7 +505,7 @@ public class CameraVision {
 
     /**
      * Gets absolute angle relative to the field
-     * @return
+     * @return the absolute angle from an image
      */
     public double absoluteAngle(){
         double init_angle = useRadians ? Math.PI/2.0 : 90.0;
@@ -515,6 +516,34 @@ public class CameraVision {
         double x = -getX();
         double imageAngle = useRadians ?  Math.atan(x/z) : Math.toDegrees(Math.atan(x/z));
         return init_angle - getAngleToTurn() + imageAngle;
+    }
+
+    /**
+     * Gets distance from image
+     * Note: inaccurate for up to 10 mm
+     * @return the absolute distance from image in millimeters
+     */
+    public double distanceFromImage(){
+        double x = getX();
+        double z = getZ();
+        return Math.sqrt((x*x)+(z*z));
+    }
+
+    /**
+     * Updates the robot's coordinates
+     * @return the robot's field coordinates
+     */
+    public Coordinate updateCoordinates (){
+        Coordinate coordinate = new Coordinate();
+        float x = (float)distanceFromImage()*(float)Math.cos(absoluteAngle());
+        float y = (float)distanceFromImage()*(float)Math.sin(absoluteAngle());
+        x = Coordinate.convertTo(x, Coordinate.UNIT.MM_TO_UNIT);
+        y = Coordinate.convertTo(y, Coordinate.UNIT.MM_TO_UNIT);
+        x = targetedImage.getxCoordinate() - x;
+        y = targetedImage.getyCoordinate() - y;
+        coordinate.setX(x);
+        coordinate.setY(y);
+        return coordinate;
     }
 
 }

@@ -22,6 +22,8 @@ public class Catapult {
     public Thread catapultThread;
     private int readyPosition=1;
     private boolean buttonPressed = false;
+    private int margin=5;
+    private int targetPosition=1440;
     Config.ParsedData settings;
 
     public Catapult(DcMotor motor, OpticalDistanceSensor opticalDistanceSensor,
@@ -33,8 +35,12 @@ public class Catapult {
         rotator.setDirection(DcMotorSimple.Direction.REVERSE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setTargetPosition(settings.getInt("target_position"));//put config
+        targetPosition = this.settings.getInt("target_position");
+        rotator.setTargetPosition(targetPosition);//put config
+        //the real culprit of the divide by 0
+        //readyPosition = settings.getInt("ready_position");
         readyPosition = this.settings.getInt("ready_position");
+        margin = this.settings.getInt("position_margin");
         catapultThread = this.settings.getBool("use_encoder") ? new Thread(runEncoder) : new Thread(runCatapult);
     }
 
@@ -43,14 +49,14 @@ public class Catapult {
         public void run() {
             while(!Thread.interrupted())
             {
-                if (catapultReady()){
-                    buttonPressed = false;
-                    while(!button()){
-                        oscillate();
-                    }
-                    buttonPressed = true;
-                    while(catapultReady()){
-                        launchCatapult();
+                if (rotator.getCurrentPosition()>margin){
+                    if (catapultReady()){
+                        while(!button()){
+                            oscillate();
+                        }
+                        while(catapultReady()){
+                            launchCatapult();
+                        }
                     }
                 }
                 returnToReady();
@@ -62,14 +68,16 @@ public class Catapult {
         @Override
         public void run() {
             while (!Thread.interrupted()){
-                if (encoderReady()){
-                    buttonPressed = false;
-                    while(!button()){
-                        oscillate();
-                    }
-                    buttonPressed = true;
-                    while(encoderReady() && buttonPressed){
-                        launchCatapult();
+                if (rotator.getCurrentPosition()>margin){
+                    if (encoderReady()){
+                        buttonPressed = false;
+                        while(!button()){
+                            oscillate();
+                        }
+                        buttonPressed = true;
+                        while(encoderReady() && buttonPressed){
+                            launchCatapult();
+                        }
                     }
                 }
                 returnToReady();
@@ -109,7 +117,6 @@ public class Catapult {
     }
 
     public void launchCatapult(){
-        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorPower = 1.0f;
         rotator.setPower(motorPower);
     }
@@ -122,7 +129,6 @@ public class Catapult {
 
     public boolean encoderReady(){
         int modular;
-        int margin = settings.getInt("position_margin");
         modular = rotator.getCurrentPosition() % readyPosition;
         if (modular<readyPosition-margin && modular > margin) return false;
         else return true;
@@ -132,8 +138,13 @@ public class Catapult {
         return rotator.getCurrentPosition();
     }
 
+    public int getReadyPosition(){
+        return readyPosition;
+    }
+
+
     public int getTargetPosition(){
-        return settings.getInt("target_position");
+        return targetPosition;
     }
     public double getLight(){return stopSensor.getLightDetected();}
 

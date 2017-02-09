@@ -101,6 +101,8 @@ public class CatapultTest extends OpMode{
         telemetry.addData("Position", catapult.getCatapultPosition());
         telemetry.addData("Readiness", catapult.encoderReady());
         telemetry.addData("Light", catapult.getLight());
+        telemetry.addData("Target", catapult.getTargetPosition());
+        telemetry.addData("ReadyPosition", catapult.getReadyPosition());
         telemetry.update();
     }
 
