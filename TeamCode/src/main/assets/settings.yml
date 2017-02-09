@@ -9,18 +9,7 @@
 
 # flags
 alliance: red
-position: inside
-
-catapult:
-  light_tolerance: 0.2 #put in settings(test first)
-  ready_position: 1440 #put in settings
-  target_position: 14440 #put in settings
-  oscillation_max: 0.1 #put in settings
-  position_margin: 20
-  power_increment: 0.01 #put in settings
-  launch_power: 0.8
-  use_encoder: true #change in settings
-  map_name: launcher
+position: general
 
 robot:
   initial_position:
@@ -30,59 +19,66 @@ robot:
   size:
     x: 444.5    #width approx 17.5in
     y: 431.8    #length approx 15in
+  imu_offset:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    r: 0.0
+  phone_offset:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    r: 0.0
 
 encoder:
   output_pulses: 1440
   encoder_pulses: 28
 
+auto:
+  delay: 2000
+  drive: 5000
+  power: .778
+  power_ratio: .778
+
+intake_divisor: 5000
+
 # The drivetrain's settings.
 drivetrain:
   motor_angle: 60.0
-  motor_scale: .85
-  gear_ratio: 1
+  motor_max_power: 1
+  gear_ratio: 2.5
   motion:
     max_velocity: 100 # mm/s
     max_acceleration: 100 # mm^2/s
     max_jerk: 100 # mm^3/s
-  positional:
-    speed: .67
-    rotation: .25
-    rotational_tolerance: 3 #degrees
-    translational_tolerance: 10 #mm
   motor:
     front_left:
       map_name: drive_front_left
-      reversed: true
+      reversed: false
     front_right:
       map_name: drive_front_right
-      reversed: false
+      reversed: true
     back_right:
       map_name: drive_back_left
-      reversed: true
+      reversed: false
     back_left:
       map_name: drive_back_right
-      reversed: false
+      reversed: true
   wheel:
     diameter: 101.6 # 4 inches
-
-# Intake
-intake:
-  map_name: intake
-  reversed: true
-  increments_per_second: .2
 
 # Front Bumper-thing Settings
 bumper:
   enabled: true
-  max_ang_vel: 80.0
+  max_ang_vel: 20.0
   full_rotate: 180.0  #180 degree servo
-  max_rotate: 65.0    #programmed limit
-  preset: 45.0
+  max_rotate: 60.0    #programmed limit
+  preset: 15.0
   start_pos: 0.0
   left_servo:
     map_name: bumper_left
     reversed: true
-    offset: 18.0
+    offset: 15.75
   right_servo:
     map_name: bumper_right
     reversed: false
@@ -118,21 +114,6 @@ beacon:
       red: 2
       green: 2
       blue: 2
-
-auto:
-  time:
-  encoder:
-
-drive:
-  update_using: encoders
-  init_with_fieldmap: false
-  x_margin: 4.0 #cm
-  y_margin: 4.0 #cm
-  camera_settings:
-    centering_margin: 5.0 #mm
-    distance_to_stop: 101.6 #mm
-    angle_margin: 5.0 #degrees
-    beacon_check_distance: 100.0 #mm
 
 autonomous:
   red_alliance:
