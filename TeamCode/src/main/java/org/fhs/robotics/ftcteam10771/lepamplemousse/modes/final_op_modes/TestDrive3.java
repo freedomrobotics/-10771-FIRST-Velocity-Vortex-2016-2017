@@ -61,7 +61,7 @@ public class TestDrive3 extends LinearOpMode{
             //read without creating file if it still fails.
             if (keymapping.read() == Config.State.DEFAULT_EXISTS)
                 keymapping.read(true);
-            Log.d(TAG, "keymapping-read-again");
+                Log.d(TAG, "keymapping-read-again");
         }
 
         Config components = new Config(Static.configPath, Static.configCompFileName + Static.configFileSufffix, telemetry, "components");
@@ -71,7 +71,7 @@ public class TestDrive3 extends LinearOpMode{
             Log.d(TAG, "components-read-fail-create");
             if (components.read() == Config.State.DEFAULT_EXISTS)
                 components.read(true);
-            Log.d(TAG, "components-read-again");
+                Log.d(TAG, "components-read-again");
         }
 
         rawSettings = new Config(Static.configPath, Static.configVarFileName + Static.configFileSufffix, telemetry, "settings");
@@ -81,7 +81,7 @@ public class TestDrive3 extends LinearOpMode{
             Log.d(TAG, "settings-read-fail-create");
             if (rawSettings.read() == Config.State.DEFAULT_EXISTS)
                 rawSettings.read(true);
-            Log.d(TAG, "settings-read-again");
+                Log.d(TAG, "settings-read-again");
         }
 
         settings = rawSettings.getParsedData();

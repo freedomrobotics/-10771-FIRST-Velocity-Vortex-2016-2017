@@ -1,4 +1,4 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 
 import android.util.Log;
 
@@ -22,7 +22,7 @@ import java.util.List;
  */
 
 @Autonomous(name = "cheap_auto")
-public class auto extends LinearOpMode{
+public class Auto extends LinearOpMode{
 
     //initializes motors in order of standard graph quadrants
     private DcMotor motorFR;
@@ -153,7 +153,7 @@ public class auto extends LinearOpMode{
 
         waitForNextHardwareCycle();
 
-        sleep(settings.subData("auto").getInt("drive"));
+        sleep(settings.subData("Auto").getInt("drive"));
 
         motorFR.setPower(0);
         motorFL.setPower(0);

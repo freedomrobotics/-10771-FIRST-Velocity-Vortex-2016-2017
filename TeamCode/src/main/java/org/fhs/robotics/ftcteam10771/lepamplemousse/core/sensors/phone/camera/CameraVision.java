@@ -108,7 +108,7 @@ public class CameraVision {
     //Flag on whether to use Radians(Degrees if false)
     private boolean useRadians = true;
 
-    //Flag on whether or not to auto target image
+    //Flag on whether or not to Auto target image
     private boolean autoTarget = true;
 
     //Null vector
@@ -432,7 +432,7 @@ public class CameraVision {
     }
 
     /**
-     * Set the image to auto target or not
+     * Set the image to Auto target or not
      * @param state
      */
     public void setAutoTarget(boolean state){
@@ -440,8 +440,8 @@ public class CameraVision {
     }
 
     /**
-     * State of auto target use
-     * @return auto target state
+     * State of Auto target use
+     * @return Auto target state
      */
     public boolean isAutoTarget(){
         return autoTarget;
