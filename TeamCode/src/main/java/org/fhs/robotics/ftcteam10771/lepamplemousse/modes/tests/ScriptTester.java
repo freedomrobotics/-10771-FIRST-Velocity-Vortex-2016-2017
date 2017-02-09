@@ -62,16 +62,21 @@ public class ScriptTester extends LinearOpMode {
     public void startScript(){
         List<String> commands = (List<String>) parsedField.getObject("script");
         for (String command : commands){
+            /*
             while(!controls.getDigital("script")){}
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            telemetry.addData("Location", command);
-            telemetry.addData("X", parsedField.subData(command).getFloat("x"));
-            telemetry.addData("Y", parsedField.subData(command).getFloat("y"));
-            telemetry.update();
+            */
+            long startTime = System.currentTimeMillis();
+            while (System.currentTimeMillis()-startTime<10000){
+                telemetry.addData("Location", command);
+                telemetry.addData("X", parsedField.subData(command).getFloat("x"));
+                telemetry.addData("Y", parsedField.subData(command).getFloat("y"));
+                telemetry.update();
+            }
         }
     }
 
