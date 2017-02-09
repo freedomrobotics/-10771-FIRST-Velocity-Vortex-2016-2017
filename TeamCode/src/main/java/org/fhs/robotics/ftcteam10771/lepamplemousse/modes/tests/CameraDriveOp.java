@@ -85,6 +85,7 @@ public class CameraDriveOp extends LinearOpMode{
         rotate();
         center();
         approach();
+        /*
         if ((checkBeaconSide(RGB.Direction.LEFT))){
             telemetry.addData("Side", "left");
             telemetry.update();
@@ -93,6 +94,7 @@ public class CameraDriveOp extends LinearOpMode{
             telemetry.addData("Side", "right");
             telemetry.update();
         }
+        */
         idle();
     }
 
@@ -140,10 +142,10 @@ public class CameraDriveOp extends LinearOpMode{
             float theta = 0.0f;
             switch (direction){
                 case LEFT:
-                    theta = backCamera ? 0.0f : (float)Math.PI;
+                    theta = backCamera ? (float)Math.PI : 0.0f;
                     break;
                 case RIGHT:
-                    theta = backCamera ? (float)Math.PI : 0.0f;
+                    theta = backCamera ? 0.0f : (float)Math.PI;
                     break;
                 default:
                     theta = 0.0f;
