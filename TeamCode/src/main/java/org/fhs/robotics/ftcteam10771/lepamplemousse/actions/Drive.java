@@ -354,4 +354,11 @@ public class Drive {
             }
         }
     }
+
+    public void driveTo(String location){
+        setCoordinate(location);
+        while(!atLocation()){
+            startPosition();
+        }
+    }
 }

@@ -70,7 +70,7 @@ public class CameraDriveOp extends LinearOpMode{
 
         //FIXME: I forgot how the aliases work - Joel
         alliance = (settings.getString("alliance")=="red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
-        rgb = new RGB(Aliases.colorSensorMap.get("color_sensor_left"), Aliases.colorSensorMap.get("color_sensor_right"));
+        rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
 
         cameraVision = new CameraVision();
         backCamera = cameraVision.usingBackCamera();
