@@ -31,7 +31,7 @@ public class Drive {
     boolean driveThreadActive = false;
 
     int pastPosition;
-    int pastPositionTime;
+    float pastPositionTime;
 
     Runnable driveRunnable = new Runnable() {
         @Override
@@ -48,6 +48,7 @@ public class Drive {
 
                 if (vectorDriveActive) {
                     //sets values from the vectorR needed for movement
+                    //refresh vectorR
                     joystickTheta = (float) Math.atan2(vectorR.getY(), vectorR.getX());
                     robotVelocity = vectorR.getRadius();
                     rotationalPower = vectorR.getRad();
@@ -115,13 +116,12 @@ public class Drive {
 
                 double currentVelocity = (blMotor.getCurrentPosition()-pastPosition)*(/*time**/pastPositionTime);
                 //TODO: Continue work here(uncomment first)
-                //pastPositionTime =
-                /*
-                if(outputting){
+                pastPositionTime = System.nanoTime();
+
+                if(currentVelocity>0){
                     velocityFeedback.setX((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
                     velocityFeedback.setY((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
                 }
-                */
                 pastPosition = blMotor.getCurrentPosition();
 
                 /* spams the console
@@ -178,7 +178,7 @@ public class Drive {
     public void startVelocity(){
         vectorDriveActive = true;
         driveThreadActive = true;
-        if (!driveThread.isAlive())driveThread.start();
+        driveThread.start();
     }
 
     /**
@@ -189,7 +189,7 @@ public class Drive {
         // position can be gained from getVectorR and the vectorR provided is the aim position.
         vectorDriveActive = false;
         driveThreadActive = true;
-        if (!driveThread.isAlive())driveThread.start();
+        driveThread.start();
     }
 
     /**
