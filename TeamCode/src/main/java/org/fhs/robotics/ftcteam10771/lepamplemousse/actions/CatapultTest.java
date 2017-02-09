@@ -88,7 +88,7 @@ public class CatapultTest extends OpMode{
 
         //FIXME: not sure if this initialization will work
         //TODO: before compiling, enable motor6 and light sensor to true and configurate them or change this line of code
-        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), null, controls, settings);
+        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
     }
 
     @Override
@@ -100,6 +100,7 @@ public class CatapultTest extends OpMode{
     public void loop(){
         telemetry.addData("Position", catapult.getCatapultPosition());
         telemetry.addData("Readiness", catapult.encoderReady());
+        telemetry.addData("Light", catapult.getLight());
         telemetry.update();
     }
 

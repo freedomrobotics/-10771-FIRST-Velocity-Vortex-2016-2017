@@ -20,6 +20,7 @@ public class Catapult {
     private float motorPower=0.0f;
     private Controllers controllers;
     public Thread catapultThread;
+    private int readyPosition=1;
     private boolean buttonPressed = false;
     Config.ParsedData settings;
 
@@ -32,6 +33,8 @@ public class Catapult {
         rotator.setDirection(DcMotorSimple.Direction.REVERSE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rotator.setTargetPosition(settings.getInt("target_position"));//put config
+        readyPosition = this.settings.getInt("ready_position");
         catapultThread = this.settings.getBool("use_encoder") ? new Thread(runEncoder) : new Thread(runCatapult);
     }
 
@@ -41,14 +44,16 @@ public class Catapult {
             while(!Thread.interrupted())
             {
                 if (catapultReady()){
+                    buttonPressed = false;
                     while(!button()){
                         oscillate();
                     }
+                    buttonPressed = true;
                     while(catapultReady()){
-                        rotator.setPower(1.0);
+                        launchCatapult();
                     }
                 }
-                rotator.setPower(1.0);
+                returnToReady();
             }
         }
     };
@@ -105,24 +110,21 @@ public class Catapult {
 
     public void launchCatapult(){
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setTargetPosition(settings.getInt("target_position"));//put config
         motorPower = 1.0f;
         rotator.setPower(motorPower);
     }
 
     private void returnToReady(){
-        int targetPosition = settings.getInt("target_position");
-        motorPower = (targetPosition-rotator.getCurrentPosition()/targetPosition);
-        rotator.setTargetPosition(targetPosition);
+        int modular = rotator.getCurrentPosition() % readyPosition;
+        motorPower = (readyPosition-modular/readyPosition);
         rotator.setPower(motorPower);
     }
 
     public boolean encoderReady(){
         int modular;
-        int targetPosition = settings.getInt("target_position");
         int margin = settings.getInt("position_margin");
-        modular = rotator.getCurrentPosition() % targetPosition;
-        if (modular>targetPosition-margin && modular > margin) return false;
+        modular = rotator.getCurrentPosition() % readyPosition;
+        if (modular<readyPosition-margin && modular > margin) return false;
         else return true;
     }
 
@@ -133,6 +135,7 @@ public class Catapult {
     public int getTargetPosition(){
         return settings.getInt("target_position");
     }
+    public double getLight(){return stopSensor.getLightDetected();}
 
     //TODO: Put catapult power and light tolerance in settings
 }
