@@ -46,7 +46,7 @@ public class IMUTest3 extends LinearOpMode{
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);
-        imuHandler.createAccelerationIntegrator(parsedKalman, 3);
+        imuHandler.createAccelerationIntegrator(parsedKalman, 3, telemetry);
         imuHandler.imuInit(); //possible null pointer here; if there is, check parameters at method
         //imu.initialize();
 
