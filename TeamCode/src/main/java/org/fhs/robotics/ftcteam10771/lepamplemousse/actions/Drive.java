@@ -127,10 +127,19 @@ public class Drive {
                 double br = (-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
 
                 //calculates the motor powers
-                frMotor.setPower(Range.scale(fr, -1, 1, -motorScale, motorScale));
-                flMotor.setPower(Range.scale(fl, -1, 1, -motorScale, motorScale));
-                blMotor.setPower(Range.scale(bl, -1, 1, -motorScale, motorScale));
-                brMotor.setPower(Range.scale(br, -1, 1, -motorScale, motorScale));
+                if (!Thread.currentThread().isInterrupted()){
+                    frMotor.setPower(Range.scale(fr, -1, 1, -motorScale, motorScale));
+                    flMotor.setPower(Range.scale(fl, -1, 1, -motorScale, motorScale));
+                    blMotor.setPower(Range.scale(bl, -1, 1, -motorScale, motorScale));
+                    brMotor.setPower(Range.scale(br, -1, 1, -motorScale, motorScale));
+                }
+                else{
+                    frMotor.setPower(0.0f);
+                    flMotor.setPower(0.0f);
+                    blMotor.setPower(0.0f);
+                    brMotor.setPower(0.0f);
+                }
+
 
                 double currentVelocity = (blMotor.getCurrentPosition()-pastPosition)*(/*time**/pastPositionTime);
                 //TODO: Continue work here(uncomment first)
@@ -143,10 +152,12 @@ public class Drive {
                 pastPosition = blMotor.getCurrentPosition();
 
                 // spams the console
+                /*
                 telemetry.addData("Speed-FR", fr);
                 telemetry.addData("Speed-FL", fl);
                 telemetry.addData("Speed-BL", bl);
                 telemetry.addData("Speed-BR", br);
+                */
 
             }
             frMotor.setPower(0.0);
@@ -202,10 +213,9 @@ public class Drive {
             robot.rotation.setRadians(settings.subData("robot").getFloat("initial_rotation"));
         }*/
 
-        robot.position.setX(settings.subData("robot").subData("initial_position").getFloat("x"));
-        robot.position.setY(settings.subData("robot").subData("initial_position").getFloat("y"));
-        robot.rotation.setRadians(settings.subData("robot").getFloat("initial_rotation"));
-
+        robot.getPosition().setX(settings.subData("robot").subData("initial_position").getFloat("x"));
+        robot.getPosition().setY(settings.subData("robot").subData("initial_position").getFloat("y"));
+        robot.getVectorR().getRad();
         //sensorHandler =
 
         DcMotor.RunMode runMode = DcMotor.RunMode.RUN_USING_ENCODER;
