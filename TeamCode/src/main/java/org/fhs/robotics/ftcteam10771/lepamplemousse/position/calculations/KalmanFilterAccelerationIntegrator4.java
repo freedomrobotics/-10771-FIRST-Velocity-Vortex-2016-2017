@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import java.util.Vector;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.UltrasonicRange;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
@@ -58,6 +59,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.scale;
  */
 public class
 KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator {
+    private final BNO055IMU imu;
     //------------------------------------------------------------------------------------------
     // State
     //------------------------------------------------------------------------------------------
@@ -93,11 +95,11 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
     VectorR joystickControl; //Velocity vector derived from the joystick expected value.
 
     //Persistent Matrices
-    float[] currentState;
+    /*float[] currentState;
     float[] currentUncertainty; //also a covariance
     float[] modelCovariance;
     float[] sensorCovariance;
-    float[] matrixIdentity;
+    float[] matrixIdentity;*/
 
     public Position getPosition() {
         return this.position;
@@ -115,7 +117,7 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
     // Construction
     //------------------------------------------------------------------------------------------
 
-    public KalmanFilterAccelerationIntegrator4(Config.ParsedData kalmanConfig) {
+    public KalmanFilterAccelerationIntegrator4(Config.ParsedData kalmanConfig, VectorR joystickControl, BNO055IMU imu) {
         this.parameters = null;
         this.position = null;
         this.velocity = null;
@@ -125,18 +127,19 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         this.constantMatrices = new float[48];
         this.uncertaintyMatrices = new float[32];
         this.transformationPrediction = new float[16];
-        this.workingMatrices = new float[20];
-        this.stateMatrices =  new float[16];
+        this.workingMatrices = new float[32];
+        this.stateMatrices = new float[16];
 
-        this.currentState = new float[4];
+        /*this.currentState = new float[4];
         this.currentUncertainty = new float[16];
         this.modelCovariance = new float[16];
         this.sensorCovariance = new float[16];
         this.transformationPrediction = new float[16];
-        this.matrixIdentity = new float[16];
+        this.matrixIdentity = new float[16];*/
         // Generate a 4x4 identity matrix
         //Matrix.setIdentityM(this.matrixIdentity, 0);
         Matrix.setIdentityM(constantMatrices, CONST_IDENTITY);
+        this.imu = imu;
     }
 
     //------------------------------------------------------------------------------------------
@@ -156,9 +159,9 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         this.currentState[2] = (float) velocity.xVeloc;
         this.currentState[3] = (float) velocity.yVeloc;*/
         this.stateMatrices[STATE_CURRENT] = (float) position.x;
-        this.stateMatrices[STATE_CURRENT+1] = (float) position.y;
-        this.stateMatrices[STATE_CURRENT+2] = (float) velocity.xVeloc;
-        this.stateMatrices[STATE_CURRENT+3] = (float) velocity.yVeloc;
+        this.stateMatrices[STATE_CURRENT + 1] = (float) position.y;
+        this.stateMatrices[STATE_CURRENT + 2] = (float) velocity.xVeloc;
+        this.stateMatrices[STATE_CURRENT + 3] = (float) velocity.yVeloc;
 
         float[] modelNoise = new float[4];
         float[] sensorNoise = new float[4];
@@ -196,22 +199,80 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
     //This is where to perform the actual math
     @Override
     public void update(Acceleration linearAcceleration) {
+        // Perform Acceleration transformation here
+
         // We should always be given a timestamp here
         if (linearAcceleration.acquisitionTime != 0) {
-            Acceleration accelPrev = acceleration;
-
-            float changeTime = (float) ((acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1e-9);
-
-            // Model Prediction X = AP + BC
-            // Transformation Matrix
-            transformationPrediction[2] = transformationPrediction[7] = changeTime;
-            Matrix.multiplyMV(stateMatrices, STATE_PREDICT, transformationPrediction, 0, stateMatrices, STATE_CURRENT);
-            addV(stateMatrices, STATE_CURRENT, stateMatrices, STATE_PREDICT, stateMatrices, STATE_CONTROL);
-            // TODO: 2/8/2017 add control
-
-            
             // We can only integrate if we have a previous acceleration to baseline from
             if (acceleration != null) {
+                Acceleration accelPrev = acceleration;
+
+                float changeTime = (float) ((acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1e-9);
+
+                // START KALMAN
+                // Refer to maths below
+                // Model Prediction X = AP + BC
+                // Transformation Matrix
+                transformationPrediction[2] = transformationPrediction[7] = changeTime;
+                Matrix.multiplyMV(stateMatrices, STATE_PREDICT, transformationPrediction, 0, stateMatrices, STATE_CURRENT);
+                addV(stateMatrices, STATE_CURRENT, stateMatrices, STATE_PREDICT, stateMatrices, STATE_CONTROL);
+                // TODO: 2/8/2017 add control
+
+                // Model Uncertainty Z = A Z1 A^t + Q
+                // Store the transpose in the working matrices, indexes 16-31
+                Matrix.transposeM(workingMatrices, 16, transformationPrediction, 0);
+                // Temporarily store the current matrix in measured uncertainty
+                Matrix.multiplyMM(uncertaintyMatrices, UNC_MEASURED, transformationPrediction, 0, uncertaintyMatrices, UNC_CURRENT);
+                // Store this common start to the working matrices, indexes 0-15; we don't need the transpose after this
+                Matrix.multiplyMM(workingMatrices, 0, uncertaintyMatrices, UNC_MEASURED, workingMatrices, 16);
+                add(uncertaintyMatrices, UNC_CURRENT, workingMatrices, 0, constantMatrices, CONST_MODEL_COV);
+
+                // Measurement M = AP + Ba
+                // taking working matrix indexes 16 to 19 for transformed acceleration (Ba)
+                workingMatrices[16] = (float) (.5f * changeTime * changeTime * acceleration.xAccel);
+                workingMatrices[17] = (float) (.5f * changeTime * changeTime * acceleration.yAccel);
+                workingMatrices[18] = (float) (changeTime * acceleration.xAccel);
+                workingMatrices[19] = (float) (changeTime * acceleration.yAccel);
+                // adding to shared start
+                addV(stateMatrices, STATE_MEASURE, stateMatrices, STATE_PREDICT, workingMatrices, 16);
+
+                // Measurement Uncertainty E = A Z1 A^t + R
+                // Taking from shared start
+                add(uncertaintyMatrices, UNC_MEASURED, workingMatrices, 0, constantMatrices, CONST_SENSOR_COV);
+
+                // Calculating Kalman Gain K = Z(Z + E)^-1
+                // working matrix 0-15 holds (Z + E); 16-31 holds inverse
+                add(workingMatrices, 0, uncertaintyMatrices, UNC_CURRENT, uncertaintyMatrices, UNC_MEASURED);
+                Matrix.invertM(workingMatrices, 16, workingMatrices, 0);
+                // working matrix 0-16 will now hold K
+                Matrix.multiplyMM(workingMatrices, 0, uncertaintyMatrices, UNC_CURRENT, workingMatrices, 16);
+
+                // Calculating state S = X + K(M - X)
+                // M - X in working matrices indexes 16-19
+                subV(workingMatrices, 16, stateMatrices, STATE_MEASURE, stateMatrices, STATE_CURRENT);
+                Matrix.multiplyMV(workingMatrices, 20, workingMatrices, 0, workingMatrices, 16);
+                addV(stateMatrices, STATE_CURRENT, stateMatrices, STATE_CURRENT, workingMatrices, 20);
+
+                // Temporary Matrix for uncertainty F = I - K
+                sub(workingMatrices, 16, constantMatrices, CONST_IDENTITY, workingMatrices, 0);
+
+                // Calculating new uncertainty FZF^t + KRK^t
+                // F^t in measured uncertainty; FZ in transformationPrediction
+                Matrix.transposeM(uncertaintyMatrices, UNC_MEASURED, workingMatrices, 16);
+                Matrix.multiplyMM(transformationPrediction, 0, workingMatrices, 16, uncertaintyMatrices, UNC_CURRENT);
+                Matrix.multiplyMM(uncertaintyMatrices, UNC_CURRENT, transformationPrediction, 0, uncertaintyMatrices, UNC_MEASURED);
+                // K^t in working matrices 16-31; KR in measured uncertainty; KRK^t in working 0-15
+                Matrix.transposeM(workingMatrices, 16, workingMatrices, 0);
+                Matrix.multiplyMM(uncertaintyMatrices, UNC_MEASURED, workingMatrices, 0, constantMatrices, CONST_SENSOR_COV);
+                Matrix.multiplyMM(workingMatrices, 0, uncertaintyMatrices, UNC_MEASURED, workingMatrices, 16);
+                add(uncertaintyMatrices, UNC_CURRENT, uncertaintyMatrices, UNC_CURRENT, workingMatrices, 0);
+                //END KALMAN
+
+                position.x = stateMatrices[STATE_CURRENT];
+                position.y = stateMatrices[STATE_CURRENT + 1];
+                velocity.xVeloc = stateMatrices[STATE_CURRENT + 2];
+                velocity.yVeloc = stateMatrices[STATE_CURRENT + 3];
+
                 if (parameters.loggingEnabled) {
                     RobotLog.vv(parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", changeTime, acceleration, velocity, position);
                 }
@@ -220,7 +281,7 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         }
     }
 
-    public void maths(){
+    /* maths
         //Z = Current Uncertainty
         //Z1 = Previous Uncertainty
 
@@ -250,7 +311,7 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
 
         /*
         Structure of Vector: [X Y vX vY]
-         */
+         *
         /*
         Model:
         X = AP + BC
@@ -267,7 +328,7 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         Uncertainty:
         F = I-K
         Z = FZF^t + KRK^t
-         */
+         *
 
         //model
         // X = AP + BC
@@ -338,39 +399,44 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         Matrix.multiplyMM(kalmanGain, 0, kalmanGain, 0, sensorCovariance, 0);
         Matrix.multiplyMM(kalmanGain, 0, kalmanGain, 0, transposes, 0);
         add(currentUncertainty, temp, kalmanGain);
+    */
+
+    //region matrix maths
+//m1+m2 = out
+    private void add(float[] out, int offsetOut, float[] m1, int offsetM1, float[] m2, int offsetM2) {
+        for (int i = 0; i < 16; i++) {
+            out[i + offsetOut] = m1[i + offsetM1] + m2[i + offsetM2];
+        }
     }
 
-//region matrix maths
-//m1+m2 = out
-    private void add(float[] out, int offsetOut, float[] m1, int offsetM1, float[] m2, int offsetM2){
-    for (int i = 0; i < 16; i++){
-        out[i] = m1[i] + m2[i];
-    }
-}
     //m1-m2 = out
-    private void sub(float[] out, int offsetOut, float[] m1, int offsetM1, float[] m2, int offsetM2){
-        for (int i = 0; i < 16; i++){
-            out[i] = m1[i] - m2[i];
+    private void sub(float[] out, int offsetOut, float[] m1, int offsetM1, float[] m2, int offsetM2) {
+        for (int i = 0; i < 16; i++) {
+            out[i + offsetOut] = m1[i + offsetM1] - m2[i + offsetM2];
         }
     }
+
     //v1+v2 = out
-    private void addV(float[] out, int offsetOut, float[] v1, int offsetV1, float[] v2, int offsetV2){
-        for (int i = 0; i < 4; i++){
-            out[i] = v1[i] + v2[i];
+    private void addV(float[] out, int offsetOut, float[] v1, int offsetV1, float[] v2, int offsetV2) {
+        for (int i = 0; i < 4; i++) {
+            out[i + offsetOut] = v1[i + offsetV1] + v2[i + offsetV2];
         }
     }
+
     //v1-v2 = out
-    private void subV(float[] out, int offsetOut, float[] v1, int offsetV1, float[] v2, int offsetV2){
-        for (int i = 0; i < 4; i++){
-            out[i] = v1[i] - v2[i];
+    private void subV(float[] out, int offsetOut, float[] v1, int offsetV1, float[] v2, int offsetV2) {
+        for (int i = 0; i < 4; i++) {
+            out[i + offsetOut] = v1[i + offsetV1] - v2[i + offsetV2];
         }
     }
+
     //cov(s) = out
-    private void sToCov(float[] out, int offsetOut, float[] s, int offsetS){
-        for (int i = 0; i < 16; i++){
-            out[i] = s[i/4] * s[i%4];
+    private void sToCov(float[] out, int offsetOut, float[] s, int offsetS) {
+        for (int i = 0; i < 16; i++) {
+            out[i + offsetOut] = s[(i + offsetS) / 4] * s[(i + offsetS) % 4];
         }
     }
+    /*
     //m1+m2 = out
     private void add(float[] out, float[] m1, float[] m2){
         for (int i = 0; i < 16; i++){
@@ -401,5 +467,50 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
             out[i] = s[i/4] * s[i%4];
         }
     }
+    */
 //endregion
+
+    /**
+     * Returns an acceeration in respect to field coordinates
+     *
+     * @param axis the chosen axis
+     * @return the converted vector value
+     */
+    public float getAbsoluteAcceleration(IMU.Axis axis) {
+        final double full_rotation = 2.0 * Math.PI;
+        double intrinsicAccelX = imu.getAcceleration().xAccel;
+        double intrinsicAccelY = imu.getAcceleration().yAccel;
+        double robotRotation = (double) imu.getAngularOrientation().toAxesOrder(XYZ).thirdAngle;
+        double intrinsicVectorAngle = Math.atan2(intrinsicAccelY, intrinsicAccelX);
+        if (intrinsicVectorAngle < 0) {
+            intrinsicVectorAngle += full_rotation;
+        }
+        double absoluteRotation = intrinsicVectorAngle + robotRotation;
+        if (absoluteRotation > full_rotation) {
+            absoluteRotation = absoluteRotation % full_rotation;
+        }
+        double hypothenusLength = Math.sqrt((intrinsicAccelX * intrinsicAccelX) +
+                (intrinsicAccelY * intrinsicAccelY));
+        switch (axis) {
+            case X:
+                return (float) (hypothenusLength * Math.cos(absoluteRotation));
+            case Y:
+                return (float) (hypothenusLength * Math.sin(absoluteRotation));
+            default:
+                return 0.0f;
+        }
+    }
+
+    /**
+     * Absolute converter for the acceleration object
+     *
+     * @param acceleration with respect to the sensor
+     * @return the absolute acceleration
+     */
+    public Acceleration getAbsoluteAcceleration(Acceleration acceleration) {
+        acceleration.xAccel = getAbsoluteAcceleration(X);
+        acceleration.yAccel = getAbsoluteAcceleration(Y);
+        acceleration.zAccel = getAbsoluteAcceleration(Z);
+        return acceleration;
+    }
 }
