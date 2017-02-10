@@ -1,6 +1,18 @@
+model_noise:
+  x: .3227
+  y: .3227
+  x_vel: .3227
+  y_vel: .3227
+sensor_noise:
+  x: .4472
+  y: .4472
+  x_vel: .4472
+  y_vel: .4472
 initial_error:
-   x: 10
-   y: 10
-   z: 10
-process_noise: 10.0
-sensor_noise: 1.0
+   x: 2
+   y: 2
+   x_vel: 2
+   y_vel: 2
+offset_imu:
+  x_accel: 0
+  y_accel: 0

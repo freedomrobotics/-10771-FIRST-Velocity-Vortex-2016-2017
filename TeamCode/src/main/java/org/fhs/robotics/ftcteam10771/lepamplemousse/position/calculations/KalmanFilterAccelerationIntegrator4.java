@@ -44,6 +44,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.maneuvers.Ultrasonic
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
@@ -200,6 +201,7 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
     @Override
     public void update(Acceleration linearAcceleration) {
         // Perform Acceleration transformation here
+        linearAcceleration = getAbsoluteAcceleration(linearAcceleration);
 
         // We should always be given a timestamp here
         if (linearAcceleration.acquisitionTime != 0) {
@@ -480,7 +482,7 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
         final double full_rotation = 2.0 * Math.PI;
         double intrinsicAccelX = imu.getAcceleration().xAccel;
         double intrinsicAccelY = imu.getAcceleration().yAccel;
-        double robotRotation = (double) imu.getAngularOrientation().toAxesOrder(XYZ).thirdAngle;
+        double robotRotation = (double) imu.getAngularOrientation().toAxesOrder(AxesOrder.XYZ).thirdAngle;
         double intrinsicVectorAngle = Math.atan2(intrinsicAccelY, intrinsicAccelX);
         if (intrinsicVectorAngle < 0) {
             intrinsicVectorAngle += full_rotation;
@@ -508,9 +510,9 @@ KalmanFilterAccelerationIntegrator4 implements BNO055IMU.AccelerationIntegrator 
      * @return the absolute acceleration
      */
     public Acceleration getAbsoluteAcceleration(Acceleration acceleration) {
-        acceleration.xAccel = getAbsoluteAcceleration(X);
-        acceleration.yAccel = getAbsoluteAcceleration(Y);
-        acceleration.zAccel = getAbsoluteAcceleration(Z);
+        acceleration.xAccel = getAbsoluteAcceleration(IMU.Axis.X);
+        acceleration.yAccel = getAbsoluteAcceleration(IMU.Axis.Y);
+        acceleration.zAccel = getAbsoluteAcceleration(IMU.Axis.Z);
         return acceleration;
     }
 }

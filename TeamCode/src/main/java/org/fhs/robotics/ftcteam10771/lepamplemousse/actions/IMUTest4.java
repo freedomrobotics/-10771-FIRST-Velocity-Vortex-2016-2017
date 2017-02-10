@@ -20,8 +20,8 @@ import static org.fhs.robotics.ftcteam10771.lepamplemousse.actions.imu.IMU.Axis.
  * Created by joelv on 1/14/2017.
  */
 
-@TeleOp(name = "IMU Test3")
-public class IMUTest3 extends LinearOpMode{
+@TeleOp(name = "IMU Test4")
+public class IMUTest4 extends LinearOpMode{
 
     BNO055IMU imu;
     IMU imuHandler;
@@ -46,7 +46,7 @@ public class IMUTest3 extends LinearOpMode{
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);
-        imuHandler.createAccelerationIntegrator(parsedKalman, 3);
+        imuHandler.createAccelerationIntegrator(parsedKalman, 4);
         imuHandler.imuInit(); //possible null pointer here; if there is, check parameters at method
         //imu.initialize();
 
@@ -67,6 +67,11 @@ public class IMUTest3 extends LinearOpMode{
         IMU.Accelerometer accelSensor = imuHandler.getAccelerometer();
         IMU.Magnetometer magneticSensor = imuHandler.getMagnetometer();
 
+        gyroOutput.enableStream(true);
+        accelSensor.enableStream(true);
+        magneticSensor.enableStream(true);
+
+
         /*
         If the commented code fails, do this.
         IMU.Gyrometer gyroOutput = imuHandler.new IMU.Gyrometer();
@@ -74,11 +79,12 @@ public class IMUTest3 extends LinearOpMode{
         IMU.MagneticSensor magneticSensor = imuHandler.new IMU.MagneticSensor();
         */
         waitForStart();
-        imuHandler.imuThread.start();
+        //imuHandler.imuThread.start();
         //start accel integrator
         //imuHandler.parameters.accelerationIntegrationAlgorithm.initialize(imuHandler.parameters, new Position(), new Velocity());
-        imuHandler.getImu().startAccelerationIntegration(new Position(), new Velocity(), 0);
+        imuHandler.getImu().startAccelerationIntegration(new Position(), new Velocity(), 50);
         while(opModeIsActive()){
+            imuHandler.streamIMUData();
             //imuHandler.parameters.accelerationIntegrationAlgorithm.update(new Acceleration(DistanceUnit.METER,
                    // accelSensor.getAbsoluteAcceleration(X), accelSensor.getAbsoluteAcceleration(Y), 0.0, 100));
             //telemetry.addData("GyroX", (int)gyroOutput.convertAngletoSemiPossibleRange(X, gyroOutput.getOrientation(X)));
@@ -124,7 +130,7 @@ public class IMUTest3 extends LinearOpMode{
             
             telemetry.update();
         }
-        imuHandler.imuThread.interrupt();
+        //imuHandler.imuThread.interrupt();
     }
 
 
