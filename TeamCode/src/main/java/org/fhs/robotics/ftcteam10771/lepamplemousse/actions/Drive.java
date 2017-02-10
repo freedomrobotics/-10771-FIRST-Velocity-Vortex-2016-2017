@@ -44,6 +44,7 @@ public class Drive {
     SensorHandler sensorHandler;
 
     private boolean atPosition;
+    private boolean atRotation;
     Runnable driveRunnable = new Runnable() {
         @Override
         public void run() {
@@ -79,14 +80,21 @@ public class Drive {
                     updatePosition();
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();
                     float vectorY = vectorR.getY() - robot.getVectorR().getY();
+
                     robotTheta = (float) Math.atan2(vectorY, vectorX);
 
                     if(Math.abs(robotTheta) < Math.PI*2*(driveSettings.subData("positional").getFloat("rotational_tolerance")/360)){
-                        //at position
-                        atPosition = true;
+                        atRotation = true;
                     }
 
+                    float radius = (float)Math.sqrt((vectorX*vectorX)+(vectorY*vectorY));
+                    //todo put drivetrain/positional/position_margin
+                    if(radius<Math.abs(driveSettings.subData("positional").getFloat("position_tolerance"))){
+                        atPosition = true;
+                    } else atPosition = false;
+
                     robotVelocity = driveSettings.subData("positional").getFloat("speed");
+
                     float rotationalMagnitude = driveSettings.subData("positional").getFloat("rotation");
                     if (vectorR.getRad() > robot.getVectorR().getRad()){
                         if(Math.abs(vectorR.getRad()-robot.getVectorR().getRad())<(Math.PI/4)){
@@ -201,6 +209,15 @@ public class Drive {
         //sensorHandler =
 
         DcMotor.RunMode runMode = DcMotor.RunMode.RUN_USING_ENCODER;
+        DcMotor.RunMode reset = DcMotor.RunMode.STOP_AND_RESET_ENCODER;
+        frMotor.setMode(runMode);
+        flMotor.setMode(runMode);
+        brMotor.setMode(runMode);
+        blMotor.setMode(runMode);
+        frMotor.setMode(reset);
+        flMotor.setMode(reset);
+        brMotor.setMode(reset);
+        blMotor.setMode(reset);
         frMotor.setMode(runMode);
         flMotor.setMode(runMode);
         brMotor.setMode(runMode);
@@ -275,17 +292,21 @@ public class Drive {
         switch(updateDevice){
             case "encoders":
                 robot.getPosition().setX(getEncoderX());
-                robot.position.setY(getEncoderY());
+                robot.getPosition().setY(getEncoderY());
                 break;
             case "camera":
                 //todo: finish algorithm for gaining position in reference to an image
+                //robot.getPosition().cameraVision.updateCoordinates().getX();
+                //robot.getPosition().cameraVision.updateCoordinates().getY();
                 break;
             case "imu":
+                //robot.getPosition().setX(accelerometer.getOrienation(X);
+                //robot.getPosition().setY(accelerometer.getOrienation(Y)
                 //todo: check status of imu readiness
                 break;
             default:
-                robot.position.setX(getEncoderX());
-                robot.position.setY(getEncoderY());
+                robot.getPosition().setX(getEncoderX());
+                robot.getPosition().setY(getEncoderY());
         }
     }
 
@@ -318,8 +339,8 @@ public class Drive {
         float B = -flMotor.getCurrentPosition()*inch_per_pulse;
         float C = -blMotor.getCurrentPosition()*inch_per_pulse;
         float D = -brMotor.getCurrentPosition()*inch_per_pulse;
-        float AC = ((A*(float)Math.sin(Math.PI-motorAngle)) + (C*(float)Math.sin(Math.PI-motorAngle)))/2.0f;
-        float BD = ((B*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle)))/2.0f;
+        float AC = (A+C)/2.0f;
+        float BD = (B+D)/2.0f;
         return  ((AC + BD) / 2.0f) + initialY;
     }
 

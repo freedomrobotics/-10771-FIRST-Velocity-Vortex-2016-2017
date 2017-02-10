@@ -21,7 +21,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
  * Created by joelv on 2/3/2017.
  */
 @Autonomous(name="Camera Drive", group="Test")
-public class CameraDriveOp extends LinearOpMode{
+public class CameraDriveOp extends LinearOpMode {
 
     private long lastTime;
     private Config rawSettings;
@@ -38,11 +38,14 @@ public class CameraDriveOp extends LinearOpMode{
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            while(!Thread.currentThread().isInterrupted()){
+            while (!Thread.currentThread().isInterrupted()) {
                 telemetry.addData("cameraZ", cameraVision.getZ());
                 telemetry.addData("Radius", drive.getRadius());
                 telemetry.addData("Theta", drive.getTheta());
-                telemetry.addData("Motor", drive.getMotorPower(1));
+                telemetry.addData("FR", drive.getMotorPower(1));
+                telemetry.addData("FL", drive.getMotorPower(2));
+                telemetry.addData("BL", drive.getMotorPower(3));
+                telemetry.addData("BR", drive.getMotorPower(4));
                 telemetry.addData("Distance", distance_to_stop);
                 telemetry.update();
             }
@@ -86,13 +89,13 @@ public class CameraDriveOp extends LinearOpMode{
                 settings, telemetry);
 
         //FIXME: I forgot how the aliases work - Joel
-        alliance = (settings.getString("alliance")=="red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
+        alliance = (settings.getString("alliance") == "red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
         //rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
 
         cameraVision = new CameraVision();
         backCamera = cameraVision.usingBackCamera();
         cameraVision.cameraThread.start();
-
+        telemetryThread.start();
         this.lastTime = System.currentTimeMillis();
 
         waitForStart();
@@ -100,10 +103,12 @@ public class CameraDriveOp extends LinearOpMode{
         drive.setRelative(true);
         drive.startVelocity();
         //drive.driveThread.start();
-        telemetryThread.start();
         //rotate();
         //center();
+        centerRotate();
         approach();
+        driveVector.setRadius(0);
+        driveVector.setPolar(0, 0);
         drive.stop();
         telemetryThread.interrupt();
         /*
@@ -120,37 +125,62 @@ public class CameraDriveOp extends LinearOpMode{
 
     public void center() {
         float marginofError = settings.subData("drive").subData("camera_settings").getFloat("centering_margin");
-        if (targeted()){
-            while(Math.abs(cameraVision.getX())>marginofError) {
-                boolean left = backCamera ? (cameraVision.getX()>0.0) : (cameraVision.getX()<0.0);
-                float theta = left ? (float)Math.PI : 0.0f;
+        if (targeted()) {
+            while (Math.abs(cameraVision.getX()) > marginofError) {
+                boolean left = backCamera ? (cameraVision.getX() > 0.0) : (cameraVision.getX() < 0.0);
+                float theta = left ? (float) Math.PI : 0.0f;
                 float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
-                driveVector.setTheta(theta);
-                driveVector.setRadius(radius);
+                driveVector.setPolar(radius, theta);
             }
         }
+        driveVector.setRadius(0);
+        driveVector.setPolar(0, 0);
     }
 
-    public void approach(){
+    public void approach() {
         distance_to_stop = settings.subData("drive").subData("camera_settings").getFloat("distance_to_stop");
-        if (targeted()){
-            while(Math.abs(cameraVision.getZ())>distance_to_stop){
-                float theta = backCamera ? 3.0f*(float)Math.PI/2.0f : (float)Math.PI/2.0f;
+        if (targeted()) {
+            while (Math.abs(cameraVision.getZ()) > distance_to_stop) {
+                float theta = backCamera ? 3.0f * (float) Math.PI / 2.0f : (float) Math.PI / 2.0f;
                 float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
                 //todo put speed
-                driveVector.setTheta(theta);
-                driveVector.setRadius(radius);
+                driveVector.setPolar(radius, theta);
             }
         }
+        driveVector.setRadius(0);
+        driveVector.setPolar(0, 0);
     }
 
     public void rotate(){
         float rotate_margin = settings.subData("drive").subData("camera_settings").getFloat("angle_margin");
+        float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
         if (targeted()){
-            while(Math.abs(cameraVision.getAngleToTurn())>rotate_margin){
-                driveVector.setRad((float)cameraVision.getAngleToTurn());
+            while(Math.toDegrees(Math.abs(cameraVision.getAngleToTurn()))>rotate_margin){
+                driveVector.setRad((float)Math.copySign(rotate_speed, cameraVision.getAngleToTurn()));
             }
         }
+        driveVector.setRadius(0);
+        driveVector.setPolar(0, 0);
+    }
+
+    public void centerRotate(){
+        float rotate_margin = (float) Math.toRadians(settings.subData("drive").subData("camera_settings").getFloat("angle_margin"));
+        float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
+        float marginofError = settings.subData("drive").subData("camera_settings").getFloat("centering_margin");
+        float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
+        float rotate_factor = settings.subData("drive").subData("camera_settings").getFloat("rotate_factor");
+        if (targeted()) {
+            while (Math.abs(cameraVision.getX()) > marginofError || Math.abs(cameraVision.getAngleToTurn())>rotate_margin) {
+                boolean left = backCamera ? (cameraVision.getX() > 0.0) : (cameraVision.getX() < 0.0);
+                float rotate = (float)(radius/(rotate_factor*rotate_speed) * cameraVision.getAngleToTurn());
+                float side = (float)((rotate_factor*rotate_speed)/radius * cameraVision.getX());
+                float theta = left ? (float) Math.PI : 0.0f;
+                driveVector.setPolar(radius, theta);
+                driveVector.setRad((float)Math.copySign(rotate, cameraVision.getAngleToTurn()));
+            }
+        }
+        driveVector.setRadius(0);
+        driveVector.setPolar(0, 0);
     }
 
     public boolean checkBeaconSide(RGB.Direction direction){
