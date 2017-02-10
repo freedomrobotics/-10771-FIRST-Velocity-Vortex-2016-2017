@@ -15,6 +15,8 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import org.firstinspires.ftc.robotcore.internal.opengl.AutoConfigGLSurfaceView;
 
+import java.util.List;
+
 /**
  * Op mode to test out the drive class and the fieldmap file
  * Created by joelv on 2/6/2017.
@@ -25,6 +27,7 @@ public class PositionalOpMode extends LinearOpMode {
          // The time at the last time check (using System.currentTimeMillis())
     private Config rawSettings;
     private Config.ParsedData settings;
+    private Config.ParsedData fieldmap;
     private Config scriptConfig;
     private Config fieldMapConfig;
     private Components components;
@@ -55,7 +58,7 @@ public class PositionalOpMode extends LinearOpMode {
                 fieldMapConfig.read(true);
         }
 
-        Config.ParsedData parsedField = fieldMapConfig.getParsedData();
+        fieldmap = fieldMapConfig.getParsedData();
 
         this.settings = rawSettings.getParsedData();
 
@@ -72,14 +75,39 @@ public class PositionalOpMode extends LinearOpMode {
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, parsedField, telemetry);
+                settings, telemetry);
 
         waitForStart();
         drive.setRelative(true);
-        drive.driveTo("custom1");
-        drive.driveTo("custom2");
-        drive.driveTo("custom3");
+        driveTo("custom1");
+        driveTo("custom2");
+        driveTo("custom3");
         //drive.startScript();
         drive.stop();
     }
+
+    public void startScript(){
+        List<String> commands = (List<String>) fieldmap.getObject("script");
+        for (String command : commands){
+            setCoordinate(command);
+            //TODO: PUT SOMETHING THAT PREVENTS THE FOR LOOP FROM HAPPENING IN ONE INSTANCE, LIKE A WHILE LOOP OR SOMETHING
+            while (!drive.atLocation()){
+                drive.startPosition();
+            }
+        }
+    }
+
+    public void driveTo(String location){
+        setCoordinate(location);
+        while(!drive.atLocation()){
+            drive.startPosition();
+        }
+    }
+
+    public void setCoordinate(String location){
+        drive.setPosition(fieldmap.subData(location).getFloat("x"),
+                fieldmap.subData(location).getFloat("y"));
+    }
+
+
 }

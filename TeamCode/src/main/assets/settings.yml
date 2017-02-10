@@ -19,7 +19,7 @@ catapult:
   position_margin: 20
   power_increment: 0.01 #put in settings
   launch_power: 0.8
-  use_encoder: true #change in settings
+  use_encoder: false #change in settings
   map_name: launcher
 
 robot:

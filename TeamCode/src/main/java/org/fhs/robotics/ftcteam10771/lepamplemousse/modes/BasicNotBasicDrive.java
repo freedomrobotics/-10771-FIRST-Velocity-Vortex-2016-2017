@@ -76,7 +76,7 @@ public class BasicNotBasicDrive extends OpMode {
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, null, telemetry);
+                settings, telemetry);
 
         //intake = hardwareMap.dcMotor.get()
 

@@ -66,7 +66,7 @@ public class CameraDriveOp extends LinearOpMode{
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, null, telemetry);
+                settings, telemetry);
 
         //FIXME: I forgot how the aliases work - Joel
         alliance = (settings.getString("alliance")=="red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;

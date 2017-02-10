@@ -46,7 +46,7 @@ public class Drive {
         @Override
         public void run() {
 
-            while (!Thread.interrupted() && driveThreadActive) {
+            while (!Thread.currentThread().interrupted() && driveThreadActive) {
 
                 float joystickTheta;
                 float absoluteTheta;
@@ -149,7 +149,7 @@ public class Drive {
      */
     public Drive(VectorR vectorR, Robot robot, DcMotor frMotor,
                  DcMotor flMotor, DcMotor blMotor, DcMotor brMotor,
-                 Config.ParsedData settings, Config.ParsedData fieldmap, Telemetry telemetry){
+                 Config.ParsedData settings, Telemetry telemetry){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -169,9 +169,10 @@ public class Drive {
 
         this.settings = settings;
         String team = settings.getString("alliance");
-        this.fieldmap = fieldmap.subData("coordinates").subData(team);
+        //if (fieldmap!=null) this.fieldmap = fieldmap.subData("coordinates").subData(team);
 
-        if (settings.subData("drive").getBool("init_with_fieldmap")){
+        /*
+        if (this.settings.subData("drive").getBool("init_with_fieldmap")){
             String initial_position = settings.getString("position");
             if (((!initial_position.equals("inside"))) && (!initial_position.equals("outside"))){
                 initial_position = "inside";
@@ -185,7 +186,11 @@ public class Drive {
             robot.position.setX(settings.subData("robot").subData("initial_position").getFloat("x"));
             robot.position.setY(settings.subData("robot").subData("initial_position").getFloat("y"));
             robot.rotation.setRadians(settings.subData("robot").getFloat("initial_rotation"));
-        }
+        }*/
+
+        robot.position.setX(settings.subData("robot").subData("initial_position").getFloat("x"));
+        robot.position.setY(settings.subData("robot").subData("initial_position").getFloat("y"));
+        robot.rotation.setRadians(settings.subData("robot").getFloat("initial_rotation"));
 
         //sensorHandler =
 
@@ -331,12 +336,7 @@ public class Drive {
         return  ((AC + BD) / 2.0f) + initialY;
     }
 
-    public void setCoordinate(String location){
-        setPosition(fieldmap.subData(location).getFloat("x"),
-                fieldmap.subData(location).getFloat("y"));
-    }
-
-    private boolean atLocation(){
+    public boolean atLocation(){
         //todo learn how to convert yml list to a list of strings
         float xMargin = settings.subData("drive").getFloat("x_margin");
         float yMargin = settings.subData("drive").getFloat("y_margin");
@@ -347,21 +347,5 @@ public class Drive {
         return ((xMargin>Math.abs(robotX-setX))&&(yMargin>Math.abs(robotY-setY)));
     }
 
-    public void startScript(){
-        List<String> commands = (List<String>) fieldmap.getObject("script");
-        for (String command : commands){
-            setCoordinate(command);
-            //TODO: PUT SOMETHING THAT PREVENTS THE FOR LOOP FROM HAPPENING IN ONE INSTANCE, LIKE A WHILE LOOP OR SOMETHING
-            while (!atLocation()){
-                startPosition();
-            }
-        }
-    }
 
-    public void driveTo(String location){
-        setCoordinate(location);
-        while(!atLocation()){
-            startPosition();
-        }
-    }
 }

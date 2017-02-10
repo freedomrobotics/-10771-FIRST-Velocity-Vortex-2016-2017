@@ -24,6 +24,7 @@ public class Catapult {
     private int margin=5;
     private int targetPosition=1440;
     private float increment=0.01f;
+    private boolean button = false;
     Config.ParsedData settings;
 
     public Catapult(DcMotor motor, OpticalDistanceSensor opticalDistanceSensor,
@@ -36,26 +37,53 @@ public class Catapult {
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         targetPosition = this.settings.getInt("target_position");
-        rotator.setTargetPosition(targetPosition);//put config
+        //rotator.setTargetPosition(targetPosition);//put config
         //the real culprit of the divide by 0
         //readyPosition = settings.getInt("ready_position");
         readyPosition = this.settings.getInt("ready_position");
         margin = this.settings.getInt("position_margin");
         increment = this.settings.getFloat("power_increment");
-        catapultThread = this.settings.getBool("use_encoder") ? new Thread(runEncoder) : new Thread(runCatapult);
+        catapultThread = this.settings.getBool("use_encoder") ? new Thread(runEncoder) : new Thread(runSomething);
     }
+
+    public Runnable runSomething = new Runnable() {
+        @Override
+        public void run() {
+            while(!Thread.currentThread().isInterrupted())
+            {
+                if (catapultReady()) {
+                    rotator.setTargetPosition(rotator.getCurrentPosition() + margin);
+                    while (!Thread.currentThread().isInterrupted() && !button()) {
+                        oscillate();
+                    }
+                    if (!Thread.currentThread().isInterrupted()) {
+                        launchCatapult();
+                        try {
+                            Thread.sleep(settings.getInt("grace"));
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                if (!Thread.currentThread().isInterrupted()) launchCatapult();
+            }
+            rotator.setTargetPosition(0);
+            rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
+    };
 
     public Runnable runCatapult = new Runnable() {
         @Override
         public void run() {
-            while(!Thread.interrupted())
+            while(!Thread.currentThread().isInterrupted())
             {
-                if (rotator.getCurrentPosition()>margin){
+                if (rotator.getCurrentPosition() > rotator.getCurrentPosition() + margin){
                     if (catapultReady()){
-                        while(!button()){
+                        while(!button() && !Thread.currentThread().isInterrupted() && !button){
                             oscillate();
                         }
-                        while(catapultReady()){
+                        button = true;
+                        while(catapultReady() && !Thread.currentThread().isInterrupted()){
                             launchCatapult();
                         }
                     }
@@ -63,7 +91,7 @@ public class Catapult {
                 else {
                     launchCatapult();
                 }
-                returnToSensor();
+                //returnToSensor();
             }
         }
     };
@@ -72,7 +100,7 @@ public class Catapult {
         @Override
         public void run() {
             while (!Thread.interrupted()){
-                if (rotator.getCurrentPosition()>margin){
+                if (rotator.getCurrentPosition() > rotator.getCurrentPosition() + margin){
                     if (encoderReady()){
                         while(!button()){
                             oscillate();
@@ -111,26 +139,21 @@ public class Catapult {
      */
     public void oscillate(){
         float max = settings.getFloat("oscillation_max");
-        if (Math.abs(motorPower)>max){
-            motorPower = max;
-        }
-        if (motorPower>=max){
-            increment = -Math.abs(increment);
-        }
-        else if (motorPower<=-max){
-            increment = Math.abs(increment);
-        }
         motorPower += increment;
+        if (motorPower>=max){
+            motorPower = 0;
+        }
         rotator.setPower(motorPower);
     }
 
     public void launchCatapult(){
         motorPower = settings.getFloat("launch_power");
         rotator.setPower(motorPower);
+        rotator.setTargetPosition(rotator.getCurrentPosition() + targetPosition);
     }
 
     public boolean catapultReady(){
-        return stopSensor.getLightDetected() <
+        return stopSensor.getLightDetected() >
                 settings.getFloat("light_tolerance");
     }
 

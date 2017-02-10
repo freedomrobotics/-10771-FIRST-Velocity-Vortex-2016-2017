@@ -50,7 +50,7 @@ public class UltrasonicRange {
     public final Runnable rangeRunnable = new Runnable() {
         @Override
         public void run() {
-            while (!Thread.interrupted()){
+            while (!Thread.currentThread().interrupted()){
                 streamDistance();
             }
         }
