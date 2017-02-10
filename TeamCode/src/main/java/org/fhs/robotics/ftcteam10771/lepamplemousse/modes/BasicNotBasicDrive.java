@@ -69,8 +69,6 @@ public class BasicNotBasicDrive extends OpMode {
 
         Config.ParsedData drivetrainMotors = settings.subData("drivetrain").subData("motor");
 
-        Aliases.motorMap.get(drivetrainMotors.subData("front_right").getString("map_name"));
-
         drive = new Drive(driveVector, new Robot(),
                 Aliases.motorMap.get(drivetrainMotors.subData("front_right").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),

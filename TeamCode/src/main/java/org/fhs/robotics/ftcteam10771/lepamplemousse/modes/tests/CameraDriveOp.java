@@ -124,12 +124,10 @@ public class CameraDriveOp extends LinearOpMode{
             while(Math.abs(cameraVision.getX())>marginofError) {
                 boolean left = backCamera ? (cameraVision.getX()>0.0) : (cameraVision.getX()<0.0);
                 float theta = left ? (float)Math.PI : 0.0f;
-                float radius = (Coordinate.convertTo((float) Math.abs(cameraVision.getX()), Coordinate.UNIT.MM_TO_UNIT));
-                radius = (Coordinate.convertTo(radius, Coordinate.UNIT.UNIT_TO_DM));
+                float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
                 driveVector.setTheta(theta);
                 driveVector.setRadius(radius);
             }
-            drive.stop();
         }
     }
 
@@ -138,7 +136,8 @@ public class CameraDriveOp extends LinearOpMode{
         if (targeted()){
             while(Math.abs(cameraVision.getZ())>distance_to_stop){
                 float theta = backCamera ? 3.0f*(float)Math.PI/2.0f : (float)Math.PI/2.0f;
-                float radius = 1.0f;
+                float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
+                //todo put speed
                 driveVector.setTheta(theta);
                 driveVector.setRadius(radius);
             }
@@ -151,7 +150,6 @@ public class CameraDriveOp extends LinearOpMode{
             while(Math.abs(cameraVision.getAngleToTurn())>rotate_margin){
                 driveVector.setRad((float)cameraVision.getAngleToTurn());
             }
-            drive.stop();
         }
     }
 
@@ -172,11 +170,11 @@ public class CameraDriveOp extends LinearOpMode{
             while (Math.abs(cameraVision.getX())<distance){
                 float radius = distance - (float)Math.abs(cameraVision.getX());
                 //todo put power cutback ratio in settings config
-                radius *= 0.08f;
+                radius *= settings.subData("drive").subData("camera_settings").getFloat("speed");
+                //todo put speed under camera_settings under drive
                 driveVector.setTheta(theta);
                 driveVector.setRadius(radius);
             }
-            drive.stop();
             return rgb.isSide(alliance, direction);
         }
         else return false;

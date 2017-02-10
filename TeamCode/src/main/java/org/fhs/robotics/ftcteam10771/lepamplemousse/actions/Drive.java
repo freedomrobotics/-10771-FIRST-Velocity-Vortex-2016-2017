@@ -32,6 +32,8 @@ public class Drive {
     int pastPosition;
     long pastPositionTime;
 
+    VectorR velocityFeedback = new VectorR();
+
     //Positional drive stuff
     private float initialX = 0.0f;
     private float initialY = 0.0f;
@@ -132,12 +134,12 @@ public class Drive {
                 }
                 pastPosition = blMotor.getCurrentPosition();
 
-                /* spams the console
+                // spams the console
                 telemetry.addData("Speed-FR", fr);
                 telemetry.addData("Speed-FL", fl);
                 telemetry.addData("Speed-BL", bl);
                 telemetry.addData("Speed-BR", br);
-                */
+
             }
             frMotor.setPower(0.0);
             flMotor.setPower(0.0);
@@ -258,23 +260,8 @@ public class Drive {
         relativeDrive = isRelative;
     }
 
-    VectorR velocityFeedback = new VectorR();
-
     VectorR returnVelocityFeedback(){
         return velocityFeedback;
-    }
-
-    public void setVelocity(float radius, float theta){
-        this.vectorR.setPolar(radius, theta);
-    }
-
-    public void setPosition(float x, float y){
-        this.vectorR.setX(x);
-        this.vectorR.setY(y);
-    }
-
-    public void setRotation(float rotation){
-        this.vectorR.setRad(rotation);
     }
 
     /*
@@ -287,7 +274,7 @@ public class Drive {
         String updateDevice = settings.subData("drive").getString("update_using");
         switch(updateDevice){
             case "encoders":
-                robot.position.setX(getEncoderX());
+                robot.getPosition().setX(getEncoderX());
                 robot.position.setY(getEncoderY());
                 break;
             case "camera":
@@ -341,7 +328,7 @@ public class Drive {
         float xMargin = settings.subData("drive").getFloat("x_margin");
         float yMargin = settings.subData("drive").getFloat("y_margin");
         float robotX = robot.position.getX();
-        float robotY = robot.position.getY();
+        float robotY = robot.getPosition().getY();
         float setX = vectorR.getX();
         float setY = vectorR.getY();
         return ((xMargin>Math.abs(robotX-setX))&&(yMargin>Math.abs(robotY-setY)));

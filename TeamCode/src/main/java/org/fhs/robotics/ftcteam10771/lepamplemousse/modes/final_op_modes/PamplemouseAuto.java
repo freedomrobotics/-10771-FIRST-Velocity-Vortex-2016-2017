@@ -90,7 +90,7 @@ public class PamplemouseAuto extends OpMode {
     public void stop() {
 
     }
-
+    /*
     public void center() {
         float marginofError = settings.subData("drive").subData("camera_settings").getFloat("centering_margin");
         if (targeted()){

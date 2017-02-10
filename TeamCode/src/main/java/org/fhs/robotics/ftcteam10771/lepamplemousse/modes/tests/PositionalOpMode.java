@@ -33,6 +33,7 @@ public class PositionalOpMode extends LinearOpMode {
     private Components components;
     private Drive drive;
     private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
+    private Robot robot = new Robot(driveVector.getX(), driveVector.getY(), driveVector.getRad());
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -79,35 +80,28 @@ public class PositionalOpMode extends LinearOpMode {
 
         waitForStart();
         drive.setRelative(true);
-        driveTo("custom1");
-        driveTo("custom2");
-        driveTo("custom3");
-        //drive.startScript();
+        //driveTo("custom1");
+        //driveTo("custom2");
+        //driveTo("custom3");
+        startScript();
         drive.stop();
     }
 
     public void startScript(){
         List<String> commands = (List<String>) fieldmap.getObject("script");
         for (String command : commands){
-            setCoordinate(command);
-            //TODO: PUT SOMETHING THAT PREVENTS THE FOR LOOP FROM HAPPENING IN ONE INSTANCE, LIKE A WHILE LOOP OR SOMETHING
-            while (!drive.atLocation()){
-                drive.startPosition();
+            while(!drive.isAtPosition()){
+                setCoordinate(command);
             }
+            //TODO: PUT SOMETHING THAT PREVENTS THE FOR LOOP FROM HAPPENING IN ONE INSTANCE, LIKE A WHILE LOOP OR SOMETHING
         }
     }
 
     public void driveTo(String location){
         setCoordinate(location);
-        while(!drive.atLocation()){
-            drive.startPosition();
-        }
     }
-
     public void setCoordinate(String location){
-        drive.setPosition(fieldmap.subData(location).getFloat("x"),
-                fieldmap.subData(location).getFloat("y"));
+        driveVector.setX(fieldmap.subData(location).getFloat("x"));
+        driveVector.setY(fieldmap.subData(location).getFloat("y"));
     }
-
-
 }
