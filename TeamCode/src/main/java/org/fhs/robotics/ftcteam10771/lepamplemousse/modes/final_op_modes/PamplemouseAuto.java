@@ -123,7 +123,7 @@ public class PamplemouseAuto extends OpMode {
         float rotate_margin = settings.subData("drive").subData("camera_settings").getFloat("angle_margin");
         if (targeted()){
             while(Math.abs(cameraVision.getAngleToTurn())>rotate_margin){
-                drive.setRoation((float)cameraVision.getAngleToTurn());
+                drive.setRotation((float)cameraVision.getAngleToTurn());
             }
             drive.stop();
         }

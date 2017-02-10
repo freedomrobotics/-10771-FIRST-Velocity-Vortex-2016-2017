@@ -156,7 +156,7 @@ public class CameraVision {
     public final Runnable cameraRunnable = new Runnable() {
         @Override
         public void run() {
-            while(!Thread.currentThread().interrupted()) {
+            while(!Thread.currentThread().isInterrupted()) {
                 runImageTracking();
             }
         }

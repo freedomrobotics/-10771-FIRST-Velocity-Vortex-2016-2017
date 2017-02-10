@@ -32,7 +32,24 @@ public class CameraDriveOp extends LinearOpMode{
     private RGB rgb;
     private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
     private boolean backCamera = true;
+    float distance_to_stop = 500.0f;
     Alliance alliance;
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            while(!Thread.currentThread().isInterrupted()){
+                telemetry.addData("cameraZ", cameraVision.getZ());
+                telemetry.addData("Radius", drive.getRadius());
+                telemetry.addData("Theta", drive.getTheta());
+                telemetry.addData("Motor", drive.getMotorPower(1));
+                telemetry.addData("Distance", distance_to_stop);
+                telemetry.update();
+            }
+        }
+    };
+
+    Thread telemetryThread = new Thread(runnable);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -70,7 +87,7 @@ public class CameraDriveOp extends LinearOpMode{
 
         //FIXME: I forgot how the aliases work - Joel
         alliance = (settings.getString("alliance")=="red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
-        rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
+        //rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
 
         cameraVision = new CameraVision();
         backCamera = cameraVision.usingBackCamera();
@@ -82,9 +99,13 @@ public class CameraDriveOp extends LinearOpMode{
 
         drive.setRelative(true);
         drive.startVelocity();
-        rotate();
-        center();
+        //drive.driveThread.start();
+        telemetryThread.start();
+        //rotate();
+        //center();
         approach();
+        drive.stop();
+        telemetryThread.interrupt();
         /*
         if ((checkBeaconSide(RGB.Direction.LEFT))){
             telemetry.addData("Side", "left");
@@ -95,7 +116,6 @@ public class CameraDriveOp extends LinearOpMode{
             telemetry.update();
         }
         */
-        idle();
     }
 
     public void center() {
@@ -106,23 +126,22 @@ public class CameraDriveOp extends LinearOpMode{
                 float theta = left ? (float)Math.PI : 0.0f;
                 float radius = (Coordinate.convertTo((float) Math.abs(cameraVision.getX()), Coordinate.UNIT.MM_TO_UNIT));
                 radius = (Coordinate.convertTo(radius, Coordinate.UNIT.UNIT_TO_DM));
-                drive.setVelocity(radius, theta);
+                driveVector.setTheta(theta);
+                driveVector.setRadius(radius);
             }
             drive.stop();
         }
     }
 
     public void approach(){
-        float distance_to_stop = settings.subData("drive").subData("camera_settings").getFloat("distance_to_stop");
+        distance_to_stop = settings.subData("drive").subData("camera_settings").getFloat("distance_to_stop");
         if (targeted()){
             while(Math.abs(cameraVision.getZ())>distance_to_stop){
                 float theta = backCamera ? 3.0f*(float)Math.PI/2.0f : (float)Math.PI/2.0f;
-                float radius = (Coordinate.convertTo((float) cameraVision.getZ(), Coordinate.UNIT.MM_TO_UNIT));
-                //todo put power cutback in settings
-                radius = 0.5f * (Coordinate.convertTo(radius, Coordinate.UNIT.UNIT_TO_M));
-                drive.setVelocity(radius, theta);
+                float radius = 1.0f;
+                driveVector.setTheta(theta);
+                driveVector.setRadius(radius);
             }
-            drive.stop();
         }
     }
 
@@ -130,7 +149,7 @@ public class CameraDriveOp extends LinearOpMode{
         float rotate_margin = settings.subData("drive").subData("camera_settings").getFloat("angle_margin");
         if (targeted()){
             while(Math.abs(cameraVision.getAngleToTurn())>rotate_margin){
-                drive.setRoation((float)cameraVision.getAngleToTurn());
+                driveVector.setRad((float)cameraVision.getAngleToTurn());
             }
             drive.stop();
         }
@@ -154,7 +173,8 @@ public class CameraDriveOp extends LinearOpMode{
                 float radius = distance - (float)Math.abs(cameraVision.getX());
                 //todo put power cutback ratio in settings config
                 radius *= 0.08f;
-                drive.setVelocity(radius, theta);
+                driveVector.setTheta(theta);
+                driveVector.setRadius(radius);
             }
             drive.stop();
             return rgb.isSide(alliance, direction);
