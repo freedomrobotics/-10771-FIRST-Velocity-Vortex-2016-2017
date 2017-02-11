@@ -124,15 +124,19 @@ auto:
   encoder:
 
 drive:
+  wait_time: 3000 #put in settings
   update_using: encoders
   init_with_fieldmap: false
   x_margin: 4.0 #cm
   y_margin: 4.0 #cm
   camera_settings:
     centering_margin: 5.0 #mm
-    distance_to_stop: 101.6 #mm
+    distance_to_stop: 150.0 #mm
     angle_margin: 5.0 #degrees
     beacon_check_distance: 100.0 #mm
+    detect_time: 8000 #miliseconds put in settings
+    slow_speed: 0.2 #put in settings
+    speed: 0.6 #put in settings
 
 autonomous:
   red_alliance:

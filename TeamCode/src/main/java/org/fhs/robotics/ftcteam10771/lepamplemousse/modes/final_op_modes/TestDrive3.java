@@ -13,6 +13,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 
 import java.util.LinkedList;
@@ -38,6 +39,7 @@ public class TestDrive3 extends LinearOpMode{
     private Config.ParsedData settings;
     private Components components;
     private Controllers controls;
+    private Catapult catapult;
 
     private static final String TAG = "TestDrive3Debug";
     private float bumperPos;
@@ -163,9 +165,11 @@ public class TestDrive3 extends LinearOpMode{
             bumperRight.setDirection(Servo.Direction.REVERSE);
 
         float power = settings.subData("drivetrain").getFloat("power");
+        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
 
         lastTime = System.currentTimeMillis();
         waitForStart();
+        catapult.catapultThread.start();
         while(opModeIsActive()){
             long changeTime = System.currentTimeMillis() - lastTime;
             lastTime += changeTime;
@@ -260,6 +264,8 @@ public class TestDrive3 extends LinearOpMode{
             //idle();
 
         }
+        //fixme threads not allowed after loop
+        catapult.catapultThread.interrupt();
         Aliases.clearAll();
     }
 
@@ -282,8 +288,8 @@ public class TestDrive3 extends LinearOpMode{
         float B = -motorFL.getCurrentPosition()*inch_per_pulse;
         float C = -motorBL.getCurrentPosition()*inch_per_pulse;
         float D = -motorBR.getCurrentPosition()*inch_per_pulse;
-        float AC = ((A*(float)Math.sin(Math.PI-motorAngle)) + (C*(float)Math.sin(Math.PI-motorAngle)))/2.0f;
-        float BD = ((B*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle)))/2.0f;
+        float AC = (A+C)/2.0f;
+        float BD = (B+D)/2.0f;
         return  ((AC + BD) / 2.0f) + initialY;
     }
 

@@ -162,8 +162,12 @@ public class Drive {
             }
             frMotor.setPower(0.0);
             flMotor.setPower(0.0);
-            brMotor.setPower(0.0);
             blMotor.setPower(0.0);
+            brMotor.setPower(0.0);
+            frMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            flMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            blMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            brMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
     };
 
@@ -213,17 +217,15 @@ public class Drive {
             robot.rotation.setRadians(settings.subData("robot").getFloat("initial_rotation"));
         }*/
 
-        robot.getPosition().setX(settings.subData("robot").subData("initial_position").getFloat("x"));
-        robot.getPosition().setY(settings.subData("robot").subData("initial_position").getFloat("y"));
-        robot.getVectorR().getRad();
+        //fixme would this work?
+        initialX = settings.subData("robot").subData("initial_position").getFloat("x");
+        initialY = settings.subData("robot").subData("initial_position").getFloat("y");
+        robot.getPosition().setX(initialX);
+        robot.getPosition().setY(initialY);
         //sensorHandler =
-
+        //todo find out if run_without_encoder works
         DcMotor.RunMode runMode = DcMotor.RunMode.RUN_USING_ENCODER;
         DcMotor.RunMode reset = DcMotor.RunMode.STOP_AND_RESET_ENCODER;
-        frMotor.setMode(runMode);
-        flMotor.setMode(runMode);
-        brMotor.setMode(runMode);
-        blMotor.setMode(runMode);
         frMotor.setMode(reset);
         flMotor.setMode(reset);
         brMotor.setMode(reset);
@@ -341,7 +343,7 @@ public class Drive {
      * Gets the y coordinate of the robot using the 4 encoders
      * assuming that the robot does not rotate
      * @return the y coordinate
-     */
+     *///todo fix math
     private float getEncoderY(){
         float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
         double motorAngle = Math.toRadians(driveSettings.getFloat("motor_angle"));
@@ -386,6 +388,29 @@ public class Drive {
             default:
                 return 0.0f;
         }
+    }
+
+    public int getEncoder(int motor){
+        switch (motor) {
+            case 1:
+                return frMotor.getCurrentPosition();
+            case 2:
+                return flMotor.getCurrentPosition();
+            case 3:
+                return blMotor.getCurrentPosition();
+            case 4:
+                return brMotor.getCurrentPosition();
+            default:
+                return 0;
+        }
+    }
+
+    public float getCurrentX(){
+        return robot.getPosition().getX();
+    }
+
+    public float getCurrentY(){
+        return robot.getPosition().getY();
     }
 
     public boolean isAtPosition(){
