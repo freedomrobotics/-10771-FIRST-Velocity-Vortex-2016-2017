@@ -2,6 +2,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 
 import android.util.Log;
 
+import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,10 +14,14 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms.Catapult;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis.Z;
 
 /**
  * Created by Matthew on 11/14/2016.
@@ -38,12 +43,15 @@ public class TestDrive3 extends LinearOpMode{
     private Config.ParsedData settings;
     private Components components;
     private Controllers controls;
+    private Catapult catapult;
+    private IMU.Gyrometer gyrometer;
+    private IMU imuHandler;
 
     private static final String TAG = "TestDrive3Debug";
     private float bumperPos;
     private float initialX = 0.0f;
     private float initialY = 0.0f;
-
+    private boolean blueTeam;
     private long lastTime;
 
     @Override
@@ -87,6 +95,9 @@ public class TestDrive3 extends LinearOpMode{
         settings = rawSettings.getParsedData();
         Log.d(TAG, "settings-parse");
 
+        blueTeam = (settings.getString("alliance").equals("blue"));
+        initialX = settings.subData("robot").subData("initial_position").getFloat("x");
+        initialY = settings.subData("robot").subData("initial_position").getFloat("y");
 
         this.components = new Components(hardwareMap, telemetry, components);
         Log.d(TAG, "components-object");
@@ -162,10 +173,13 @@ public class TestDrive3 extends LinearOpMode{
         if (bumpers.subData("right_servo").getBool("reversed"))
             bumperRight.setDirection(Servo.Direction.REVERSE);
 
-        float power = settings.subData("drivetrain").getFloat("power");
-
+        float power = settings.subData("drivetrain").getFloat("motor_scale");
+        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+        imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
+        gyrometer = imuHandler.getGyrometer();
         lastTime = System.currentTimeMillis();
         waitForStart();
+        catapult.catapultThread.start();
         while(opModeIsActive()){
             long changeTime = System.currentTimeMillis() - lastTime;
             lastTime += changeTime;
@@ -260,16 +274,27 @@ public class TestDrive3 extends LinearOpMode{
             //idle();
 
         }
+        //fixme threads not allowed after loop
+        catapult.catapultThread.interrupt();
         Aliases.clearAll();
     }
 
     private float getX(){
-        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
+        float centimeters_per_pulse = settings.subData("drive").getFloat("diameter") * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
         double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
-        float A = -motorFR.getCurrentPosition()*inch_per_pulse;
-        float B = -motorFL.getCurrentPosition()*inch_per_pulse;
-        float C = -motorBL.getCurrentPosition()*inch_per_pulse;
-        float D = -motorBR.getCurrentPosition()*inch_per_pulse;
+        double orientation = gyrometer.convert(Z, gyrometer.getOrientation(Z));
+        double margin = Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
+        //todo add to config file drive>gyro_margin
+        if (orientation < (2.0*Math.PI) - margin && orientation > margin){
+            motorAngle += gyrometer.convert(Z, gyrometer.getOrientation(Z));
+        }
+        if (blueTeam){
+            motorAngle += Math.PI/2.0;
+        }
+        float A = -motorFR.getCurrentPosition()*centimeters_per_pulse;
+        float B = -motorFL.getCurrentPosition()*centimeters_per_pulse;
+        float C = -motorBL.getCurrentPosition()*centimeters_per_pulse;
+        float D = -motorBR.getCurrentPosition()*centimeters_per_pulse;
         float AC = ((A*(float)Math.cos(Math.PI-motorAngle)) + (C*(float)Math.cos(Math.PI-motorAngle)))/2.0f;
         float BD = ((B*(float)Math.cos(motorAngle)) + (D*(float)Math.cos(motorAngle)))/2.0f;
         return  ((AC + BD) / 2.0f) + initialX;
@@ -282,8 +307,8 @@ public class TestDrive3 extends LinearOpMode{
         float B = -motorFL.getCurrentPosition()*inch_per_pulse;
         float C = -motorBL.getCurrentPosition()*inch_per_pulse;
         float D = -motorBR.getCurrentPosition()*inch_per_pulse;
-        float AC = ((A*(float)Math.sin(Math.PI-motorAngle)) + (C*(float)Math.sin(Math.PI-motorAngle)))/2.0f;
-        float BD = ((B*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle)))/2.0f;
+        float AC = (A+C)/2.0f;
+        float BD = (B+D)/2.0f;
         return  ((AC + BD) / 2.0f) + initialY;
     }
 

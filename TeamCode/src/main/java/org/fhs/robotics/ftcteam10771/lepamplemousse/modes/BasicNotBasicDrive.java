@@ -69,14 +69,12 @@ public class BasicNotBasicDrive extends OpMode {
 
         Config.ParsedData drivetrainMotors = settings.subData("drivetrain").subData("motor");
 
-        Aliases.motorMap.get(drivetrainMotors.subData("front_right").getString("map_name"));
-
         drive = new Drive(driveVector, new Robot(),
                 Aliases.motorMap.get(drivetrainMotors.subData("front_right").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, telemetry);
+                settings, null, telemetry);
 
         //intake = hardwareMap.dcMotor.get()
 
@@ -95,9 +93,9 @@ public class BasicNotBasicDrive extends OpMode {
      */
     @Override
     public void loop() {
-        driveVector.setX(controls.getAnalog("drive_x"));
-        driveVector.setY(controls.getAnalog("drive_y"));
-        driveVector.setRawR(controls.getAnalog("drive_rotate"));
+        driveVector.setX(controls.getAnalog("drivetrain_x"));
+        driveVector.setY(controls.getAnalog("drivetrain_y"));
+        driveVector.setRawR(controls.getAnalog("drivetrain_rotate"));
         telemetry.addData("drive_x", driveVector.getX());
         telemetry.addData("drive_y", driveVector.getY());
         telemetry.addData("drive_rot", driveVector.getRawR());
@@ -114,3 +112,24 @@ public class BasicNotBasicDrive extends OpMode {
         drive.stop();
     }
 }
+/*
+ public void startScript(){
+        List<String> commands = (List<String>) parsedField.getObject("script");
+        for (String command : commands){
+            /*
+            while(!controls.getDigital("script")){}
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+long startTime = System.currentTimeMillis();
+while (System.currentTimeMillis()-startTime<10000){
+        telemetry.addData("Location", command);
+        telemetry.addData("X", parsedField.subData(command).getFloat("x"));
+        telemetry.addData("Y", parsedField.subData(command).getFloat("y"));
+        telemetry.update();
+                }
+            }
+        }
+ */

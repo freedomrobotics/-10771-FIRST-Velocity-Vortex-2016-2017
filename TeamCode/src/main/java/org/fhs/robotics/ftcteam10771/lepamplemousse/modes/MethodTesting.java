@@ -1,9 +1,8 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -19,17 +18,15 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
-import java.util.List;
-
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis.Z;
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.LEFT;
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.RIGHT;
 
 /**
- * Created by joelv on 2/9/2017.
+ * Created by joelv on 2/10/2017.
  */
-@Autonomous (name="Pampletonomous")
-public class PamplemouseAuto extends LinearOpMode {
+@Autonomous(name="Method Testing")
+public class MethodTesting extends LinearOpMode{
 
     private Config rawSettings;
     private Config.ParsedData settings;
@@ -119,41 +116,12 @@ public class PamplemouseAuto extends LinearOpMode {
         imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
         gyroOutput = imuHandler.getGyrometer();
         telemetryThread.start();
-        cameraVision.cameraThread.start();
         waitForStart();
-        imuHandler.imuThread.start();
-        drive.setRelative(true);
         drive.startPosition();
-        wait(settings.subData("drive").getInt("wait_time"));
-        if (!parsedField.getString("beacon1").equals("null")){
-            claimBeacon(parsedField.getString("beacon1"));
-        }
-        if (!parsedField.getString("beacon2").equals("null")){
-            claimBeacon(parsedField.getString("beacon2"));
-        }
-        driveVector.setX(drive.getCurrentX());
-        driveVector.setY(drive.getCurrentY());
-        drive.startPosition();
-        cameraVision.cameraThread.interrupt();
-        /*
-        if (parsedField.getBool("knock_ball")){
-            driveTo("center");
-            while(!proceed){
-                proceed = drive.isAtPosition();
-            }
-        }
-        driveTo(parsedField.getString("park"));
-        proceed = false;
-        while(!proceed){
-            proceed = drive.isAtPosition();
-        }
-        driveVector.setX(drive.getCurrentX());
-        driveVector.setY(drive.getCurrentY());
-        *///todo complete imu code before making uncommenting
-        imuHandler.imuThread.interrupt();
+        //drive.startVelocity();
+        rotate((float)Math.toRadians(90.0));
         telemetryThread.interrupt();
         drive.stop();
-        //add the imu and possibly catapult if there is time
     }
 
     private void claimBeacon(String beacon){
@@ -344,4 +312,5 @@ public class PamplemouseAuto extends LinearOpMode {
         driveVector.setX(parsedField.subData(location).getFloat("x"));
         driveVector.setY(parsedField.subData(location).getFloat("y"));
     }
+
 }
