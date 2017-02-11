@@ -170,7 +170,7 @@ public class PamplemouseAuto extends LinearOpMode {
         int waitTime = settings.subData("drive").subData("camera_settings").getInt("detect_time");
         //todo put in config file
         boolean detected = false;
-        while(System.currentTimeMillis()-currentTime<waitTime){
+        while(System.currentTimeMillis()-currentTime<waitTime && !detected){
             detected = cameraVision.countTrackedImages()==1;
         }
         if (detected){
@@ -261,7 +261,7 @@ public class PamplemouseAuto extends LinearOpMode {
             }
             driveVector.setRad(gyroOutput.convert(Z, gyroOutput.getOrientation(Z)));
         }
-        drive.refresh();
+        //drive.refresh();
     }
 
     /**
@@ -317,6 +317,7 @@ public class PamplemouseAuto extends LinearOpMode {
                     driveVector.setPolar(radius, theta);
                 }
             }
+            driveVector.setPolar(0.0f, 0.0f);
             return rgb.isSide(alliance, direction);
         }
         else return false;
@@ -331,6 +332,7 @@ public class PamplemouseAuto extends LinearOpMode {
         while(System.currentTimeMillis()-currentTime<waitTime){
             driveVector.setPolar(radius, theta);
         }
+        driveVector.setPolar(0.0f, 0.0f);
     }
 
     private boolean targeted(){
