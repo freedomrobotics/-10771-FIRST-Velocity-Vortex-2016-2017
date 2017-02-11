@@ -24,7 +24,7 @@ catapult:
 
 robot:
   initial_position:
-    x: 0.0
+    x: 0.0  #needed in testDrive3
     y: 0.0
   intial_rotation: 0.0
   size:
@@ -124,6 +124,8 @@ auto:
   encoder:
 
 drive:
+  gyro_margin: 5.0 #degrees (put in settings)
+  diameter: 10.16 #cm (put in settings)
   wait_time: 3000 #put in settings
   update_using: encoders
   init_with_fieldmap: false

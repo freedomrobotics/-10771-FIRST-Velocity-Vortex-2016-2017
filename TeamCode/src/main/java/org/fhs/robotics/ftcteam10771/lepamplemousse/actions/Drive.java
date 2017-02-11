@@ -4,12 +4,16 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.lang.Math;
 import java.util.List;
+
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis.Z;
+
 /**
  * Created by Adam Li on 10/27/2016.
  * Class to manage how the robot drives (smart control schemes, drivetrain types, etc.)
@@ -23,6 +27,7 @@ public class Drive {
     DcMotor brMotor;
     DcMotor blMotor;
     Config.ParsedData driveSettings;
+    IMU.Gyrometer gyrometer;
     boolean vectorDriveActive;
     boolean blueTeam;
     boolean relativeDrive;
@@ -83,7 +88,7 @@ public class Drive {
 
                     robotTheta = (float) Math.atan2(vectorY, vectorX);
 
-                    if(Math.abs(robotTheta) < Math.PI*2*(driveSettings.subData("positional").getFloat("rotational_tolerance")/360)){
+                    if(Math.abs(robotTheta) < Math.toRadians(driveSettings.subData("positional").getFloat("rotational_tolerance")/360)){
                         atRotation = true;
                     }
 
@@ -178,7 +183,7 @@ public class Drive {
      */
     public Drive(VectorR vectorR, Robot robot, DcMotor frMotor,
                  DcMotor flMotor, DcMotor blMotor, DcMotor brMotor,
-                 Config.ParsedData settings, Telemetry telemetry){
+                 Config.ParsedData settings, IMU.Gyrometer gyrometer, Telemetry telemetry){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -190,6 +195,7 @@ public class Drive {
         this.vectorDriveActive = true;
         this.joystickControl = false;
         this.telemetry = telemetry;
+        this.gyrometer = gyrometer;
 
         this.blueTeam = false;
         if (settings.getString("alliance") == "blue")
@@ -300,25 +306,12 @@ public class Drive {
         Test_drive3, where the encoder outputs are calculated into X and Y coordinates
     */
     public void updatePosition(){
-        String updateDevice = settings.subData("drive").getString("update_using");
-        switch(updateDevice){
-            case "encoders":
-                robot.getPosition().setX(getEncoderX());
-                robot.getPosition().setY(getEncoderY());
-                break;
-            case "camera":
-                //todo: finish algorithm for gaining position in reference to an image
-                //robot.getPosition().cameraVision.updateCoordinates().getX();
-                //robot.getPosition().cameraVision.updateCoordinates().getY();
-                break;
-            case "imu":
-                //robot.getPosition().setX(accelerometer.getOrienation(X);
-                //robot.getPosition().setY(accelerometer.getOrienation(Y)
-                //todo: check status of imu readiness
-                break;
-            default:
-                robot.getPosition().setX(getEncoderX());
-                robot.getPosition().setY(getEncoderY());
+        robot.getPosition().setX(getEncoderX());
+        robot.getPosition().setY(getEncoderY());
+        float orientation = gyrometer.convert(Z, gyrometer.getOrientation(Z));
+        float margin = (float)Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
+        if (orientation>margin && orientation < ((float)Math.PI*2.0)-margin){
+            robot.getVectorR().setRad(orientation);
         }
     }
 
@@ -328,14 +321,24 @@ public class Drive {
      * @return the x coordinate
      */
     private float getEncoderX(){
-        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
+        float centimeters_per_pulse = settings.subData("drive").getFloat("diameter") * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
         double motorAngle = Math.toRadians(driveSettings.getFloat("motor_angle"));
-        float A = -frMotor.getCurrentPosition()*inch_per_pulse;
-        float B = -flMotor.getCurrentPosition()*inch_per_pulse;
-        float C = -blMotor.getCurrentPosition()*inch_per_pulse;
-        float D = -brMotor.getCurrentPosition()*inch_per_pulse;
-        float AC = ((A*(float)Math.cos(Math.PI-motorAngle)) + (C*(float)Math.cos(Math.PI-motorAngle)))/2.0f;
-        float BD = ((B*(float)Math.cos(motorAngle)) + (D*(float)Math.cos(motorAngle)))/2.0f;
+        double orientation = gyrometer.convert(Z, gyrometer.getOrientation(Z));
+        double margin = Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
+        //todo add to config file drive>gyro_margin
+        double absoluteAngle = 0.0;
+        if (orientation < (2.0*Math.PI) - margin && orientation > margin){
+             absoluteAngle = gyrometer.convert(Z, gyrometer.getOrientation(Z));
+        }
+        if (blueTeam){
+            absoluteAngle += Math.PI/2.0;
+        }
+        float A = -frMotor.getCurrentPosition()*centimeters_per_pulse;
+        float B = -flMotor.getCurrentPosition()*centimeters_per_pulse;
+        float C = -blMotor.getCurrentPosition()*centimeters_per_pulse;
+        float D = -brMotor.getCurrentPosition()*centimeters_per_pulse;
+        float AC = ((A*(float)Math.cos(absoluteAngle + Math.PI-motorAngle)) + (C*(float)Math.cos(absoluteAngle + Math.PI-motorAngle)))/2.0f;
+        float BD = ((B*(float)Math.cos(absoluteAngle + motorAngle)) + (D*(float)Math.cos(absoluteAngle + motorAngle)))/2.0f;
         return  ((AC + BD) / 2.0f) + initialX;
     }
 
@@ -345,14 +348,25 @@ public class Drive {
      * @return the y coordinate
      *///todo fix math
     private float getEncoderY(){
-        float inch_per_pulse = 4f  * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
-        double motorAngle = Math.toRadians(driveSettings.getFloat("motor_angle"));
-        float A = -frMotor.getCurrentPosition()*inch_per_pulse;
-        float B = -flMotor.getCurrentPosition()*inch_per_pulse;
-        float C = -blMotor.getCurrentPosition()*inch_per_pulse;
-        float D = -brMotor.getCurrentPosition()*inch_per_pulse;
-        float AC = (A+C)/2.0f;
-        float BD = (B+D)/2.0f;
+        //todo add drive>diameter: 10.16
+        float centimeters_per_pulse = settings.subData("drive").getFloat("diameter") * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
+        double motorAngle = Math.PI/2.0;
+        double orientation = 0.0f;
+        if (gyrometer!=null) orientation = gyrometer.convert(Z, gyrometer.getOrientation(Z));
+        double margin = Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
+        //todo add to config file drive>gyro_margin
+        if (orientation < (2.0*Math.PI) - margin && orientation > margin){
+            motorAngle += gyrometer.convert(Z, gyrometer.getOrientation(Z));
+        }
+        if (blueTeam){
+            motorAngle += Math.PI/2.0;
+        }
+        float A = -frMotor.getCurrentPosition()*centimeters_per_pulse;
+        float B = -flMotor.getCurrentPosition()*centimeters_per_pulse;
+        float C = -blMotor.getCurrentPosition()*centimeters_per_pulse;
+        float D = -brMotor.getCurrentPosition()*centimeters_per_pulse;
+        float AC = ((A*(float)Math.sin(motorAngle)) + (C*(float)Math.sin(motorAngle)))/2.0f;
+        float BD = ((B*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle)))/2.0f;
         return  ((AC + BD) / 2.0f) + initialY;
     }
 
@@ -415,5 +429,22 @@ public class Drive {
 
     public boolean isAtPosition(){
         return atPosition;
+    }
+
+    public boolean isVectorDriveActive(){
+        return vectorDriveActive;
+    }
+
+    public void refresh(){
+        initialX = getEncoderX();
+        initialY = getEncoderY();
+        frMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        flMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        blMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        brMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        blMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        brMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
