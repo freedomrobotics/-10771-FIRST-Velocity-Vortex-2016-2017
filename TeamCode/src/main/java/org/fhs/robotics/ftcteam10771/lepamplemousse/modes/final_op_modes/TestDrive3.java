@@ -271,6 +271,8 @@ public class TestDrive3 extends LinearOpMode{
             telemetry.addData("Y inches", getY());
             telemetry.update();
 
+            catapult.setLaunch(controls.getDigital("launch"));
+
             //idle();
 
         }

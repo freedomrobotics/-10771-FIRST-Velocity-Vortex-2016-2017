@@ -26,6 +26,7 @@ public class Catapult {
     private float increment=0.01f;
     private boolean button = false;
     Config.ParsedData settings;
+    private boolean launch;
 
     public Catapult(DcMotor motor, OpticalDistanceSensor opticalDistanceSensor,
                     Controllers controllers, Config.ParsedData settings){
@@ -43,7 +44,7 @@ public class Catapult {
         readyPosition = this.settings.getInt("ready_position");
         margin = this.settings.getInt("position_margin");
         increment = this.settings.getFloat("power_increment");
-        catapultThread = this.settings.getBool("use_encoder") ? new Thread(runEncoder) : new Thread(runSomething);
+        catapultThread = new Thread(runSomething);
     }
 
     public Runnable runSomething = new Runnable() {
@@ -53,7 +54,7 @@ public class Catapult {
             {
                 if (catapultReady()) {
                     rotator.setTargetPosition(rotator.getCurrentPosition() + margin);
-                    while (!Thread.currentThread().isInterrupted() && !button()) {
+                    while (!Thread.currentThread().isInterrupted() && !launch) {
                         oscillate();
                     }
                     if (!Thread.currentThread().isInterrupted()) {
@@ -124,6 +125,10 @@ public class Catapult {
      */
     private Boolean button(){
         return controllers.getDigital("launch");
+    }
+
+    public void setLaunch(boolean state){
+        launch = state;
     }
 
     /**
