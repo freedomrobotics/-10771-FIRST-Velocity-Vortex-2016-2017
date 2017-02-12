@@ -534,16 +534,19 @@ public class CameraVision {
      * @return the robot's field coordinates
      */
     public Coordinate updateCoordinates (){
-        Coordinate coordinate = new Coordinate();
-        float x = (float)distanceFromImage()*(float)Math.cos(absoluteAngle());
-        float y = (float)distanceFromImage()*(float)Math.sin(absoluteAngle());
-        x = Coordinate.convertTo(x, Coordinate.UNIT.MM_TO_UNIT);
-        y = Coordinate.convertTo(y, Coordinate.UNIT.MM_TO_UNIT);
-        x = targetedImage.getxCoordinate() - x;
-        y = targetedImage.getyCoordinate() - y;
-        coordinate.setX(x);
-        coordinate.setY(y);
-        return coordinate;
+        if (imageInSight()){
+            Coordinate coordinate = new Coordinate();
+            float x = (float)distanceFromImage()*(float)Math.cos(absoluteAngle());
+            float y = (float)distanceFromImage()*(float)Math.sin(absoluteAngle());
+            x = Coordinate.convertTo(x, Coordinate.UNIT.MM_TO_UNIT);
+            y = Coordinate.convertTo(y, Coordinate.UNIT.MM_TO_UNIT);
+            x = targetedImage.getxCoordinate() - x;
+            y = targetedImage.getyCoordinate() - y;
+            coordinate.setX(x);
+            coordinate.setY(y);
+            return coordinate;
+        }
+        return null;
     }
 
 }

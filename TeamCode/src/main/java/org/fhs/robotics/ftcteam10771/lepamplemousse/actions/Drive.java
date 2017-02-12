@@ -447,4 +447,10 @@ public class Drive {
         blMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         brMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
+    public void manuallyUpdatePosition(float x, float y){
+        refresh();
+        initialX = x;
+        initialY = y;
+    }
 }
