@@ -42,7 +42,7 @@ public class IMU {
 
     //Stream flags that can be toggled on or off
     private boolean gyroStreamEnabled = false;
-
+    private long streamDelay = 100;
     /*
         Default constructor
      */
@@ -166,9 +166,18 @@ public class IMU {
         public void run() {
             while (!Thread.currentThread().isInterrupted()){
                 streamIMUData();
+                try {
+                    Thread.sleep(streamDelay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
+
+    public void setStreamDelay(long delay){
+        this.streamDelay = delay;
+    }
 
     //The runnable's respective thread
     public final Thread imuThread = new Thread(imuRunnable);
@@ -182,7 +191,7 @@ public class IMU {
             orientation = imu.getAngularOrientation();
             //angularVelocity = imu.getAngularVelocity();
         }
-        clearData();
+        //clearData();
     }
 
     /**
