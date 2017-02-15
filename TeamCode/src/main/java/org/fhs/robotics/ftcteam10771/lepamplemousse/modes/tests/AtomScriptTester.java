@@ -119,6 +119,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         imuHandler.imuInit(); //todo remember to init imu
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
+        imuHandler.streamIMUData();
         imuHandler.setStreamDelay(150);
         imuHandler.imuThread.start();
 
@@ -233,7 +234,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         }
 
         if (commandParser.command().equalsIgnoreCase("rotate")){
-            rotate(commandParser.getArgFloat(0));
+            rotateA(commandParser.getArgFloat(0));
             return;
         }
 
@@ -317,6 +318,26 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         driveVector.setPolar(0, 0);
     }
 
+    public void rotateA(double degrees){
+        drive.startVelocity();
+        drive.setRelative(true);
+        double targetOrientation = gyrometer.getOrientation(IMU.Axis.Z) + Math.toRadians(degrees);
+        double transformedOrientation = targetOrientation;
+        while (Math.abs(transformedOrientation) > 2*Math.PI || Math.abs(transformedOrientation) < 0) {
+            if (Math.abs(transformedOrientation) > 2 * Math.PI) {
+                transformedOrientation -= 2 * Math.PI;
+            } else if (Math.abs(transformedOrientation) < 0) {
+                transformedOrientation += 2 * Math.PI;
+            }
+        }
+        float rotate_margin = (float) Math.toRadians(settings.subData("drive").subData("camera_settings").getFloat("angle_margin"));
+        float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
+        while(gyrometer.getOrientation(IMU.Axis.Z) < transformedOrientation - rotate_margin && gyrometer.getOrientation(IMU.Axis.Z) > transformedOrientation + rotate_margin && opModeIsActive()){
+            driveVector.setRad((float)Math.copySign(rotate_speed, targetOrientation));
+        }
+        driveVector.setRad(0);
+        driveVector.setPolar(0, 0);
+    }
 
     /**
      * Positionally drive the robot to a location on the field

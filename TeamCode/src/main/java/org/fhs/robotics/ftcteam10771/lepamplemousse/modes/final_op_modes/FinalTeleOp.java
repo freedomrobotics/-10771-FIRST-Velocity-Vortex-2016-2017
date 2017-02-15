@@ -194,19 +194,20 @@ public class FinalTeleOp extends OpMode{
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);//todo put in config
+        imuHandler.imuInit(); //todo remember to init imu
         gyrometer = imuHandler.getGyrometer();
+        gyrometer.enableStream(true);
         lastTime = System.currentTimeMillis();
-
+        catapult.catapultThread.start();
+        drive.startVelocity();
     }
 
     @Override
     public void start(){
-        catapult.catapultThread.start();
-        drive.startVelocity();
-        imuHandler.imuInit();
     }
 
     public void loop(){
+        imuHandler.streamIMUData();
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
         if (intakePower < 0){
