@@ -278,12 +278,12 @@ public class Drive {
         this.relativeDrive = true;
         vectorDriveActive = false;
         if(driveThread.isAlive()){driveThread.interrupt();}
-        /* todo ask if this is needed
+        //* todo ask if this is needed
         frMotor.setPower(0.0);
         flMotor.setPower(0.0);
         brMotor.setPower(0.0);
         blMotor.setPower(0.0);
-        */
+        //*/
     }
 
     /**

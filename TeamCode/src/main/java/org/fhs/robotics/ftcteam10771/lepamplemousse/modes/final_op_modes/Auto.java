@@ -2,6 +2,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -18,7 +19,7 @@ import java.util.List;
  * Rough autonomous from framework_test
  * Created by joelv on 2/9/2017.
  */
-
+@Autonomous(name="CheapAuto")
 public class Auto extends LinearOpMode{
 
     //initializes motors in order of standard graph quadrants

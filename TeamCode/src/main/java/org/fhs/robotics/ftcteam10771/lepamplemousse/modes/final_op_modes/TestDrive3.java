@@ -44,8 +44,9 @@ public class TestDrive3 extends LinearOpMode{
     private Components components;
     private Controllers controls;
     private Catapult catapult;
-    private IMU.Gyrometer gyrometer;
-    private IMU imuHandler;
+    private Servo arm;
+    //private IMU.Gyrometer gyrometer;
+    //private IMU imuHandler;
 
     private static final String TAG = "TestDrive3Debug";
     private float bumperPos;
@@ -53,6 +54,9 @@ public class TestDrive3 extends LinearOpMode{
     private float initialY = 0.0f;
     private boolean blueTeam;
     private long lastTime;
+    private boolean armToggle = false;
+    private boolean dropBalls = false;
+    Servo ballDropper;
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -121,6 +125,12 @@ public class TestDrive3 extends LinearOpMode{
         Log.d(TAG, "motor setup");
 
         intakeMotor = hardwareMap.dcMotor.get("motorIntake");
+        ballDropper = hardwareMap.servo.get("drop");
+        if (settings.subData("drop").getBool("reversed")){
+            ballDropper.setDirection(Servo.Direction.REVERSE);
+        } else{
+            ballDropper.setDirection(Servo.Direction.FORWARD);
+        }
 
         Log.d(TAG, "motor setup 2");
 
@@ -175,12 +185,14 @@ public class TestDrive3 extends LinearOpMode{
 
         float power = settings.subData("drivetrain").getFloat("motor_scale");
         catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
-        imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
-        gyrometer = imuHandler.getGyrometer();
+        //imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
+        //gyrometer = imuHandler.getGyrometer();
+        //gyrometer.enableStream(true);
         lastTime = System.currentTimeMillis();
-        waitForStart();
         catapult.catapultThread.start();
+        waitForStart();
         while(opModeIsActive()){
+            //imuHandler.streamIMUData();
             long changeTime = System.currentTimeMillis() - lastTime;
             lastTime += changeTime;
             if (intakePower < 0){
@@ -228,13 +240,6 @@ public class TestDrive3 extends LinearOpMode{
 
             telemetry.addData("IntakeSpeed", intakePower);
 
-            if (gamepad1.b && !toggle.contains("intakeF")){
-                intakeB = !intakeB;
-                intakeF = false;
-                toggle.add("intakeB");
-            } if (!gamepad1.b && toggle.contains("intakeB")){
-                toggle.remove("intakeB");
-            }
             if (gamepad1.a && !toggle.contains("intakeF")){
                 intakeF = !intakeF;
                 intakeB = false;
@@ -242,17 +247,21 @@ public class TestDrive3 extends LinearOpMode{
             } if (!gamepad1.a && toggle.contains("intakeF")){
                 toggle.remove("intakeF");
             }
+            if (controls.getDigital("drop") && !toggle.contains("drop")){
+                dropBalls = !dropBalls;
+                toggle.add("drop");
+            } if (!controls.getDigital("drop") && toggle.contains("drop")){
+                toggle.remove("drop");
+            }
 
             if (intakeF){
-                intakeMotor.setPower(Range.scale(intakePower, 0, 1, -.778, .778));
-            } else if (intakeB){
                 intakeMotor.setPower(-Range.scale(intakePower, 0, 1, -.778, .778));
             } else {
                 intakeMotor.setPower(0);
             }
 
             //servo
-
+            dropBalls();
 
             bumperPos += controls.getAnalog("bumper_angle") * (bumperVel / bumperRange) * ((float) changeTime / 1000.0f);
 
@@ -284,11 +293,11 @@ public class TestDrive3 extends LinearOpMode{
     private float getX(){
         float centimeters_per_pulse = settings.subData("drive").getFloat("diameter") * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
         double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
-        double orientation = gyrometer.convert(Z, gyrometer.getOrientation(Z));
+        double orientation = 0.0;
         double margin = Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
         //todo add to config file drive>gyro_margin
         if (orientation < (2.0*Math.PI) - margin && orientation > margin){
-            motorAngle += gyrometer.convert(Z, gyrometer.getOrientation(Z));
+            motorAngle += 0.0;
         }
         if (blueTeam){
             motorAngle += Math.PI/2.0;
@@ -326,4 +335,32 @@ public class TestDrive3 extends LinearOpMode{
         motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
+    public void setToggle(){
+        armToggle = controls.getDigital("arm");
+        if (armToggle){
+            arm.setPosition(settings.subData("catapult").getFloat("up"));
+
+        }
+    }
+
+    /**
+     * Lifts plow if it is down
+     * Drops plow if it is lifted
+     */
+    public void dropBalls(){
+        Config.ParsedData drop = settings.subData("drop");
+        float fullRange = drop.getFloat("full_rotate");
+        float offset = drop.getFloat("offset") / fullRange;
+        float up = drop.getFloat("up_angle") / fullRange;
+        float down = drop.getFloat("down_angle") / fullRange;
+        if (dropBalls){
+            ballDropper.setPosition(up + offset);
+            telemetry.addData("dropper", "up");
+        }else {
+            ballDropper.setPosition(down + offset);
+            telemetry.addData("dropper", "down");
+        }
+    }
+
 }
