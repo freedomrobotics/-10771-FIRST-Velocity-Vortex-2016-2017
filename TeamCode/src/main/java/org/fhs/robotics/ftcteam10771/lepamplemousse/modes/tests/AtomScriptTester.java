@@ -163,6 +163,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         waitForStart();
         this.lastTime = System.currentTimeMillis();
         try{
+            imuHandler.imuInit(); //the real reason rotate was not working: imuInit() never called
             catapult.catapultThread.start();
             imuHandler.imuThread.start();
             for(String command : commandList){
@@ -191,11 +192,10 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
             launcher.setPower(0.0);
             drive.stop();
         }
-
         drive.stop();
         imuHandler.imuThread.interrupt();
         catapult.catapultThread.interrupt();
-        speech.shutdown();
+        //speech.shutdown();
     }
 
     @Override

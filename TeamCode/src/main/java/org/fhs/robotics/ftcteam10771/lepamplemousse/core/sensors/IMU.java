@@ -37,6 +37,7 @@ public class IMU {
     //Runnable variables
     private Orientation orientation = null;    //might move to main IMU class
     private AngularVelocity angularVelocity = null;   //might move to main IMU class
+    private final Orientation zero = new Orientation();
 
 
 
@@ -187,10 +188,11 @@ public class IMU {
      * To be used in a looping thread
      */
     public void streamIMUData(){
-        if (gyroStreamEnabled){
+        if (gyroStreamEnabled && isImuInit()){
             orientation = imu.getAngularOrientation();
             //angularVelocity = imu.getAngularVelocity();
         }
+        else orientation = zero;
         //clearData();
     }
 

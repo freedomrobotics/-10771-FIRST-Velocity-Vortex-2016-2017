@@ -2,6 +2,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 
 import android.util.Log;
 
+import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -15,6 +16,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms.Catapult;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
@@ -51,6 +53,10 @@ public class FinalTeleOp extends OpMode{
     private Config.ParsedData bumpers;
     private Components components;
     private Controllers controls;
+
+    private IMU imuHandler;
+    private IMU.Gyrometer gyrometer;
+    private BNO055IMU imu;
 
     private Catapult catapult;
     private Drive drive;
@@ -183,14 +189,21 @@ public class FinalTeleOp extends OpMode{
             bumperRight.setDirection(Servo.Direction.REVERSE);
 
         power = settings.subData("drivetrain").getFloat("motor_scale");
+
         catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imuHandler = new IMU(imu);//todo put in config
+        gyrometer = imuHandler.getGyrometer();
         lastTime = System.currentTimeMillis();
+
     }
 
     @Override
     public void start(){
         catapult.catapultThread.start();
         drive.startVelocity();
+        imuHandler.imuInit();
     }
 
     public void loop(){
@@ -204,6 +217,17 @@ public class FinalTeleOp extends OpMode{
         intakePower += gamepad1.right_stick_y / settings.getInt("intake_divisor");
 
         double joystickTheta = Math.atan2((controls.getAnalog("drivetrain_y")),(controls.getAnalog("drivetrain_x"))); //declares the angle of joystick position in standard polar coordinates
+        joystickTheta -= (Math.PI * 2.0) + gyrometer.getOrientation(IMU.Axis.Z);
+
+        //todo see if this works for the driver
+        while (joystickTheta<0){
+            joystickTheta += (Math.PI * 2.0);
+        }
+        if (joystickTheta > (2.0 * Math.PI)){
+            joystickTheta = joystickTheta % (Math.PI * 2.0);
+        }
+
+
         double joystickRadius = Math.sqrt((controls.getAnalog("drivetrain_x"))*(controls.getAnalog("drivetrain_x"))+
                 (controls.getAnalog("drivetrain_y"))*(controls.getAnalog("drivetrain_y"))); //declares the magnitude of the radius of the joystick position
         // Halved rotationPower value to allow for simultaneous translation and rotation when fully depressed - Adam Li
@@ -275,6 +299,7 @@ public class FinalTeleOp extends OpMode{
     public void stop() {
         catapult.catapultThread.interrupt();
         drive.startVelocity();
+        imu.close();
     }
 
     /**
