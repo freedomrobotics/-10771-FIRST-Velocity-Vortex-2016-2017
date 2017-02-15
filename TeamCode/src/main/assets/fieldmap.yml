@@ -29,6 +29,9 @@ coordinates:
     center:
       x: -28.00
       y: -28.00
+    center_vortex:
+      x: -26.94
+      y: -26.94
     custom1:
       x: 50.0
       y: 0.0
@@ -57,6 +60,9 @@ coordinates:
     center:
       x: 28.00
       y: 28.00
+    center_vortex:
+      x: 26.94
+      y: 26.94
     custom1:
       x: 0.0
       y: 0.0

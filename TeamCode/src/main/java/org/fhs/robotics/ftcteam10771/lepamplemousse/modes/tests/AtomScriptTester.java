@@ -304,7 +304,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         boolean targetNearZero = (targetOrientation < rotate_margin || targetOrientation > fullRotation - rotate_margin);
         if (targetOrientation > fullRotation - rotate_margin) targetOrientation -= fullRotation;
         while(orientation < targetOrientation - rotate_margin
-                && orientation > targetOrientation + rotate_margin && opModeIsActive()){
+                || orientation > targetOrientation + rotate_margin && opModeIsActive()){
             if (targetNearZero){
                 orientation = gyrometer.convertAngletoSemiPossibleRange(
                         Z, gyrometer.getOrientation(Z));
@@ -330,24 +330,42 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
     public void driveTo(float x, float y){
         rotate(0.0); //todo comment if imu is finished
         drive.startPosition();
-        driveVector.setX(x);
-        driveVector.setY(y);
         //todo make a config file for margins and such
         float margin = Math.abs(settings.subData("drive").subData("camera_settings").getFloat("distance_to_stop"));
         float xDistance = drive.getCurrentX() - x;
         float yDistance = drive.getCurrentY() - y;
         float distance = (float)Math.sqrt((xDistance*xDistance)+(yDistance*yDistance));
+        driveVector.setX(x);
+        driveVector.setY(y);
         while (distance > margin){
+            xDistance = drive.getCurrentX() - x;
+            yDistance = drive.getCurrentY() - y;
             distance = (float)Math.sqrt((xDistance*xDistance)+(yDistance*yDistance));
         }
         driveVector.setX(drive.getCurrentX());
         driveVector.setY(drive.getCurrentY());
     }
 
-
-    public void driveToCenterVortex(){
+    /**
+     * The drive to center vortex
+     */
+    public void driveToCenterVortex(float power){
         rotate(0.0); //todo comment after imu completion
-
+        final float fullRotation = (float)Math.toRadians(360.0);
+        float vortexX = fieldMap.subData("coordinates").subData(team).subData("center_vortex").getFloat("x");
+        float vortexY = fieldMap.subData("coordinates").subData(team).subData("center_vortex").getFloat("y");
+        float xDistance = drive.getCurrentX() - vortexX;
+        float yDistance = drive.getCurrentY() - vortexY;
+        float distance = (float)Math.sqrt((xDistance*xDistance)+(yDistance*yDistance));
+        float theta = (float)Math.atan(yDistance/xDistance);
+        float targetDistance = fieldMap.subData("values").getFloat("distance_from_vortex");
+        float margin = 3.0f; //todo move all margins under new heading called margins:
+        drive.startVelocity();
+        while (distance < targetDistance - margin || distance > targetDistance + margin){
+            if (distance > targetDistance) theta = (theta + fullRotation/2.0f) % fullRotation;
+            driveVector.setPolar(power, theta);
+        }
+        rotate((theta + fullRotation/2.0f) % fullRotation);
     }
 
     /*
@@ -384,11 +402,11 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         driveVector.setRadius(0);
         driveVector.setPolar(0, 0);
     }
-
     private boolean targeted(){
         return cameraVision.imageInSight(cameraVision.target());
     }
     */
+
     /**
      * Lifts plow if it is down
      * Drops plow if it is lifted
