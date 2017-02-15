@@ -99,6 +99,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
 
         //setup imu
         imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
+        imuHandler.imuInit(); //todo remember to init imu
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
         imuHandler.setStreamDelay(150);
@@ -143,30 +144,29 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         int counter = 1; //debug
         //WAIT FOR THE STARTI!@HTIOgRFOIWUQ#GQIOH
         telemetry.addData("ready", true);
+        telemetry.addData("orient", gyrometer.getOrientation(IMU.Axis.Z));
         telemetry.update();
         waitForStart();
         this.lastTime = System.currentTimeMillis();
-        while(opModeIsActive()){
-            for(String command : commandList){
-                //check if opmode is active
-                if (!opModeIsActive()) break;
-                this.lastTime = System.currentTimeMillis();
+        for(String command : commandList){
+            //check if opmode is active
+            if (!opModeIsActive()) break;
+            this.lastTime = System.currentTimeMillis();
 
-                ScriptLoader.CommandParser commandParser = new ScriptLoader.CommandParser(command);
+            ScriptLoader.CommandParser commandParser = new ScriptLoader.CommandParser(command);
 
-                commandPicker(commandParser);
+            commandPicker(commandParser);
 
-                if (commandParser.command().equalsIgnoreCase("stop")){
-                    break;
-                }
-
-                //Debug section
-                telemetry.addData("robot", robot.toString());
-                telemetry.addData(counter + "", command);
-                counter++;
-
-                telemetry.update();
+            if (commandParser.command().equalsIgnoreCase("stop")){
+                break;
             }
+
+            //Debug section
+            telemetry.addData("robot", robot.toString());
+            telemetry.addData(counter + "", command);
+            counter++;
+
+            telemetry.update();
         }
         drive.stop();
         imuHandler.imuThread.interrupt();
@@ -219,8 +219,6 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         if (commandParser.command().equalsIgnoreCase("rotate")){
             drive.startVelocity();
             drive.setRelative(true);
-            telemetry.addData("did it", "nope");
-            telemetry.update();
             rotate(commandParser.getArgFloat(0));
             return;
         }
@@ -275,20 +273,21 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
 
 
     public void rotate(double degrees){
-        double targetOrientation = Math.toRadians(degrees);
-        double orientation = Math.toRadians(360.0) + gyrometer.getOrientation(IMU.Axis.Z);
-        float rotate_margin = settings.subData("drive").subData("camera_settings").getFloat("angle_margin");
-        float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
-        while(orientation < targetOrientation - rotate_margin && orientation > targetOrientation + rotate_margin && opModeIsActive()){
-            telemetry.addData("orientation", gyrometer.getOrientation(IMU.Axis.Z));
-            orientation = Math.toRadians(360.0) + gyrometer.getOrientation(IMU.Axis.Z);
-            telemetry.addData("orientation2", orientation);
-            driveVector.setRad((float)Math.copySign(rotate_speed, targetOrientation - orientation));
-            telemetry.update();
+        double targetOrientation = gyrometer.getOrientation(IMU.Axis.Z) + Math.toRadians(degrees);
+        double transformedOrientation = targetOrientation;
+        while (Math.abs(transformedOrientation) > 2*Math.PI || Math.abs(transformedOrientation) < 0) {
+            if (Math.abs(transformedOrientation) > 2 * Math.PI) {
+                transformedOrientation -= 2 * Math.PI;
+            } else if (Math.abs(transformedOrientation) < 0) {
+                transformedOrientation += 2 * Math.PI;
+            }
         }
-        telemetry.addData("did it", "yep");
-        telemetry.update();
-        driveVector.setRadius(0);
+        float rotate_margin = (float) Math.toRadians(settings.subData("drive").subData("camera_settings").getFloat("angle_margin"));
+        float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
+        while(gyrometer.getOrientation(IMU.Axis.Z) < transformedOrientation - rotate_margin && gyrometer.getOrientation(IMU.Axis.Z) > transformedOrientation + rotate_margin && opModeIsActive()){
+            driveVector.setRad((float)Math.copySign(rotate_speed, targetOrientation));
+        }
+        driveVector.setRad(0);
         driveVector.setPolar(0, 0);
     }
 

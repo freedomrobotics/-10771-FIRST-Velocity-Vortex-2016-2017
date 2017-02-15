@@ -103,11 +103,11 @@ public class CameraDriveOp extends LinearOpMode {
         drive.setRelative(true);
         drive.startVelocity();
         //drive.driveThread.start();
-        //rotate();
-        //center();
         centerRotate();
+        rotate();
+        center();
         approach();
-        driveVector.setRadius(0);
+        driveVector.setRad(0);
         driveVector.setPolar(0, 0);
         drive.stop();
         telemetryThread.interrupt();
@@ -133,7 +133,7 @@ public class CameraDriveOp extends LinearOpMode {
                 driveVector.setPolar(radius, theta);
             }
         }
-        driveVector.setRadius(0);
+        driveVector.setRad(0);
         driveVector.setPolar(0, 0);
     }
 
@@ -147,7 +147,7 @@ public class CameraDriveOp extends LinearOpMode {
                 driveVector.setPolar(radius, theta);
             }
         }
-        driveVector.setRadius(0);
+        driveVector.setRad(0);
         driveVector.setPolar(0, 0);
     }
 
@@ -159,7 +159,7 @@ public class CameraDriveOp extends LinearOpMode {
                 driveVector.setRad((float)Math.copySign(rotate_speed, cameraVision.getAngleToTurn()));
             }
         }
-        driveVector.setRadius(0);
+        driveVector.setRad(0);
         driveVector.setPolar(0, 0);
     }
 
@@ -179,7 +179,7 @@ public class CameraDriveOp extends LinearOpMode {
                 driveVector.setRad((float)Math.copySign(rotate, cameraVision.getAngleToTurn()));
             }
         }
-        driveVector.setRadius(0);
+        driveVector.setRad(0);
         driveVector.setPolar(0, 0);
     }
 
