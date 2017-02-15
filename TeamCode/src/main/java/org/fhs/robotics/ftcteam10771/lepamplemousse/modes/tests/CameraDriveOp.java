@@ -265,7 +265,7 @@ public class CameraDriveOp extends LinearOpMode {
     }
 
     private void updatePosition(){
-        drive.manuallyUpdatePosition(cameraVision.updateCoordinates().getX(),
+        drive.initPosition(cameraVision.updateCoordinates().getX(),
                 cameraVision.updateCoordinates().getY());
     }
 

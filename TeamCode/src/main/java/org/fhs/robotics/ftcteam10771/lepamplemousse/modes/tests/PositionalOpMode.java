@@ -38,8 +38,8 @@ public class PositionalOpMode extends LinearOpMode {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
-                telemetry.addData("Radius", drive.getRadius());
-                telemetry.addData("Theta", drive.getTheta());
+                telemetry.addData("Radius", driveVector.getRadius());
+                telemetry.addData("Theta", driveVector.getTheta());
                 telemetry.addData("FR", drive.getMotorPower(1));
                 telemetry.addData("FL", drive.getMotorPower(2));
                 telemetry.addData("BL", drive.getMotorPower(3));
@@ -111,7 +111,7 @@ public class PositionalOpMode extends LinearOpMode {
             while(!atPosition){
                 telemetry.addData("location", command);
                 telemetry.update();
-                atPosition = drive.isAtPosition();
+                //atPosition = drive.isAtPosition();
             }
             atPosition = false;
             //TODO: PUT SOMETHING THAT PREVENTS THE FOR LOOP FROM HAPPENING IN ONE INSTANCE, LIKE A WHILE LOOP OR SOMETHING

@@ -62,7 +62,7 @@ public class Drive {
                 float robotVelocity;
                 float rotationalPower;
                 float robotRotation;
-
+                updatePosition();
                 if (vectorDriveActive) {
                     //sets values from the vectorR needed for movement
                     joystickTheta = vectorR.getTheta();
@@ -82,7 +82,6 @@ public class Drive {
                         robotTheta = absoluteTheta + robotRotation;
                     }
                 } else {
-                    updatePosition();
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();
                     float vectorY = vectorR.getY() - robot.getVectorR().getY();
 
@@ -370,25 +369,6 @@ public class Drive {
         return  ((AC + BD) / 2.0f) + initialY;
     }
 
-    public boolean atLocation(){
-        //todo learn how to convert yml list to a list of strings
-        float xMargin = settings.subData("drive").getFloat("x_margin");
-        float yMargin = settings.subData("drive").getFloat("y_margin");
-        float robotX = robot.position.getX();
-        float robotY = robot.getPosition().getY();
-        float setX = vectorR.getX();
-        float setY = vectorR.getY();
-        return ((xMargin>Math.abs(robotX-setX))&&(yMargin>Math.abs(robotY-setY)));
-    }
-
-    public float getRadius(){
-        return vectorR.getRadius();
-    }
-
-    public float getTheta(){
-        return vectorR.getTheta();
-    }
-
     public float getMotorPower(int motor){
         switch (motor) {
             case 1:
@@ -427,10 +407,6 @@ public class Drive {
         return robot.getPosition().getY();
     }
 
-    public boolean isAtPosition(){
-        return atPosition;
-    }
-
     public boolean isVectorDriveActive(){
         return vectorDriveActive;
     }
@@ -448,7 +424,7 @@ public class Drive {
         brMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    public void manuallyUpdatePosition(float x, float y){
+    public void initPosition(float x, float y){
         refresh();
         initialX = x;
         initialY = y;
