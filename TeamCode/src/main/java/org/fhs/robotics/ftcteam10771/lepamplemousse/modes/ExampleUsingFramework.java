@@ -62,6 +62,7 @@ public class ExampleUsingFramework extends OpMode {
         this.components = new Components(hardwareMap, telemetry, components);
         this.components.initialize();
         controls = new Controllers(gamepad1, gamepad2, keymapping);
+        controls.initialize();
 
         /*
         drive = new Drive(new VectorR(), new Robot(), Aliases.motorMap.get("left_drive"),
