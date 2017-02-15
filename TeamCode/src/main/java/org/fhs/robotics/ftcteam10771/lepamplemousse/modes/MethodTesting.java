@@ -51,8 +51,8 @@ public class MethodTesting extends LinearOpMode{
             while (!Thread.currentThread().isInterrupted()) {
                 telemetry.addData("Team", team);
                 telemetry.addData("cameraZ", cameraVision.getZ());
-                telemetry.addData("Radius", drive.getRadius());
-                telemetry.addData("Theta", drive.getTheta());
+                telemetry.addData("Radius", driveVector.getRadius());
+                telemetry.addData("Theta", driveVector.getTheta());
                 telemetry.addData("FR", drive.getMotorPower(1));
                 telemetry.addData("FL", drive.getMotorPower(2));
                 telemetry.addData("BL", drive.getMotorPower(3));
@@ -112,7 +112,7 @@ public class MethodTesting extends LinearOpMode{
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, gyroOutput, telemetry);
+                settings, telemetry);
         imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
         gyroOutput = imuHandler.getGyrometer();
         telemetryThread.start();

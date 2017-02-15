@@ -25,6 +25,8 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
 import java.util.List;
 
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis.Z;
+
 /**
  * Created by Freedom Robotics on 2/10/2017.
  */
@@ -32,8 +34,10 @@ import java.util.List;
 public class AtomScriptTester extends LinearOpMode implements ScriptRunner, TextToSpeech.OnInitListener {
     Controllers controls;
     private long lastTime;      // The time at the last time check (using System.currentTimeMillis())
+    private Config fieldMapConfig;
     private Config rawSettings;
     private Config.ParsedData settings;
+    private Config.ParsedData fieldMap;
     private Components components;
     private Robot robot;
     private Drive drive;
@@ -44,8 +48,11 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
     private boolean dropBalls = false;
     private Servo ballDropper;
     private DcMotor intakeMotor;
+    private DcMotor launcher;
     private boolean status;
     private TextToSpeech speech;
+    private String team = "blue";
+    private CameraVision cameraVision;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -75,7 +82,17 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
 
         this.settings = rawSettings.getParsedData();
 
+        fieldMapConfig = new Config("/Position", "fieldmap.yml", telemetry, "field");
+        if (fieldMapConfig.read()== Config.State.DEFAULT_EXISTS){
+            fieldMapConfig.create(true);
+            if (fieldMapConfig.read()== Config.State.DEFAULT_EXISTS)
+                fieldMapConfig.read(true);
+        }
+
+        this.fieldMap = fieldMapConfig.getParsedData();
+
         // TODO: 2/10/2017 Initialize for realz
+        team = this.settings.getString("alliance");
         robot = new Robot();
 
         this.components = new Components(hardwareMap, telemetry, components);
@@ -91,7 +108,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, null, telemetry);
+                settings, telemetry);
 
         //PREP THE COMMAND LIST!
         if (settings.subData("autonomous").getObject("command_list") == null)
@@ -121,7 +138,8 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         //rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
 
         //setup catapult
-        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+        launcher = hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name"));
+        catapult = new Catapult(launcher, hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
         catapult.catapultThread.start();
 
         //setup ball dropper
@@ -147,7 +165,6 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         telemetry.addData("orient", gyrometer.getOrientation(IMU.Axis.Z));
         telemetry.update();
         waitForStart();
-        this.lastTime = System.currentTimeMillis();
         for(String command : commandList){
             //check if opmode is active
             if (!opModeIsActive()) break;
@@ -165,13 +182,12 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
             telemetry.addData("robot", robot.toString());
             telemetry.addData(counter + "", command);
             counter++;
-
             telemetry.update();
         }
         drive.stop();
         imuHandler.imuThread.interrupt();
         catapult.catapultThread.interrupt();
-        speech.shutdown();
+        //speech.shutdown();
     }
 
     @Override
@@ -217,8 +233,6 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         }
 
         if (commandParser.command().equalsIgnoreCase("rotate")){
-            drive.startVelocity();
-            drive.setRelative(true);
             rotate(commandParser.getArgFloat(0));
             return;
         }
@@ -271,26 +285,85 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         }
     }
 
-
+    /**
+     * Rotates the robot to a target Z orientation using the IMU
+     * todo test rotate function using script
+     * @param degrees the angular orientation to rotate to around the Z axis
+     */
     public void rotate(double degrees){
-        double targetOrientation = gyrometer.getOrientation(IMU.Axis.Z) + Math.toRadians(degrees);
-        double transformedOrientation = targetOrientation;
-        while (Math.abs(transformedOrientation) > 2*Math.PI || Math.abs(transformedOrientation) < 0) {
-            if (Math.abs(transformedOrientation) > 2 * Math.PI) {
-                transformedOrientation -= 2 * Math.PI;
-            } else if (Math.abs(transformedOrientation) < 0) {
-                transformedOrientation += 2 * Math.PI;
-            }
-        }
-        float rotate_margin = (float) Math.toRadians(settings.subData("drive").subData("camera_settings").getFloat("angle_margin"));
+        drive.startVelocity();
+        drive.setRelative(true);
+        final double fullRotation = Math.toRadians(360.0);
+        double targetOrientation = Math.toRadians(degrees);
+        double orientation = fullRotation + gyrometer.getOrientation(Z);
+        double rotate_margin = Math.toRadians(settings.subData("drive").subData("camera_settings").getFloat("angle_margin"));
         float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
-        while(gyrometer.getOrientation(IMU.Axis.Z) < transformedOrientation - rotate_margin && gyrometer.getOrientation(IMU.Axis.Z) > transformedOrientation + rotate_margin && opModeIsActive()){
-            driveVector.setRad((float)Math.copySign(rotate_speed, targetOrientation));
+        boolean targetNearZero = (targetOrientation < rotate_margin || targetOrientation > fullRotation - rotate_margin);
+        if (targetOrientation > fullRotation - rotate_margin) targetOrientation -= fullRotation;
+        while(orientation < targetOrientation - rotate_margin
+                || orientation > targetOrientation + rotate_margin && opModeIsActive()){
+            if (targetNearZero){
+                orientation = gyrometer.convertAngletoSemiPossibleRange(
+                        Z, gyrometer.getOrientation(Z));
+            }
+            else orientation = Math.toRadians(360.0) + gyrometer.getOrientation(Z);
+            telemetry.addData("Orientation", gyrometer.getOrientation(Z));
+            driveVector.setRad((float)Math.copySign(rotate_speed, targetOrientation - orientation));
+            telemetry.update();
         }
+        telemetry.addData("Rotation", "Done");
+        telemetry.update();
         driveVector.setRad(0);
         driveVector.setPolar(0, 0);
     }
 
+
+    /**
+     * Positionally drive the robot to a location on the field
+     * Unit in cm, and using FTC field coordinate system
+     * @param x coordinate to drive to
+     * @param y coordinate to drive to
+     */
+    public void driveTo(float x, float y){
+        rotate(0.0); //todo comment if imu is finished
+        drive.startPosition();
+        //todo make a config file for margins and such
+        float margin = Math.abs(settings.subData("drive").subData("camera_settings").getFloat("distance_to_stop"));
+        float xDistance = drive.getCurrentX() - x;
+        float yDistance = drive.getCurrentY() - y;
+        float distance = (float)Math.sqrt((xDistance*xDistance)+(yDistance*yDistance));
+        driveVector.setX(x);
+        driveVector.setY(y);
+        while (distance > margin){
+            xDistance = drive.getCurrentX() - x;
+            yDistance = drive.getCurrentY() - y;
+            distance = (float)Math.sqrt((xDistance*xDistance)+(yDistance*yDistance));
+        }
+        driveVector.setX(drive.getCurrentX());
+        driveVector.setY(drive.getCurrentY());
+    }
+
+    /**
+     * The drive to center vortex
+     */
+    public void driveToCenterVortex(float power){
+        rotate(0.0); //todo comment after imu completion
+        final float fullRotation = (float)Math.toRadians(360.0);
+        float vortexX = fieldMap.subData("coordinates").subData(team).subData("center_vortex").getFloat("x");
+        float vortexY = fieldMap.subData("coordinates").subData(team).subData("center_vortex").getFloat("y");
+        float xDistance = drive.getCurrentX() - vortexX;
+        float yDistance = drive.getCurrentY() - vortexY;
+        float distance = (float)Math.sqrt((xDistance*xDistance)+(yDistance*yDistance));
+        float theta = (float)Math.atan(yDistance/xDistance);
+        float targetDistance = fieldMap.subData("values").getFloat("distance_from_vortex");
+        float margin = 3.0f; //todo move all margins under new heading called margins:
+        drive.startVelocity();
+        while (distance < targetDistance - margin || distance > targetDistance + margin){
+            if (distance > targetDistance) theta = (theta + fullRotation/2.0f) % fullRotation;
+            driveVector.setPolar(power, theta);
+        }
+        rotate((theta + fullRotation/2.0f) % fullRotation);
+    }
 
     /*
     public void centerRotate(){
@@ -326,11 +399,11 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         driveVector.setRadius(0);
         driveVector.setPolar(0, 0);
     }
-
     private boolean targeted(){
         return cameraVision.imageInSight(cameraVision.target());
     }
     */
+
     /**
      * Lifts plow if it is down
      * Drops plow if it is lifted

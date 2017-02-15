@@ -62,7 +62,7 @@ public class Drive {
                 float robotVelocity;
                 float rotationalPower;
                 float robotRotation;
-
+                updatePosition();
                 if (vectorDriveActive) {
                     //sets values from the vectorR needed for movement
                     joystickTheta = vectorR.getTheta();
@@ -82,7 +82,6 @@ public class Drive {
                         robotTheta = absoluteTheta + robotRotation;
                     }
                 } else {
-                    updatePosition();
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();
                     float vectorY = vectorR.getY() - robot.getVectorR().getY();
 
@@ -183,7 +182,7 @@ public class Drive {
      */
     public Drive(VectorR vectorR, Robot robot, DcMotor frMotor,
                  DcMotor flMotor, DcMotor blMotor, DcMotor brMotor,
-                 Config.ParsedData settings, IMU.Gyrometer gyrometer, Telemetry telemetry){
+                 Config.ParsedData settings, Telemetry telemetry){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -195,7 +194,6 @@ public class Drive {
         this.vectorDriveActive = true;
         this.joystickControl = false;
         this.telemetry = telemetry;
-        this.gyrometer = gyrometer;
 
         this.blueTeam = false;
         if (settings.getString("alliance") == "blue")
@@ -308,11 +306,6 @@ public class Drive {
     public void updatePosition(){
         robot.getPosition().setX(getEncoderX());
         robot.getPosition().setY(getEncoderY());
-        float orientation = gyrometer.convert(Z, gyrometer.getOrientation(Z));
-        float margin = (float)Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
-        if (orientation>margin && orientation < ((float)Math.PI*2.0)-margin){
-            robot.getVectorR().setRad(orientation);
-        }
     }
 
     /**
@@ -322,23 +315,17 @@ public class Drive {
      */
     private float getEncoderX(){
         float centimeters_per_pulse = settings.subData("drive").getFloat("diameter") * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
-        double motorAngle = Math.toRadians(driveSettings.getFloat("motor_angle"));
-        double orientation = gyrometer.convert(Z, gyrometer.getOrientation(Z));
-        double margin = Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
+        double motorAngle = Math.toRadians(driveSettings.getFloat("motor_angle"));double margin = Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
         //todo add to config file drive>gyro_margin
-        double absoluteAngle = 0.0;
-        if (orientation < (2.0*Math.PI) - margin && orientation > margin){
-             absoluteAngle = gyrometer.convert(Z, gyrometer.getOrientation(Z));
-        }
         if (blueTeam){
-            absoluteAngle += Math.PI/2.0;
+            motorAngle += Math.PI/2.0;
         }
         float A = -frMotor.getCurrentPosition()*centimeters_per_pulse;
         float B = -flMotor.getCurrentPosition()*centimeters_per_pulse;
         float C = -blMotor.getCurrentPosition()*centimeters_per_pulse;
         float D = -brMotor.getCurrentPosition()*centimeters_per_pulse;
-        float AC = ((A*(float)Math.cos(absoluteAngle + Math.PI-motorAngle)) + (C*(float)Math.cos(absoluteAngle + Math.PI-motorAngle)))/2.0f;
-        float BD = ((B*(float)Math.cos(absoluteAngle + motorAngle)) + (D*(float)Math.cos(absoluteAngle + motorAngle)))/2.0f;
+        float AC = ((A*(float)Math.cos(Math.PI-motorAngle)) + (C*(float)Math.cos(Math.PI-motorAngle)))/2.0f;
+        float BD = ((B*(float)Math.cos(motorAngle)) + (D*(float)Math.cos(motorAngle)))/2.0f;
         return  ((AC + BD) / 2.0f) + initialX;
     }
 
@@ -351,13 +338,6 @@ public class Drive {
         //todo add drive>diameter: 10.16
         float centimeters_per_pulse = settings.subData("drive").getFloat("diameter") * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
         double motorAngle = Math.PI/2.0;
-        double orientation = 0.0f;
-        if (gyrometer!=null) orientation = gyrometer.convert(Z, gyrometer.getOrientation(Z));
-        double margin = Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
-        //todo add to config file drive>gyro_margin
-        if (orientation < (2.0*Math.PI) - margin && orientation > margin){
-            motorAngle += gyrometer.convert(Z, gyrometer.getOrientation(Z));
-        }
         if (blueTeam){
             motorAngle += Math.PI/2.0;
         }
@@ -368,25 +348,6 @@ public class Drive {
         float AC = ((A*(float)Math.sin(motorAngle)) + (C*(float)Math.sin(motorAngle)))/2.0f;
         float BD = ((B*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle)))/2.0f;
         return  ((AC + BD) / 2.0f) + initialY;
-    }
-
-    public boolean atLocation(){
-        //todo learn how to convert yml list to a list of strings
-        float xMargin = settings.subData("drive").getFloat("x_margin");
-        float yMargin = settings.subData("drive").getFloat("y_margin");
-        float robotX = robot.position.getX();
-        float robotY = robot.getPosition().getY();
-        float setX = vectorR.getX();
-        float setY = vectorR.getY();
-        return ((xMargin>Math.abs(robotX-setX))&&(yMargin>Math.abs(robotY-setY)));
-    }
-
-    public float getRadius(){
-        return vectorR.getRadius();
-    }
-
-    public float getTheta(){
-        return vectorR.getTheta();
     }
 
     public float getMotorPower(int motor){
@@ -427,10 +388,6 @@ public class Drive {
         return robot.getPosition().getY();
     }
 
-    public boolean isAtPosition(){
-        return atPosition;
-    }
-
     public boolean isVectorDriveActive(){
         return vectorDriveActive;
     }
@@ -446,5 +403,19 @@ public class Drive {
         flMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         blMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         brMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void initPosition(float x, float y){
+        refresh();
+        initialX = x;
+        initialY = y;
+    }
+
+    public boolean isAtPosition(){
+        return atPosition;
+    }
+
+    public Runnable getDriveRunnable(){
+        return driveRunnable;
     }
 }
