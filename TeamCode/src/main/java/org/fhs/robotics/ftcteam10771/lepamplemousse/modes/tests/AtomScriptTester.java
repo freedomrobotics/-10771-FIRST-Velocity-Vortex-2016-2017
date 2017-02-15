@@ -48,6 +48,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
     private boolean dropBalls = false;
     private Servo ballDropper;
     private DcMotor intakeMotor;
+    private DcMotor launcher;
     private boolean status;
     private TextToSpeech speech;
     private String team = "blue";
@@ -107,7 +108,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, null, telemetry);
+                settings, telemetry);
 
         //PREP THE COMMAND LIST!
         if (settings.subData("autonomous").getObject("command_list") == null)
@@ -118,8 +119,6 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
         imuHandler.setStreamDelay(150);
-        imuHandler.imuThread.start();
-
         //setup camera
 
         Config.ParsedData bumpers = settings.subData("bumper");
@@ -135,9 +134,10 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         bumperRight.setPosition(bumpers.subData("right_servo").getFloat("offset") / bumperRange);
         //rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
 
+        launcher = hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name"));
+
         //setup catapult
-        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
-        catapult.catapultThread.start();
+        catapult = new Catapult(launcher, hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
 
         //setup ball dropper
 
@@ -162,7 +162,9 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         telemetry.update();
         waitForStart();
         this.lastTime = System.currentTimeMillis();
-        while(opModeIsActive()){
+        try{
+            catapult.catapultThread.start();
+            imuHandler.imuThread.start();
             for(String command : commandList){
                 //check if opmode is active
                 if (!opModeIsActive()) break;
@@ -183,7 +185,13 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
 
                 telemetry.update();
             }
+        }catch (Exception e){
+            if (imuHandler.imuThread.isAlive()) imuHandler.imuThread.interrupt();
+            if (catapult.catapultThread.isAlive()) catapult.catapultThread.interrupt();
+            launcher.setPower(0.0);
+            drive.stop();
         }
+
         drive.stop();
         imuHandler.imuThread.interrupt();
         catapult.catapultThread.interrupt();

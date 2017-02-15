@@ -90,32 +90,26 @@ public class PositionalOpMode extends LinearOpMode {
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("back_right").getString("map_name")),
-                settings, null,telemetry);
+                settings,telemetry);
         telemetryThread.start();
         waitForStart();
+        boolean proceed = false;
         drive.setRelative(true);
         drive.startPosition();
-        //driveTo("custom1");
-        //driveTo("custom2");
-        //driveTo("custom3");
-        startScript();
+        driveTo("custom1");
+        while(!proceed){
+            proceed = distance() < 3.0;
+        } proceed = false;
+        driveTo("custom2");
+        while(!proceed){
+            proceed = distance() < 3.0;
+        } proceed = false;
+        driveTo("custom3");
+        while(!proceed){
+            proceed = distance() < 3.0;
+        }
         telemetryThread.interrupt();
         drive.stop();
-    }
-
-    public void startScript(){
-        boolean atPosition = false;
-        List<String> commands = (List<String>) fieldmap.subData("coordinates").subData("red").getObject("script");
-        for (String command : commands){
-            setCoordinate(command);
-            while(!atPosition){
-                telemetry.addData("location", command);
-                telemetry.update();
-                //atPosition = drive.isAtPosition();
-            }
-            atPosition = false;
-            //TODO: PUT SOMETHING THAT PREVENTS THE FOR LOOP FROM HAPPENING IN ONE INSTANCE, LIKE A WHILE LOOP OR SOMETHING
-        }
     }
 
     public void driveTo(String location){
@@ -124,5 +118,15 @@ public class PositionalOpMode extends LinearOpMode {
     public void setCoordinate(String location){
         driveVector.setX(fieldmap.subData("coordinates").subData("red").subData(location).getFloat("x"));
         driveVector.setY(fieldmap.subData("coordinates").subData("red").subData(location).getFloat("y"));
+    }
+
+    public double distance(){
+        double currentX = drive.getCurrentX();
+        double currentY = drive.getCurrentY();
+        double targetX = driveVector.getX();
+        double targetY = driveVector.getY();
+        double xDistance = Math.abs(currentX-targetX);
+        double yDistance = Math.abs(currentY-targetY);
+        return Math.sqrt((xDistance*xDistance)+(yDistance*yDistance));
     }
 }
