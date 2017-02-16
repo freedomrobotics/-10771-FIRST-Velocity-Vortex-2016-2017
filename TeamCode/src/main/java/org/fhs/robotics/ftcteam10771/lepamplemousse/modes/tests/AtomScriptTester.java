@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptLoader;
@@ -234,7 +235,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         }
 
         if (commandParser.command().equalsIgnoreCase("rotate")){
-            rotateA(commandParser.getArgFloat(0));
+            rotateD(commandParser.getArgFloat(0));
             return;
         }
 
@@ -332,6 +333,94 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
         while((gyrometer.getOrientation(IMU.Axis.Z) < targetOrientation - rotate_margin || gyrometer.getOrientation(IMU.Axis.Z) > targetOrientation + rotate_margin) && opModeIsActive()){
             driveVector.setRad((float)Math.copySign(rotate_speed, degrees));
+        }
+        driveVector.setRad(0);
+        driveVector.setPolar(0, 0);
+    }
+
+    public void rotateB(double degrees){
+        drive.startVelocity();
+        drive.setRelative(true);
+        double orientation = gyrometer.getOrientation(IMU.Axis.Z);
+        double targetOrientation = orientation + Math.toRadians(degrees);
+        while (Math.abs(targetOrientation) > 2*Math.PI || Math.abs(targetOrientation) < 0) {
+            if (Math.abs(targetOrientation) > 2 * Math.PI)
+                targetOrientation -= 2 * Math.PI;
+            else if (Math.abs(targetOrientation) < 0)
+                targetOrientation += 2 * Math.PI;
+        }
+        float rotate_margin = (float) Math.toRadians(settings.subData("drive").subData("camera_settings").getFloat("angle_margin"));
+        float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
+        while((orientation < targetOrientation - rotate_margin || orientation > targetOrientation + rotate_margin) && opModeIsActive()){
+            orientation = gyrometer.getOrientation(IMU.Axis.Z);
+            float factor = (float) (1.0 / Math.abs(gyrometer.getOrientation(IMU.Axis.Z) - targetOrientation));
+            driveVector.setRad((float)Math.copySign(rotate_speed / factor, degrees));
+        }
+        driveVector.setRad(0);
+        driveVector.setPolar(0, 0);
+    }
+
+    public void rotateC(double degrees){
+        drive.startVelocity();
+        drive.setRelative(true);
+        double orientation = gyrometer.getOrientation(IMU.Axis.Z);
+        double targetOrientation = orientation + Math.toRadians(degrees);
+        while (Math.abs(targetOrientation) > 2*Math.PI || Math.abs(targetOrientation) < 0) {
+            if (Math.abs(targetOrientation) > 2 * Math.PI)
+                targetOrientation -= 2 * Math.PI;
+            else if (Math.abs(targetOrientation) < 0)
+                targetOrientation += 2 * Math.PI;
+        }
+        float rotate_margin = (float) Math.toRadians(settings.subData("drive").subData("camera_settings").getFloat("angle_margin"));
+        float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
+        while(opModeIsActive()){
+            if ((degrees >= 0 && orientation >= targetOrientation + rotate_margin)
+                    || (degrees < 0 && orientation < targetOrientation + rotate_margin))
+                break;
+            orientation = gyrometer.getOrientation(IMU.Axis.Z);
+            if (orientation < 0) orientation += 2 * Math.PI;
+            float factor = (float) (Math.abs(orientation - targetOrientation) / 6.28);
+            driveVector.setRad((float)Math.copySign(Range.scale(factor, 0, 1, rotate_speed / 6.0, rotate_speed), degrees));
+        }
+        driveVector.setRad(0);
+        driveVector.setPolar(0, 0);
+    }
+
+    public void rotateD(float degrees){
+        drive.startVelocity();
+        drive.setRelative(true);
+        double orientation = gyrometer.getOrientation(IMU.Axis.Z);
+        double targetOrientation = orientation + Math.toRadians(degrees);
+        float rotate_margin = (float) Math.toRadians(settings.subData("scriptauto").getFloat("angle_margin"));
+        float rotate_speed = settings.subData("scriptauto").getFloat("rotate_speed");
+        double lower = targetOrientation - rotate_margin;
+        double upper = targetOrientation + rotate_margin;
+        while (Math.abs(lower) > 2*Math.PI || Math.abs(lower) < 0) {
+            if (Math.abs(lower) > 2 * Math.PI)
+                lower -= 2 * Math.PI;
+            else if (Math.abs(lower) < 0)
+                lower += 2 * Math.PI;
+        }
+        while (Math.abs(upper) > 2*Math.PI || Math.abs(upper) < 0) {
+            if (Math.abs(upper) > 2 * Math.PI)
+                upper -= 2 * Math.PI;
+            else if (Math.abs(upper) < 0)
+                upper += 2 * Math.PI;
+        }
+        while(opModeIsActive()){
+            if (degrees > 0) {
+                driveVector.setRad(rotate_speed);
+                if (gyrometer.getOrientation(IMU.Axis.Z) > lower)
+                    break;
+            }
+            if (degrees < 0) {
+                driveVector.setRad(-rotate_speed);
+                if (gyrometer.getOrientation(IMU.Axis.Z) < upper)
+                    break;
+            }
+            if (gyrometer.getOrientation(IMU.Axis.Z) > lower
+                    && gyrometer.getOrientation(IMU.Axis.Z) < upper)
+                break;
         }
         driveVector.setRad(0);
         driveVector.setPolar(0, 0);
