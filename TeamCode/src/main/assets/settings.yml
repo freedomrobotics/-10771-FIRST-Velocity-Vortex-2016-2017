@@ -34,6 +34,7 @@ robot:
 encoder:
   output_pulses: 1440
   encoder_pulses: 28
+  centimeters_per_pulse: 0.29 #add this to settings
 
 # The drivetrain's settings.
 drivetrain:
