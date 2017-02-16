@@ -302,16 +302,13 @@ public class IMU {
          */
         public float getAngularVelocity(IMU.Axis axis, boolean intrinsicReference, boolean useRunnable){
             AngularVelocity vectorToUse = useRunnable ? angularVelocity : imu.getAngularVelocity();
-            if (intrinsicReference){
-                vectorToUse = vectorToUse.toAxesReference(reference);
-            }
             switch(axis){
                 case X:
-                    return vectorToUse.firstAngleRate;
+                    return vectorToUse.xRotationRate;
                 case Y:
-                    return vectorToUse.secondAngleRate;
+                    return vectorToUse.yRotationRate;
                 case Z:
-                    return vectorToUse.thirdAngleRate;
+                    return vectorToUse.zRotationRate;
                 default:
                     return 0f;
             }

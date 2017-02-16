@@ -322,18 +322,16 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         drive.startVelocity();
         drive.setRelative(true);
         double targetOrientation = gyrometer.getOrientation(IMU.Axis.Z) + Math.toRadians(degrees);
-        double transformedOrientation = targetOrientation;
-        while (Math.abs(transformedOrientation) > 2*Math.PI || Math.abs(transformedOrientation) < 0) {
-            if (Math.abs(transformedOrientation) > 2 * Math.PI) {
-                transformedOrientation -= 2 * Math.PI;
-            } else if (Math.abs(transformedOrientation) < 0) {
-                transformedOrientation += 2 * Math.PI;
-            }
+        while (Math.abs(targetOrientation) > 2*Math.PI || Math.abs(targetOrientation) < 0) {
+            if (Math.abs(targetOrientation) > 2 * Math.PI)
+                targetOrientation -= 2 * Math.PI;
+            else if (Math.abs(targetOrientation) < 0)
+                targetOrientation += 2 * Math.PI;
         }
         float rotate_margin = (float) Math.toRadians(settings.subData("drive").subData("camera_settings").getFloat("angle_margin"));
         float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
-        while(gyrometer.getOrientation(IMU.Axis.Z) < transformedOrientation - rotate_margin && gyrometer.getOrientation(IMU.Axis.Z) > transformedOrientation + rotate_margin && opModeIsActive()){
-            driveVector.setRad((float)Math.copySign(rotate_speed, targetOrientation));
+        while((gyrometer.getOrientation(IMU.Axis.Z) < targetOrientation - rotate_margin || gyrometer.getOrientation(IMU.Axis.Z) > targetOrientation + rotate_margin) && opModeIsActive()){
+            driveVector.setRad((float)Math.copySign(rotate_speed, degrees));
         }
         driveVector.setRad(0);
         driveVector.setPolar(0, 0);
