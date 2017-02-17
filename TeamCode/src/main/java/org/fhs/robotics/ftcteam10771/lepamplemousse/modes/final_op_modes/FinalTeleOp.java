@@ -86,6 +86,8 @@ public class FinalTeleOp extends OpMode{
 
     public void init() {
 
+        Log.d(TAG, "startingInitNow");
+
         Config keymapping = new Config(Static.configPath, Static.configControlFileName + Static.configFileSufffix, telemetry, "keymapping");
 
         Log.d(TAG, "keymapping");
@@ -136,6 +138,8 @@ public class FinalTeleOp extends OpMode{
         controls.initialize();
         Log.d(TAG, "controllers-init");
 
+        Log.d(TAG, "STARTING SETUPS");
+
         //sets variables to motors
         motorFR = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("front_right").getString("map_name"));
         motorFL = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("front_left").getString("map_name"));
@@ -149,7 +153,7 @@ public class FinalTeleOp extends OpMode{
 
         drive = new Drive(driveVector, new Robot(), motorFR, motorFL, motorBL, motorBR, settings, telemetry);
 
-        Log.d(TAG, "motor setup");
+        Log.d(TAG, "DRIVETRAIN SETUP DONE");
 
         intakeMotor = hardwareMap.dcMotor.get("motorIntake");
         ballDropper = hardwareMap.servo.get("drop");
@@ -159,7 +163,7 @@ public class FinalTeleOp extends OpMode{
             ballDropper.setDirection(Servo.Direction.FORWARD);
         }
 
-        Log.d(TAG, "motor setup 2");
+        Log.d(TAG, "INTAKE AND ARM DONE");
 
         /*
         In our mecanum setup, the two front wheels are chain driven and the two rear wheels are
@@ -190,20 +194,25 @@ public class FinalTeleOp extends OpMode{
 
         power = settings.subData("drivetrain").getFloat("motor_scale");
 
+        Log.d(TAG, "BUMPER DONE");
+
         catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+
+        Log.d(TAG, "CATAPULT DONE");
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);//todo put in config
         imuHandler.imuInit(); //todo remember to init imu
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
+
+        Log.d(TAG, "IMU SETUP DONE");
+
         lastTime = System.currentTimeMillis();
         catapult.catapultThread.start();
         drive.startVelocity();
-    }
 
-    @Override
-    public void start(){
+        Log.d(TAG, "THREAD STARTS DONE");
     }
 
     public void loop(){
