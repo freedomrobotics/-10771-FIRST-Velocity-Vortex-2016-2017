@@ -27,7 +27,9 @@ import java.util.Map;
 
 /**
  * Create the actual references to the components based on the configuration
+ * <b>Deprecated for now. Use the direct hardware map and define map names in the settings file</b>
  */
+@Deprecated
 public class Components {
 
     HardwareMap hardwareMap = null;
