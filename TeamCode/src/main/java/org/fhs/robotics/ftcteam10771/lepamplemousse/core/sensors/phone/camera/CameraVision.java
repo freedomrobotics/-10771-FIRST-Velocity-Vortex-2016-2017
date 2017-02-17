@@ -128,7 +128,7 @@ public class CameraVision {
     };
 
     //Flag for whether Vuforia should be running or not
-    boolean vuforiaRunning = true;
+    private boolean vuforiaRunning = true;
 
     //Variables that indicate the targeted image
     private Image targetedImage = null;
@@ -138,6 +138,9 @@ public class CameraVision {
 
     //Flag on whether or not to auto target image
     private boolean autoTarget = true;
+
+    //Flag on whether or not vuforia was init
+    private boolean isVuforiaInit = false;
 
     //Null vector
     private final VectorF none = new VectorF(0f, 0f, 0f);
@@ -199,22 +202,35 @@ public class CameraVision {
      * https://www.youtube.com/watch?v=2z-o9Ts8XoE
      */
     public void vuforiaInit() {
-        params = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
-        params.cameraDirection = cameraDirection;
-        params.vuforiaLicenseKey = "AVj2kiX/////AAAAGV0J5W5oOkUTvP1+IKxrWdIpD63oQV8zSY/+qSNDxkt5zj8tW0N9AK7/3yUJRBlnJx80gStuZcHF7JoiKUNj4JmO6gcyIQn2LWZ/0hL9gFM+PmwM6lvzJu9U/gmvf++GngzR74ft0gjlNPle9qDHEaAgMHYcbEDpc4msHDVn6ZjCcxDem2tQyW4gEY334fwAU9E0ySkw1KwC/Mo6gaE7bW1Mh9xLbXYTe2+sRclEA6YbrKeH8LHmJBDXQxTdcL4HyS26oPYAGRXfFLoi7QkBdkPDYKiPQUsCoHhNz1uhPh5duEdwOD9Sm6YUPZYet7Mo9QP3sxaDlaqY5l2pHYn/tH31Xu9eqLKe2RmNRzgMNaJ9\n";
-        params.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
-        vuforia = ClassFactory.createVuforiaLocalizer(params);
-        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
-        beacons = vuforia.loadTrackablesFromAsset("FTC_2016-17");
-        beacons.get(Image.WHEELS.index).setName(Image.WHEELS.name);
-        beacons.get(Image.TOOLS.index).setName(Image.TOOLS.name);
-        beacons.get(Image.LEGOS.index).setName(Image.LEGOS.name);
-        beacons.get(Image.GEARS.index).setName(Image.GEARS.name);
-        imageData = new ImageData[beacons.size()];
-        for (int i=0; i < beacons.size(); i++){
-            imageData[i] = new ImageData();
+        vuforiaRunning = true;
+        if (!isVuforiaInit){
+            params = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
+            params.cameraDirection = cameraDirection;
+            params.vuforiaLicenseKey = "AVj2kiX/////AAAAGV0J5W5oOkUTvP1+IKxrWdIpD63oQV8zSY/+qSNDxkt5zj8tW0N9AK7/3yUJRBlnJx80gStuZcHF7JoiKUNj4JmO6gcyIQn2LWZ/0hL9gFM+PmwM6lvzJu9U/gmvf++GngzR74ft0gjlNPle9qDHEaAgMHYcbEDpc4msHDVn6ZjCcxDem2tQyW4gEY334fwAU9E0ySkw1KwC/Mo6gaE7bW1Mh9xLbXYTe2+sRclEA6YbrKeH8LHmJBDXQxTdcL4HyS26oPYAGRXfFLoi7QkBdkPDYKiPQUsCoHhNz1uhPh5duEdwOD9Sm6YUPZYet7Mo9QP3sxaDlaqY5l2pHYn/tH31Xu9eqLKe2RmNRzgMNaJ9\n";
+            params.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
+            vuforia = ClassFactory.createVuforiaLocalizer(params);
+            Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
+            beacons = vuforia.loadTrackablesFromAsset("FTC_2016-17");
+            beacons.get(Image.WHEELS.index).setName(Image.WHEELS.name);
+            beacons.get(Image.TOOLS.index).setName(Image.TOOLS.name);
+            beacons.get(Image.LEGOS.index).setName(Image.LEGOS.name);
+            beacons.get(Image.GEARS.index).setName(Image.GEARS.name);
+            imageData = new ImageData[beacons.size()];
+            for (int i=0; i < beacons.size(); i++){
+                imageData[i] = new ImageData();
+            }
+            beacons.activate();
         }
-        beacons.activate();
+        isVuforiaInit = true;
+    }
+
+    public void vuforiaDeinit(){
+        vuforiaRunning = false;
+        if (isVuforiaInit){
+            beacons.deactivate();
+            vuforia = null;
+        }
+        isVuforiaInit = false;
     }
 
     /**
