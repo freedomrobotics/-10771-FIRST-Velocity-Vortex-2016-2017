@@ -7,6 +7,8 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.ReturnValues;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +26,9 @@ public class Controllers {
     //endregion
 
     private Map<String, inputMethods> aliasing = new HashMap<String, inputMethods>();
+
+    private List<String> toggle = new LinkedList<>();
+    private List<String> toggleDown = new LinkedList<>();
 
     /**
      * Contructs the Controllers class which is for the aliasing of various inputs from the gamepads
@@ -365,10 +370,21 @@ public class Controllers {
         return false;
     }
 
-    /*public Boolean getToggle(String name) {
-        // TODO: 11/19/2016 implement
-        return false;
-    }*/
+    //Likely still finicky
+    public Boolean getToggle(String name) {
+        if (aliasing.containsKey(name)) {
+            if (aliasing.get(name).getBoolean() && !toggleDown.contains(name)) {
+                if (toggle.contains(name))
+                    toggle.remove(name);
+                else
+                    toggle.add(name);
+                toggleDown.add(name);
+            } else if (!aliasing.get(name).getBoolean() && toggleDown.contains(name)) {
+                toggleDown.remove(name);
+            }
+        }
+        return toggle.contains(name);
+    }
 
     private class inputMethods {
         boolean inverted = false;

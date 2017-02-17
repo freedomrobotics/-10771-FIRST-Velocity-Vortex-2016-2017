@@ -1,7 +1,8 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.config;
 
 import android.os.Environment;
-import android.util.Log;
+
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -48,13 +49,17 @@ public class Config {
 
     /** To debug or not to debug */
     private boolean debug = true;
-    /** NOT USED NOR IMPLEMENTED. Flag to debug to log file */
-    private boolean logOutput = false;
+    /** Flag to debug to telemetry */
+    private boolean telemetryOutput = true;
+    /** Flag to debug to log file */
+    private boolean logOutput = true;
+    /** Strict number cast or not. If true, throws error when accessing int as float or vice versa */
+    private boolean strict = false;
 
     private String parentPath;
     private String filename;
     private final Telemetry telemetry;
-    private final String id;
+    private String id;
 
     /**
      * Enumeration of various specific return values.
@@ -121,6 +126,7 @@ public class Config {
             if (valueExists(key)) {
                 return data.get(key);
             }
+            outputError("Error-" + id, key + " does not exist!");
             return null;
         }
 
@@ -160,7 +166,10 @@ public class Config {
          * @return The boolean associated with the key
          */
         public boolean getBool(String key) {
-            return get(key).toString().equals("true");
+            if (valueExists(key))
+                return get(key).toString().equals("true");
+            outputError("Error-" + id, key + " does not exist!");
+            return false;
         }
 
         /**
@@ -170,7 +179,10 @@ public class Config {
          * @return The string associated with the key
          */
         public String getString(String key) {
-            return get(key).toString();
+            if (valueExists(key))
+                return get(key).toString();
+            outputError("Error-" + id, key + " does not exist!");
+            return "";
         }
 
         /**
@@ -184,13 +196,16 @@ public class Config {
                 Pattern p = Pattern.compile("[a-zA-Z]");
                 Matcher m = p.matcher(data.get(key).toString());
                 if (m.find()) {
+                    outputError("Error-" + id, key + " is not a number!");
                     return 0;
                 }
                 if (data.get(key).toString().contains(".")) {
+                    if (strict) outputError("Error-" + id, key + " is a float!");
                     return ((Double) data.get(key)).intValue();
                 }
                 return (Integer) data.get(key);
             }
+            outputError("Error-" + id, key + " does not exist!");
             return 0;
         }
 
@@ -205,13 +220,16 @@ public class Config {
                 Pattern p = Pattern.compile("[a-zA-Z]");
                 Matcher m = p.matcher(data.get(key).toString());
                 if (m.find()) {
+                    outputError("Error-" + id, key + " is not a number!");
                     return 0;
                 }
                 if (!data.get(key).toString().contains(".")) {
+                    if (strict) outputError("Error-" + id, key + " is an integer!");
                     return ((Integer) data.get(key)).floatValue();
                 }
                 return ((Double) data.get(key)).floatValue();
             }
+            outputError("Error-" + id, key + " does not exist!");
             return 0;
         }
 
@@ -229,6 +247,7 @@ public class Config {
                     return (ParsedData) data.get(key);
                 }
             }
+            outputError("Error-" + id, key + " does not exist!");
             return null;
         }
 
@@ -240,15 +259,16 @@ public class Config {
 
     /**
      * Non-verbose constructor to create an empty config object.
-     * Outputs to given telemetry
      */
     public Config() {
         this(null, null, null, null);
+        logOutput = false;
+        debug = false;
     }
 
     /**
      * Verbose constructor to create an empty config object.
-     * Outputs to given telemetry
+     * Outputs to given telemetry and RobotLog
      *
      * @param telemetry Telemetry output to driver station
      * @param id String to use to identify instance output
@@ -265,6 +285,8 @@ public class Config {
      */
     public Config(String filename) {
         this(null, filename, null, null);
+        logOutput = false;
+        debug = false;
     }
 
     /**
@@ -277,11 +299,14 @@ public class Config {
      */
     public Config(String parentPath, String filename) {
         this(parentPath, filename, null, null);
+        logOutput = false;
+        debug = false;
     }
 
     /**
      * Verbose constructor to create config object pointing
      * to a file relative to a sdcard root.
+     * Outputs to given telemetry and RobotLog
      *
      * @param filename Complete filename
      * @param telemetry Telemetry output to driver station
@@ -292,9 +317,10 @@ public class Config {
     }
 
     /**
-     * Non-verbose constructor to create config object pointing
+     * Verbose constructor to create config object pointing
      * to a file relative to a parent directory, which is relative
      * to sdcard root.
+     * Outputs to given telemetry and RobotLog
      *
      * @param parentPath Path to parent directory from "root" directory
      * @param filename Complete filename
@@ -307,28 +333,30 @@ public class Config {
         this.parentPath = parentPath;
         this.filename = filename;
 
-        //Disable debug flag regardless of original setting if incomplete information is provided.
-        if (telemetry == null || id == null)
-            debug = false;
+        //Disable telemetryOutput flag regardless of original setting if incomplete information is provided.
+        if (telemetry == null || id == null) {
+            telemetryOutput = false;
+            this.id = filename;
+        }
 
         //Check for write permissions
         if (!fsWrite) {
             fsWrite = Environment.getExternalStorageDirectory().canWrite();
-            if (debug) Log.d("FS-Write", fsWrite ? "true" : "false");
+            outputLog("FS-Write", fsWrite ? "true" : "false");
         }
 
         //Check and prepare parent dirctory
         if (this.parentPath != null && !this.parentPath.equals("")){
             parentDirectory = new File(dataPath + this.parentPath);
             if (parentDirectory.exists()) {
-                if (debug) Log.d(this.parentPath, "exists");
+                outputLog(this.parentPath, "exists");
             } else {
-                if (debug) Log.d(this.parentPath, "does not exist... creating...");
+                outputLog(this.parentPath, "does not exist... creating...");
 
                 if (parentDirectory.mkdirs()) {
-                    if (debug) Log.d(this.parentPath, "created successfully");
+                    outputLog(this.parentPath, "created successfully");
                 } else {
-                    if (debug) Log.d(this.parentPath, "failed to create");
+                    outputLog(this.parentPath, "failed to create");
                 }
             }
         }
@@ -342,14 +370,14 @@ public class Config {
         if (this.filename != null && !this.filename.equals("")){
             configFile = new File(parentDirectory, this.filename);
             if (configFile.exists()) {
-                Log.d("File-" + this.id, "exists");
+                outputLog("File-" + this.id, "exists");
             } else {
-                Log.d("File-" + this.id, "does not exist... creating with defaults...");
+                outputLog("File-" + this.id, "does not exist... creating with defaults...");
                 if (create(true) == State.SUCCESS && fsWrite) {
-                    Log.d("File-"+id, "created successfully");
+                    outputLog("File-"+id, "created successfully");
                 } else {
-                    Log.d("File-"+id, "failed to create...");
-                    Log.d("File-"+id, create(true).name());
+                    outputLog("File-"+id, "failed to create...");
+                    outputLog("File-"+id, create(true).name());
                 }
             }
         }
@@ -391,11 +419,9 @@ public class Config {
         if (useDefault) {
             try {
                 config = FtcRobotControllerActivity.getGlobalAssets().open(filename);
-                if (debug)
-                    Log.d("LoadFile-" + id, "default selected");
+                outputLog("LoadFile-" + id, "default selected");
             } catch (IOException e) {
-                if (debug)
-                    Log.d("LoadFile-" + id, "failed to read default");
+                outputLog("LoadFile-" + id, "failed to read default");
                 e.printStackTrace();
                 if (configFile.exists())
                     return State.FILE_EXISTS;
@@ -406,8 +432,7 @@ public class Config {
                 config = new FileInputStream(configFile);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-                if (debug)
-                    Log.d("LoadFile-" + id, "failed to read file");
+                outputLog("LoadFile-" + id, "failed to read file");
                 try {
                     FtcRobotControllerActivity.getGlobalAssets().open(filename);
                     return State.DEFAULT_EXISTS;
@@ -415,19 +440,17 @@ public class Config {
                     return State.FAILED;
                 }
             }
-            Log.d("LoadFile-" + id, "file selected");
+            outputLog("LoadFile-" + id, "file selected");
         }
 
 
         if (config != null) {
             data = (Map<String,Object>) yaml.load(config);
             if (data != null) {
-                if (debug)
-                    Log.d("LoadFile-" + id, (useDefault ? "default" : "file") + "loaded");
+                outputLog("LoadFile-" + id, (useDefault ? "default" : "file") + "loaded");
                 return State.SUCCESS;
             } else {
-                if (debug)
-                    Log.d("LoadFile-" + id, "failed to load");
+                outputLog("LoadFile-" + id, "failed to load");
                 return State.FAILED;
             }
         }
@@ -521,8 +544,7 @@ public class Config {
         if (createDefault) {
             try {
                 if (!configFile.isFile() && !configFile.createNewFile()) {
-                    if (debug)
-                        Log.d("CreatedFile-" + id, "failed to create default");
+                    outputLog("CreatedFile-" + id, "failed to create default");
                     return State.FAILED;
                 }
                 InputStream in = FtcRobotControllerActivity.getGlobalAssets().open(filename);
@@ -537,14 +559,12 @@ public class Config {
                 out.flush();
                 out.close();
 
-                if (debug)
-                    Log.d("CreateFile-" + id, "default created");
+                outputLog("CreateFile-" + id, "default created");
 
                 return State.SUCCESS;
             } catch (Exception e) {
                 e.printStackTrace();
-                if (debug)
-                    Log.d("CreatedFile-" + id, "failed to create default");
+                outputLog("CreatedFile-" + id, "failed to create default");
                 return State.FAILED;
             }
         }
@@ -553,13 +573,11 @@ public class Config {
             configWrite.write(yaml.dump(data));
             configWrite.flush();
             configWrite.close();
-            if (debug)
-                Log.d("CreateFile-" + id, "created successfully");
+            outputLog("CreateFile-" + id, "created successfully");
             return State.SUCCESS;
         } catch (IOException e) {
             e.printStackTrace();
-            if (debug)
-                Log.d("CreatedFile-" + id, "failed to create");
+            outputLog("CreatedFile-" + id, "failed to create");
             return State.FAILED;
         }
     }
@@ -616,8 +634,46 @@ public class Config {
         return new ParsedData();
     }
 
-    //todo implement
-    private void enableLogOutput(boolean logOutput) {
+    /**
+     * Flag for whether or not to log output.
+     * If using any of the telemetry constructors, this is set to true.
+     *
+     * @param logOutput Whether or not to log this configuration file
+     */
+    public void logOutput(boolean logOutput) {
         this.logOutput = logOutput;
+    }
+
+    /**
+     * Flag for whether or not to throw verbose errors (debug).
+     * If using any of the telemetry constructors, this is set to true.
+     *
+     * @param debug Whether or not to be verbose (debug)
+     */
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
+
+
+    /**
+     * Strict number cast or not. If true, throws error when accessing
+     * int as float or vice versa
+     *
+     * @param strict Whether or not to use strict number casts
+     */
+    public void setStrict(boolean strict){
+        this.strict = strict;
+    }
+
+    private void outputLog(String id, String data){
+        if (telemetryOutput) telemetry.addData(id, data);
+        if (logOutput) RobotLog.aa(id, data);
+    }
+
+    private void outputError(String id, String data){
+        outputLog(id, data);
+        if (debug){
+            throw new RuntimeException(id + ": " + data);
+        }
     }
 }
