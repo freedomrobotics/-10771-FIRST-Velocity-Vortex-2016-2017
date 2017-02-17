@@ -24,6 +24,7 @@ import java.util.Map;
  * todo Implement getters and setter and mutex or mutex-like operations for safe multithreading in the future
  * todo better yet, create an interface or abstract class or like with everything already preset.
  */
+@Deprecated
 public class Aliases {
     /**
      * Motor Map. Values from the Components config file can be used to
