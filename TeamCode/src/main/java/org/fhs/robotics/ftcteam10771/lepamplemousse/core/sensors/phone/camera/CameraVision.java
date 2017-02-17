@@ -15,6 +15,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class that handles camera vision targeting
  * for the four images under the beacons
@@ -66,6 +69,7 @@ public class CameraVision {
         TOOLS("Tools", 1, Coordinate.convertTo(-3.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f),
         LEGOS("Legos", 2, -182.9f, Coordinate.convertTo(-1.0f, Coordinate.UNIT.FT_TO_UNIT)),
         GEARS("Gears", 3, Coordinate.convertTo(1.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f);
+
         private String name;
         private int index;
         private float xCoordinate;
@@ -94,8 +98,32 @@ public class CameraVision {
             return yCoordinate;
         }
 
-        private Image getImage(int index){
-            return this;
+        public static Image getImage(int index){
+            List<Image> images =  new ArrayList<Image>();
+            images.add(WHEELS);
+            images.add(TOOLS);
+            images.add(LEGOS);
+            images.add(GEARS);
+            for(Image image : images){
+                if (image.getIndex()==index){
+                    return image;
+                }
+            }
+            return null;
+        }
+
+        public static Image getImage(String id){
+            List<Image> images =  new ArrayList<Image>();
+            images.add(WHEELS);
+            images.add(TOOLS);
+            images.add(LEGOS);
+            images.add(GEARS);
+            for(Image image : images){
+                if (image.getName().equals(id)){
+                    return image;
+                }
+            }
+            return null;
         }
     };
 
