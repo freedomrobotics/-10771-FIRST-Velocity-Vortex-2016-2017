@@ -2,18 +2,13 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
 
 import android.util.Log;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsAnalogOpticalDistanceSensor;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms.Catapult;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 
 import java.util.LinkedList;
@@ -22,7 +17,7 @@ import java.util.List;
 /**
  * Created by joelv on 2/7/2017.
  */
-@TeleOp(name="Catapult Test", group = "Test")
+@TeleOp(name="CatapultOld Test", group = "Test")
 public class CatapultTest extends OpMode{
 
     private List<String> toggle = new LinkedList<>();
@@ -30,7 +25,7 @@ public class CatapultTest extends OpMode{
     private Config.ParsedData settings;
     private Components components;
     private Controllers controls;
-    private Catapult catapult;
+    private CatapultOld catapult;
 
     private static final String TAG = "TestDrive3Debug";
     private float bumperPos;
@@ -88,7 +83,7 @@ public class CatapultTest extends OpMode{
 
         //FIXME: not sure if this initialization will work
         //TODO: before compiling, enable motor6 and light sensor to true and configurate them or change this line of code
-        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+        catapult = new CatapultOld(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
     }
 
     @Override

@@ -13,11 +13,10 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptLoader;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptRunner;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms.Catapult;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
@@ -45,7 +44,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
     private VectorR driveVector = new VectorR();
     private IMU imuHandler;
     private IMU.Gyrometer gyrometer;
-    private Catapult catapult;
+    private CatapultOld catapult;
     private boolean dropBalls = false;
     private Servo ballDropper;
     private DcMotor intakeMotor;
@@ -141,7 +140,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
 
         //setup catapult
         launcher = hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name"));
-        catapult = new Catapult(launcher, hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+        catapult = new CatapultOld(launcher, hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
         catapult.catapultThread.start();
 
         //setup ball dropper

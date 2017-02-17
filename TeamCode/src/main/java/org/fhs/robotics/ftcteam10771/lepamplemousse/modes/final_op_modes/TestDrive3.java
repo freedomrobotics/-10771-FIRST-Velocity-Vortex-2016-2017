@@ -2,11 +2,9 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 
 import android.util.Log;
 
-import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -14,14 +12,11 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms.Catapult;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis.Z;
 
 /**
  * Created by Matthew on 11/14/2016.
@@ -43,7 +38,7 @@ public class TestDrive3 extends LinearOpMode{
     private Config.ParsedData settings;
     private Components components;
     private Controllers controls;
-    private Catapult catapult;
+    private CatapultOld catapult;
     private Servo arm;
     //private IMU.Gyrometer gyrometer;
     //private IMU imuHandler;
@@ -184,7 +179,7 @@ public class TestDrive3 extends LinearOpMode{
             bumperRight.setDirection(Servo.Direction.REVERSE);
 
         float power = settings.subData("drivetrain").getFloat("motor_scale");
-        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+        catapult = new CatapultOld(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
         //imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
         //gyrometer = imuHandler.getGyrometer();
         //gyrometer.enableStream(true);

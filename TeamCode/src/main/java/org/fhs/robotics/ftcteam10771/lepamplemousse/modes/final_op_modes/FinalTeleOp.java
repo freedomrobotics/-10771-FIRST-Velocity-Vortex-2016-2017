@@ -3,7 +3,6 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 import android.util.Log;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,7 +14,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms.Catapult;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
@@ -58,7 +57,7 @@ public class FinalTeleOp extends OpMode{
     private IMU.Gyrometer gyrometer;
     private BNO055IMU imu;
 
-    private Catapult catapult;
+    private CatapultOld catapult;
     private Drive drive;
     private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
     //private IMU.Gyrometer gyrometer;
@@ -196,7 +195,7 @@ public class FinalTeleOp extends OpMode{
 
         Log.d(TAG, "BUMPER DONE");
 
-        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+        catapult = new CatapultOld(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
 
         Log.d(TAG, "CATAPULT DONE");
 

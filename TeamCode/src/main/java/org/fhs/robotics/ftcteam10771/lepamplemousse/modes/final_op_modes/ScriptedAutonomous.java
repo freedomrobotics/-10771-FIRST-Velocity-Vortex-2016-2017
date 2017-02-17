@@ -10,10 +10,9 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptLoader;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptRunner;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms.Catapult;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
@@ -85,8 +84,9 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         //setup launcher
         // TODO: 2/16/2017 clean up catapult module
         catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")),
-                                hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
-        catapult.catapultThread.start();
+                                hardwareMap.opticalDistanceSensor.get(settings.subData("catapult")
+                                        .subData("light_sensor").getString("map_name")), settings.subData("catapult"));
+        catapult.start();
 
         int counter = 1; //debug
         //WAIT FOR THE STARTI!@HTIOgRFOIWUQ#GQIOH
@@ -119,7 +119,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         telemetry.update();
         drive.stop();
         imuHandler.imuThread.interrupt();
-        catapult.catapultThread.interrupt();
+        catapult.stop();
     }
 
     /**
@@ -176,9 +176,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         }
 
         if (commandParser.command().equalsIgnoreCase("catapult")) {
-            catapult.setLaunch(true);
-            sleep(5);
-            catapult.setLaunch(false);
+            catapult.launch();
             sleep(settings.subData("catapult").getInt("grace"));
             while (!catapult.catapultReady() && opModeIsActive());
             return;

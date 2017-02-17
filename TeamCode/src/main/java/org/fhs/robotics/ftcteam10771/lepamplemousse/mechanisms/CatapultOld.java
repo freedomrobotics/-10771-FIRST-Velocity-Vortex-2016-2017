@@ -1,6 +1,5 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.core.mechanisms;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsAnalogOpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
@@ -12,7 +11,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
  * Created by joelv on 2/7/2017.
  */
 
-public class Catapult {
+public class CatapultOld {
 
     private DcMotor rotator;
     private OpticalDistanceSensor stopSensor;
@@ -28,8 +27,8 @@ public class Catapult {
     Config.ParsedData settings;
     private boolean launch;
 
-    public Catapult(DcMotor motor, OpticalDistanceSensor opticalDistanceSensor,
-                    Controllers controllers, Config.ParsedData settings){
+    public CatapultOld(DcMotor motor, OpticalDistanceSensor opticalDistanceSensor,
+                       Controllers controllers, Config.ParsedData settings){
         rotator = motor;
         stopSensor = opticalDistanceSensor;
         this.controllers = controllers;
