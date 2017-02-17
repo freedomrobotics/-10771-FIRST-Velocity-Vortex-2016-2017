@@ -20,7 +20,7 @@ import java.util.List;
  * Created by joelv on 2/9/2017.
  */
 @Autonomous(name="CheapAuto")
-public class Auto extends LinearOpMode{
+public class CheapAuto extends LinearOpMode{
 
     //initializes motors in order of standard graph quadrants
     private DcMotor motorFR;
