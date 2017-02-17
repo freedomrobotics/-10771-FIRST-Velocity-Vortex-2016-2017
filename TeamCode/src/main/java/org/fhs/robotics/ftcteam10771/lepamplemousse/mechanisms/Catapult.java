@@ -22,6 +22,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
  * </ul>
  * <li><b>power:</b> The power the driving motor should use
  * <li><b>position_tuning:</b> The encoder steps to move beyond the detection point of teh catapult on the motor
+ * <li><b>tuning_power:</b> The power when tuning to position
  * <li><b>forward_position:</b> A generally arbitrary number that's used to move the motor forward
  * <li><b>grace:</b> The grace period in which the light sensor should be ignored to make sure the catapult fully activates
  * <li><b>oscillation_max:</b> The max power to use for the oscillation. Saw wave type oscillation.
@@ -38,6 +39,8 @@ public class Catapult {
 
     /** The amount the catapult moves after detecting light break to prepare for launch */
     private final int positionTuning;   //Recommended: 5
+    /** The power for when tuning */
+    private final float positionTuningPower;
     /** The amount of light needed to let the robot know the catapult is close to ready */
     private final float breakThreshold;
     /** The amount of light needed to let the robot know the catapult is close to ready */
@@ -85,6 +88,7 @@ public class Catapult {
         oscillationMax = catapultSettings.getFloat("oscillation_max");
         launchPower = catapultSettings.getFloat("power");
         positionTuning = catapultSettings.getInt("position_tuning");
+        positionTuningPower = catapultSettings.getFloat("tuning_power");
         increment = catapultSettings.getFloat("power_increment");
         forwardPosition = catapultSettings.getInt("forward_position");
         grace = catapultSettings.getInt("grace");
@@ -100,12 +104,17 @@ public class Catapult {
             while(!Thread.currentThread().isInterrupted())
             {
                 if (catapultReady()) {
+                    catapult.setPower(positionTuningPower);
                     //if catapult is ready, reset the launch variable and lock it in position.
                     catapult.setTargetPosition(catapult.getCurrentPosition() + positionTuning);
+                    while(catapult.getCurrentPosition() > catapult.getTargetPosition() + 10
+                            || catapult.getCurrentPosition() < catapult.getTargetPosition() - 10
+                            && !Thread.currentThread().isInterrupted());
                     launch = false;
                     lastTimeNano = System.nanoTime();
                     //until launch is called, oscillate teh catapult power
                     while (!Thread.currentThread().isInterrupted() && !launch) {
+                        if (!catapultReady()) break;
                         oscillate();
                     }
 

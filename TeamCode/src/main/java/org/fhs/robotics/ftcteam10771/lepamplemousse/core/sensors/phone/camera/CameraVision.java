@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.R;
@@ -226,9 +227,10 @@ public class CameraVision {
 
     public void vuforiaDeinit(){
         vuforiaRunning = false;
+        toggleVuforia(false);
         if (isVuforiaInit){
             beacons.deactivate();
-            vuforia = null;
+            //Vuforia.onPause();
         }
         isVuforiaInit = false;
     }

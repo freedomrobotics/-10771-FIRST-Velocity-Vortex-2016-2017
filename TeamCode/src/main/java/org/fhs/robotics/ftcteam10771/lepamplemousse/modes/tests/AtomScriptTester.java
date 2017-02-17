@@ -4,6 +4,7 @@ import android.speech.tts.TextToSpeech;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -31,6 +32,7 @@ import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis
  * Created by Freedom Robotics on 2/10/2017.
  */
 @Autonomous(name= "scripted")
+@Disabled
 public class AtomScriptTester extends LinearOpMode implements ScriptRunner, TextToSpeech.OnInitListener {
     Controllers controls;
     private long lastTime;      // The time at the last time check (using System.currentTimeMillis())

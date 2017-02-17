@@ -14,6 +14,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
@@ -57,7 +58,7 @@ public class FinalTeleOp extends OpMode{
     private IMU.Gyrometer gyrometer;
     private BNO055IMU imu;
 
-    private CatapultOld catapult;
+    private Catapult catapult;
     private Drive drive;
     private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
     //private IMU.Gyrometer gyrometer;
@@ -195,7 +196,9 @@ public class FinalTeleOp extends OpMode{
 
         Log.d(TAG, "BUMPER DONE");
 
-        catapult = new CatapultOld(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")),
+                hardwareMap.opticalDistanceSensor.get(settings.subData("catapult")
+                        .subData("light_sensor").getString("map_name")), settings.subData("catapult"));
 
         Log.d(TAG, "CATAPULT DONE");
 
@@ -208,10 +211,13 @@ public class FinalTeleOp extends OpMode{
         Log.d(TAG, "IMU SETUP DONE");
 
         lastTime = System.currentTimeMillis();
-        catapult.catapultThread.start();
         drive.startVelocity();
 
         Log.d(TAG, "THREAD STARTS DONE");
+    }
+
+    public void start(){
+        catapult.start();
     }
 
     public void loop(){
@@ -289,7 +295,8 @@ public class FinalTeleOp extends OpMode{
         bumperLeft.setPosition(bumperPos + bumpers.subData("left_servo").getFloat("offset") / bumperRange);
         bumperRight.setPosition(bumperPos + bumpers.subData("right_servo").getFloat("offset") / bumperRange);
 
-        catapult.setLaunch(controls.getDigital("launch"));
+        if (controls.getDigital("launch"))
+            catapult.launch();
 
         telemetry.addData("Speed-FR", motorFR.getPower());
         telemetry.addData("Speed-FL", motorFL.getPower());
@@ -306,7 +313,7 @@ public class FinalTeleOp extends OpMode{
 
     @Override
     public void stop() {
-        catapult.catapultThread.interrupt();
+        catapult.stop();
         drive.startVelocity();
         imu.close();
     }

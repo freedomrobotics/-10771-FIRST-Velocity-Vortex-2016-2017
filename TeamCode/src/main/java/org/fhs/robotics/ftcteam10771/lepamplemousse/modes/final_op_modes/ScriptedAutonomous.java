@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptLoader;
@@ -118,7 +119,6 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         }
         telemetry.update();
         drive.stop();
-        imuHandler.imuThread.interrupt();
         catapult.stop();
     }
 
@@ -171,7 +171,11 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         }
 
         if (commandParser.command().equalsIgnoreCase("rotate")){
-            rotate(commandParser.getArgFloat(0));
+            if (commandParser.getArgsSize() == 2){
+                rotate(commandParser.getArgFloat(0), commandParser.getArgBool(1));
+            } else {
+                rotate(commandParser.getArgFloat(0), false);
+            }
             return;
         }
 
@@ -217,8 +221,47 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
      *
      * @param degrees
      */
-    private void rotate(double degrees){
-
+    private void rotate(double degrees, boolean relative){
+        drive.startVelocity();
+        drive.setRelative(true);
+        driveVector.setRad(0);
+        driveVector.setPolar(0, 0);
+        final double fullRotation = Math.toRadians(360.0);
+        double orientation = fullRotation + gyrometer.getOrientation(IMU.Axis.Z, false, false);
+        double targetOrientation;
+        if (relative) {
+            targetOrientation = orientation + Math.toRadians(degrees);
+            while (Math.abs(targetOrientation) > 2 * Math.PI || Math.abs(targetOrientation) < 0) {
+                if (Math.abs(targetOrientation) > 2 * Math.PI)
+                    targetOrientation -= 2 * Math.PI;
+                else if (Math.abs(targetOrientation) < 0)
+                    targetOrientation += 2 * Math.PI;
+            }
+        }else{
+            targetOrientation = Math.toRadians(degrees);
+        }
+        float rotate_margin = (float) Math.toRadians(settings.subData("scriptauto").subData("rotate").getFloat("angle_margin"));
+        float rotate_speed = settings.subData("scriptauto").subData("rotate").getFloat("rotate_speed");
+        float min_speed = settings.subData("scriptauto").subData("rotate").getFloat("min_speed");
+        boolean targetNearZero = (targetOrientation < rotate_margin || targetOrientation > fullRotation - rotate_margin);
+        if (targetOrientation > fullRotation - rotate_margin) targetOrientation -= fullRotation;
+        while(orientation < targetOrientation - rotate_margin
+                || orientation > targetOrientation + rotate_margin && opModeIsActive()){
+            imuHandler.streamIMUData();
+            if (targetNearZero){
+                orientation = gyrometer.convertAngletoSemiPossibleRange(
+                        IMU.Axis.Z, gyrometer.getOrientation(IMU.Axis.Z));
+            }
+            else orientation = Math.toRadians(360.0) + gyrometer.getOrientation(IMU.Axis.Z);
+            //telemetry.addData("Orientation", Math.toDegrees(orientation));
+            float factor = (float) (Math.abs(orientation - targetOrientation) / 6.28);
+            driveVector.setRad((float)Math.copySign(Range.scale(factor, 0, 1, min_speed, rotate_speed), targetOrientation - orientation));
+            //telemetry.update();
+        }
+        //telemetry.addData("Rotation", "Done");
+        //telemetry.update();
+        driveVector.setRad(0);
+        driveVector.setPolar(0, 0);
     }
 
     /**

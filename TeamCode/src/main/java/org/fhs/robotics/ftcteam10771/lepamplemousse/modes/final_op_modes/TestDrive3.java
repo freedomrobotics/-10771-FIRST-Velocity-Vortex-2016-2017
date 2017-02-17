@@ -290,12 +290,6 @@ public class TestDrive3 extends LinearOpMode{
         float centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
         //todo put in settings settings>encoder>centimeters_per_pulse
         double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
-        double orientation = 0.0;
-        double margin = Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
-        //todo add to config file drive>gyro_margin
-        if (orientation < (2.0*Math.PI) - margin && orientation > margin){
-            motorAngle += 0.0;
-        }
         float A = -motorFR.getCurrentPosition()*centimeters_per_pulse;
         float B = -motorFL.getCurrentPosition()*centimeters_per_pulse;
         float C = -motorBL.getCurrentPosition()*centimeters_per_pulse;
@@ -307,7 +301,6 @@ public class TestDrive3 extends LinearOpMode{
 
     private float getY(){
         float centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
-        double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
         float A = -motorFR.getCurrentPosition()*centimeters_per_pulse;
         float B = -motorFL.getCurrentPosition()*centimeters_per_pulse;
         float C = -motorBL.getCurrentPosition()*centimeters_per_pulse;

@@ -304,8 +304,8 @@ public class Drive {
         Test_drive3, where the encoder outputs are calculated into X and Y coordinates
     */
     public void updatePosition(){
-        robot.getPosition().setX(getEncoderX());
-        robot.getPosition().setY(getEncoderY());
+        robot.getPosition().setX(getX());
+        robot.getPosition().setY(getY());
     }
 
     /**
@@ -313,13 +313,11 @@ public class Drive {
      * assuming that the robot does not rotate
      * @return the x coordinate
      */
-    private float getEncoderX(){
-        float centimeters_per_pulse = settings.subData("drive").getFloat("diameter") * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
-        double motorAngle = Math.toRadians(driveSettings.getFloat("motor_angle"));double margin = Math.toRadians(settings.subData("drive").getFloat("gyro_margin"));
-        //todo add to config file drive>gyro_margin
-        if (blueTeam){
-            motorAngle += Math.PI/2.0;
-        }
+    private float getX(){
+        //todo put in config file
+        float centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
+        //todo put in settings settings>encoder>centimeters_per_pulse
+        double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
         float A = -frMotor.getCurrentPosition()*centimeters_per_pulse;
         float B = -flMotor.getCurrentPosition()*centimeters_per_pulse;
         float C = -blMotor.getCurrentPosition()*centimeters_per_pulse;
@@ -334,19 +332,14 @@ public class Drive {
      * assuming that the robot does not rotate
      * @return the y coordinate
      *///todo fix math
-    private float getEncoderY(){
-        //todo add drive>diameter: 10.16
-        float centimeters_per_pulse = settings.subData("drive").getFloat("diameter") * (float)Math.PI / settings.subData("encoder").getFloat("output_pulses");
-        double motorAngle = Math.PI/2.0;
-        if (blueTeam){
-            motorAngle += Math.PI/2.0;
-        }
+    private float getY(){
+        float centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
         float A = -frMotor.getCurrentPosition()*centimeters_per_pulse;
         float B = -flMotor.getCurrentPosition()*centimeters_per_pulse;
         float C = -blMotor.getCurrentPosition()*centimeters_per_pulse;
         float D = -brMotor.getCurrentPosition()*centimeters_per_pulse;
-        float AC = ((A*(float)Math.sin(motorAngle)) + (C*(float)Math.sin(motorAngle)))/2.0f;
-        float BD = ((B*(float)Math.sin(motorAngle)) + (D*(float)Math.sin(motorAngle)))/2.0f;
+        float AC = (A+C)/2.0f;
+        float BD = (B+D)/2.0f;
         return  ((AC + BD) / 2.0f) + initialY;
     }
 
@@ -393,8 +386,8 @@ public class Drive {
     }
 
     public void refresh(){
-        initialX = getEncoderX();
-        initialY = getEncoderY();
+        initialX = getX();
+        initialY = getY();
         frMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         blMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
