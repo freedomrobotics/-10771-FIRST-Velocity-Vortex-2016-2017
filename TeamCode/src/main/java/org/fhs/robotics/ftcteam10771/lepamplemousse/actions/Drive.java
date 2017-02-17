@@ -418,4 +418,8 @@ public class Drive {
     public Runnable getDriveRunnable(){
         return driveRunnable;
     }
+
+    public VectorR getVectorR(){
+        return vectorR;
+    }
 }
