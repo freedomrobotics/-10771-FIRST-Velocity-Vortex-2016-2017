@@ -5,6 +5,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.core;
  */
 
 public enum Alliance {
+    UNKNOWN ("unknown", "general"),
     RED_ALLIANCE ("red", "general"),
     RED_ALLIANCE_INSIDE ("red", "inside"),
     RED_ALLIANCE_OUTSIDE ("red", "outside"),
