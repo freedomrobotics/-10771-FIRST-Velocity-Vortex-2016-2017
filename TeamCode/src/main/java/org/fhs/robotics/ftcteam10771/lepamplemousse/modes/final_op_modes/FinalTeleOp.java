@@ -204,6 +204,10 @@ public class FinalTeleOp extends OpMode{
         imuHandler.imuInit(); //todo remember to init imu
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
+        imuHandler.setStreamDelay(75);
+        imuHandler.streamIMUData();
+        robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z));
+        imuHandler.imuThread.start();
 
         Log.d(TAG, "IMU SETUP DONE");
 
@@ -219,7 +223,8 @@ public class FinalTeleOp extends OpMode{
     }
 
     public void loop(){
-        imuHandler.streamIMUData();
+        // TODO: 2/18/2017 move into imu thread
+        robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z));
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
         if (intakePower < 0){
@@ -231,7 +236,6 @@ public class FinalTeleOp extends OpMode{
 
         driveVector.setX(controls.getAnalog("drivetrain_x"));
         driveVector.setY(controls.getAnalog("drivetrain_y"));
-        joystickTheta -= (Math.PI * 2.0) + gyrometer.getOrientation(IMU.Axis.Z);
 
         driveVector.setRad(controls.getAnalog("drivetrain_rotate"));
 
@@ -277,7 +281,8 @@ public class FinalTeleOp extends OpMode{
     @Override
     public void stop() {
         catapult.stop();
-        drive.startVelocity();
+        drive.stop();
+        imuHandler.imuThread.interrupt();
         imu.close();
     }
 

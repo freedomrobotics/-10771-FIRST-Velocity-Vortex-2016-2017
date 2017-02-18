@@ -69,14 +69,15 @@ public class Drive {
 
                     if (relativeDrive) { //if the robot drives relative to the field
                         robotTheta = joystickTheta; //the direction of the joystick is the direction of motion
-                    } else {
+                    } else {/*
                         if (blueTeam) { //if our team is on blue
                             absoluteTheta = (float) (joystickTheta + Math.PI * 2);
                         } else {
                             absoluteTheta = joystickTheta; //the field coordinate does not need to be adjusted
                         }
 
-                        robotTheta = absoluteTheta + robotRotation;
+                        robotTheta = absoluteTheta + robotRotation;*/
+                        robotTheta = joystickTheta - (float)((Math.PI * 2.0) + robot.getRotation().getRadians());
                     }
                 } else {
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();
