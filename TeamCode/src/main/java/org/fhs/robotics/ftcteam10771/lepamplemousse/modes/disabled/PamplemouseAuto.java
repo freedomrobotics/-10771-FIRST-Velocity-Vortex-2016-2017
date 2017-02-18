@@ -119,7 +119,7 @@ public class PamplemouseAuto extends LinearOpMode {
         imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
         gyroOutput = imuHandler.getGyrometer();
         telemetryThread.start();
-        cameraVision.cameraThread.start();
+        cameraVision.start();
         waitForStart();
         imuHandler.imuThread.start();
         drive.setRelative(true);
@@ -134,7 +134,7 @@ public class PamplemouseAuto extends LinearOpMode {
         driveVector.setX(drive.getCurrentX());
         driveVector.setY(drive.getCurrentY());
         drive.startPosition();
-        cameraVision.cameraThread.interrupt();
+        cameraVision.stop();
         /*
         if (parsedField.getBool("knock_ball")){
             driveTo("center");

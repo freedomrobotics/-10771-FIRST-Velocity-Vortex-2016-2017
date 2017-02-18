@@ -61,7 +61,6 @@ public class CameraTest extends OpMode{
         }
         else{
             cameraVision.toggleVuforia(false);
-            cameraVision.vuforiaDeinit();
         }
 
         cameraVision.runImageTracking();

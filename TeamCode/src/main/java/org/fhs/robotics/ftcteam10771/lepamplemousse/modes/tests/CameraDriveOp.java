@@ -113,7 +113,7 @@ public class CameraDriveOp extends LinearOpMode {
                 hardwareMap.led.get("left_led"), hardwareMap.led.get("right_led"));
         cameraVision = new CameraVision();
         backCamera = cameraVision.usingBackCamera();
-        cameraVision.cameraThread.start();
+        cameraVision.start();
         telemetryThread.start();
         this.lastTime = System.currentTimeMillis();
         rgb.switchLED(BOTH, false);
@@ -151,6 +151,7 @@ public class CameraDriveOp extends LinearOpMode {
         updatePosition();
         drive.stop();
         telemetryThread.interrupt();
+        cameraVision.stop();
     }
 
     public void center() {

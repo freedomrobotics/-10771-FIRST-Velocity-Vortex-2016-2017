@@ -185,7 +185,7 @@ public class CameraVision {
     }
 
     //The thread loop code
-    public final Runnable cameraRunnable = new Runnable() {
+    private final Runnable cameraRunnable = new Runnable() {
         @Override
         public void run() {
             while(!Thread.currentThread().isInterrupted()) {
@@ -195,7 +195,7 @@ public class CameraVision {
     };
 
     //The respective thread
-    public final Thread cameraThread = new Thread(cameraRunnable);
+    private final Thread cameraThread = new Thread(cameraRunnable);
 
     /**
      * Vuforia is initialized with pre-created parameters
@@ -223,16 +223,6 @@ public class CameraVision {
             beacons.activate();
         }
         isVuforiaInit = true;
-    }
-
-    public void vuforiaDeinit(){
-        vuforiaRunning = false;
-        toggleVuforia(false);
-        if (isVuforiaInit){
-            beacons.deactivate();
-            //Vuforia.onPause();
-        }
-        isVuforiaInit = false;
     }
 
     /**
@@ -465,7 +455,6 @@ public class CameraVision {
                 linearOpMode.telemetry.addData(imageData[i].imageName, imageData[i].translation);
             } else linearOpMode.telemetry.addData(imageData[i].imageName, "null");
         }
-        //toggleVuforia(false) todo: see if this is necessary or not
     }
 
     /**
@@ -593,6 +582,20 @@ public class CameraVision {
             return coordinate;
         }
         return null;
+    }
+
+    /**
+     * Starts the thread that runs image tracking
+     */
+    public void start(){
+        if (!cameraThread.isAlive()) cameraThread.start();
+    }
+
+    /**
+     * Stops the image tracking thread
+     */
+    public void stop(){
+        if (cameraThread.isAlive()) cameraThread.interrupt();
     }
 
 }

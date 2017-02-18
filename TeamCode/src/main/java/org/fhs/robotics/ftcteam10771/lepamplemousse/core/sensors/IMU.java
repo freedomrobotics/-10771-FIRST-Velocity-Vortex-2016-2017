@@ -81,21 +81,16 @@ public class IMU {
      * Initializes the IMU with the given parameters
      */
     public void imuInit(){
-        /*parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();*/
-        imuInitialized = imu.initialize(parameters);
+        if (!imuInitialized){
+            imuInitialized = imu.initialize(parameters);
+        }
     }
 
     /**
      * Getter for IMU init state
      * @return the init state
      */
-    protected boolean isImuInit(){
+    public boolean isImuInit(){
         return imuInitialized;
     }
 
@@ -515,5 +510,29 @@ public class IMU {
      */
     public BNO055IMU getImu(){
         return imu;
+    }
+
+    /**
+     * Start IMU thread
+     */
+    public void start(){
+        if (!imuThread.isAlive()) imuThread.start();
+    }
+
+    /**
+     * Stop IMU thread
+     */
+    public void stop(){
+        if (imuThread.isAlive()) imuThread.interrupt();
+    }
+
+    public void close(){
+        if (imuThread.isAlive()){
+            stop();
+        }
+        if (imuInitialized){
+            imu.close();
+        }
+        imuInitialized = false;
     }
 }

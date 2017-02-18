@@ -24,6 +24,8 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis.Z;
+
 /**
  * Created by joelv on 2/17/2017.
  */
@@ -74,9 +76,9 @@ public class DriverOp extends LinearOpMode {
     private float power = 0f;
 
     //Flags
-    private boolean blueTeam;
-    private boolean armToggle = false;
+    //private boolean armToggle = false;
     private boolean dropBalls = false;
+    private boolean imuOn = false;
 
     //Time archive variable
     private long lastTime = 0;
@@ -134,7 +136,7 @@ public class DriverOp extends LinearOpMode {
         settings = rawSettings.getParsedData();
         Log.d(TAG, "settings-parse");
 
-        blueTeam = (settings.getString("alliance").equals("blue"));
+        //blueTeam = (settings.getString("alliance").equals("blue"));
         initialX = settings.subData("robot").subData("initial_position").getFloat("x");
         initialY = settings.subData("robot").subData("initial_position").getFloat("y");
 
@@ -162,6 +164,7 @@ public class DriverOp extends LinearOpMode {
         Log.d(TAG, settings.subData("drivetrain").subData("motor").subData("back_right").getString("map_name"));
 
         drive = new Drive(driveVector, new Robot(), motorFR, motorFL, motorBL, motorBR, settings, telemetry);
+        drive.setRelative(true);
 
         Log.d(TAG, "DRIVETRAIN SETUP DONE");
 
@@ -214,7 +217,7 @@ public class DriverOp extends LinearOpMode {
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);//todo put in config
-        imuHandler.imuInit(); //todo remember to init imu
+        //imuHandler.imuInit(); //todo remember to init imu
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
 
@@ -233,7 +236,6 @@ public class DriverOp extends LinearOpMode {
     }
 
     public void loopOpMode(){
-        imuHandler.streamIMUData();
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
         if (intakePower < 0){
@@ -243,10 +245,18 @@ public class DriverOp extends LinearOpMode {
         }
         intakePower += gamepad1.right_stick_y / settings.getInt("intake_divisor");
 
-        double joystickTheta = Math.atan2((controls.getAnalog("drivetrain_y")),(controls.getAnalog("drivetrain_x"))); //declares the angle of joystick position in standard polar coordinates
-        joystickTheta -= (Math.PI * 2.0) + gyrometer.getOrientation(IMU.Axis.Z);
+        imuOn = controls.getToggle("imu");
+        if (imuOn){
+            imuHandler.imuInit();
+        }else imuHandler.close();
 
-        //todo see if this works for the driver
+        double joystickTheta = Math.atan2((controls.getAnalog("drivetrain_y")),(controls.getAnalog("drivetrain_x"))); //declares the angle of joystick position in standard polar coordinates
+        //todo see if toggle imuworks
+
+        if (imuHandler.isImuInit()){
+            imuHandler.streamIMUData();
+            joystickTheta -= (Math.PI * 2.0) + gyrometer.getOrientation(Z);
+        }
         while (joystickTheta<0){
             joystickTheta += (Math.PI * 2.0);
         }
@@ -269,22 +279,25 @@ public class DriverOp extends LinearOpMode {
              involves positive motor values for all when rotation is disregarded, so motors C
              and D have signage on shaft power changed to positive again.
              */
-
+        //todo change these to getToggle()
+        /*
         if (gamepad1.a && !toggle.contains("intakeF")){
             intakeF = !intakeF;
             intakeB = false;
             toggle.add("intakeF");
         } if (!gamepad1.a && toggle.contains("intakeF")){
             toggle.remove("intakeF");
-        }
+        }*/
+        intakeF = controls.getToggle("intakeF");
 
-
+        /*
         if (controls.getDigital("drop") && !toggle.contains("drop")){
             dropBalls = !dropBalls;
             toggle.add("drop");
         } if (!controls.getDigital("drop") && toggle.contains("drop")){
             toggle.remove("drop");
-        }
+        }*/
+        dropBalls = controls.getToggle("drop");
 
         if (intakeF){
             intakeMotor.setPower(-Range.scale(intakePower, 0, 1, -.778, .778));
@@ -310,17 +323,14 @@ public class DriverOp extends LinearOpMode {
         if (controls.getDigital("launch"))
             catapult.launch();
 
-        telemetry.addData("Speed-FR", motorFR.getPower());
-        telemetry.addData("Speed-FL", motorFL.getPower());
-        telemetry.addData("Speed-BL", motorBL.getPower());
-        telemetry.addData("Speed-BR", motorBR.getPower());
-        telemetry.addData("Encoder-FR", motorFR.getCurrentPosition());
-        telemetry.addData("Encoder-FL", motorFL.getCurrentPosition());
-        telemetry.addData("Encoder-BL", motorBL.getCurrentPosition());
-        telemetry.addData("Encoder-BR", motorBR.getCurrentPosition());
-        telemetry.addData("x", controls.getAnalog("drivetrain_x"));
-        telemetry.addData("y", controls.getAnalog("drivetrain_y"));
-        telemetry.addData("rot", controls.getAnalog("drivetrain_rotate"));
+        double orientation = 0.1;
+        if (imuHandler.isImuInit()) {
+            final double full = 2.0 * Math.PI;
+            orientation = full + gyrometer.getOrientation(Z);
+        }
+        telemetry.addData("IMU", orientation);
+        telemetry.addData("ImuStatus", imuHandler.isImuInit());
+        telemetry.addData("IMUToggle", imuOn);
         telemetry.addData("IntakeSpeed", intakePower);
         telemetry.update();
     }
@@ -328,7 +338,7 @@ public class DriverOp extends LinearOpMode {
     public void stopOpMode(){
         catapult.stop();
         drive.startVelocity();
-        imu.close();
+        imuHandler.close();
     }
 
     /**

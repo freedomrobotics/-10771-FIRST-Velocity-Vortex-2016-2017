@@ -47,7 +47,7 @@ public class UltrasonicRange {
      * A runnable thread that streams the distance
      * every instant
      */
-    public final Runnable rangeRunnable = new Runnable() {
+    private final Runnable rangeRunnable = new Runnable() {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()){
@@ -57,7 +57,7 @@ public class UltrasonicRange {
     };
 
     //The respective thread that runs the runnable
-    public final Thread rangeThread = new Thread(rangeRunnable);
+    private final Thread rangeThread = new Thread(rangeRunnable);
 
     /**
      * Enable the range sensor
@@ -134,5 +134,13 @@ public class UltrasonicRange {
     public void testRangeSensor(LinearOpMode opMode, boolean updateTelemetry){
         opMode.telemetry.addData("Inches", distance());
         if (updateTelemetry) opMode.telemetry.update();
+    }
+
+    public void start(){
+        if (!rangeThread.isAlive()) rangeThread.start();
+    }
+
+    public void stop(){
+        if (rangeThread.isAlive()) rangeThread.interrupt();
     }
 }

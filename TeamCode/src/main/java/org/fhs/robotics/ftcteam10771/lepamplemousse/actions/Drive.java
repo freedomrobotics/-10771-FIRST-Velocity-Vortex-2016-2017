@@ -43,10 +43,7 @@ public class Drive {
     private float initialX = 0.0f;
     private float initialY = 0.0f;
     private Config.ParsedData settings;
-    private Config.ParsedData fieldmap;
-    List<String> commands;
 
-    SensorHandler sensorHandler;
 
     private boolean atPosition;
     private boolean atRotation;
