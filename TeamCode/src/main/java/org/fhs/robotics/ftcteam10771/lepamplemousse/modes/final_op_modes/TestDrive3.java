@@ -107,6 +107,8 @@ public class TestDrive3 extends LinearOpMode{
         controls.initialize();
         Log.d(TAG, "controllers-init");
 
+        Log.d(TAG, "STARTING SETUP");
+
         //sets variables to motors
         motorFR = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("front_right").getString("map_name"));
         motorFL = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("front_left").getString("map_name"));
@@ -118,7 +120,7 @@ public class TestDrive3 extends LinearOpMode{
         Log.d(TAG, settings.subData("drivetrain").subData("motor").subData("back_left").getString("map_name"));
         Log.d(TAG, settings.subData("drivetrain").subData("motor").subData("back_right").getString("map_name"));
 
-        Log.d(TAG, "motor setup");
+        Log.d(TAG, "MOTOR SETUP");
 
         intakeMotor = hardwareMap.dcMotor.get("motorIntake");
         ballDropper = hardwareMap.servo.get("drop");
@@ -128,7 +130,7 @@ public class TestDrive3 extends LinearOpMode{
             ballDropper.setDirection(Servo.Direction.FORWARD);
         }
 
-        Log.d(TAG, "motor setup 2");
+        Log.d(TAG, "MOTOR SETUP 2");
 
         motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -139,7 +141,7 @@ public class TestDrive3 extends LinearOpMode{
         motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        Log.d(TAG, "motor setup 3");
+        Log.d(TAG, "MOTOR SETUP 3");
 
         /*
         In our mecanum setup, the two front wheels are chain driven and the two rear wheels are
@@ -163,7 +165,7 @@ public class TestDrive3 extends LinearOpMode{
         if (settings.subData("drivetrain").subData("motor").subData("back_left").getBool("reversed")) motorBL.setDirection(DcMotor.Direction.REVERSE);
         if (settings.subData("drivetrain").subData("motor").subData("back_right").getBool("reversed")) motorBR.setDirection(DcMotor.Direction.REVERSE);
 
-        Log.d(TAG, "motor setup 4");
+        Log.d(TAG, "MOTOR SETUP 4");
 
         Config.ParsedData bumpers = settings.subData("bumper");
 
@@ -178,6 +180,8 @@ public class TestDrive3 extends LinearOpMode{
             bumperLeft.setDirection(Servo.Direction.REVERSE);
         if (bumpers.subData("right_servo").getBool("reversed"))
             bumperRight.setDirection(Servo.Direction.REVERSE);
+
+        Log.d(TAG, "BUMPER SETUP DONE");
 
         float power = settings.subData("drivetrain").getFloat("motor_scale");
         catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")),
@@ -227,10 +231,14 @@ public class TestDrive3 extends LinearOpMode{
             motorBL.setPower(Range.scale(powerC, -1, 1, -power, power));
             motorBR.setPower(Range.scale(powerD, -1, 1, -power, power));
 
-            telemetry.addData("Speed-FR", powerA);
-            telemetry.addData("Speed-FL", powerB);
-            telemetry.addData("Speed-BL", powerC);
-            telemetry.addData("Speed-BR", powerD);
+            telemetry.addData("Speed-FR", motorFR.getPower());
+            telemetry.addData("Speed-FL", motorFL.getPower());
+            telemetry.addData("Speed-BL", motorBL.getPower());
+            telemetry.addData("Speed-BR", motorBR.getPower());
+            telemetry.addData("Encoder-FR", motorFR.getCurrentPosition());
+            telemetry.addData("Encoder-FL", motorFL.getCurrentPosition());
+            telemetry.addData("Encoder-BL", motorBL.getCurrentPosition());
+            telemetry.addData("Encoder-BR", motorBR.getCurrentPosition());
             telemetry.addData("x", controls.getAnalog("drivetrain_x"));
             telemetry.addData("y", controls.getAnalog("drivetrain_y"));
             telemetry.addData("rot", controls.getAnalog("drivetrain_rotate"));

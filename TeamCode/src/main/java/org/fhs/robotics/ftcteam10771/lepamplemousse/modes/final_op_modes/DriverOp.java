@@ -3,9 +3,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 import android.util.Log;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -15,10 +13,9 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
@@ -28,10 +25,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by Matthew on 11/14/2016.
+ * Created by joelv on 2/17/2017.
  */
-@TeleOp(name = "Pamplemousse Drive")
-public class FinalTeleOp extends OpMode{
+
+public class DriverOp extends LinearOpMode {
 
     //initializes motors in order of standard graph quadrants
     private DcMotor motorFR;
@@ -51,7 +48,7 @@ public class FinalTeleOp extends OpMode{
     private Config rawSettings;
     private Config.ParsedData settings;
     private Config.ParsedData bumpers;
-    private Components components;
+    //private Components components;
     private Controllers controls;
 
     private IMU imuHandler;
@@ -84,8 +81,18 @@ public class FinalTeleOp extends OpMode{
     //Time archive variable
     private long lastTime = 0;
 
-    public void init() {
+    @Override
+    public void runOpMode() throws InterruptedException {
+        initialize();
+        waitForStart();
+        startOpMode();
+        while (opModeIsActive()){
+            loopOpMode();
+        }
+        stopOpMode();
+    }
 
+    public void initialize(){
         Log.d(TAG, "startingInitNow");
 
         Config keymapping = new Config(Static.configPath, Static.configControlFileName + Static.configFileSufffix, telemetry, "keymapping");
@@ -102,7 +109,7 @@ public class FinalTeleOp extends OpMode{
                 keymapping.read(true);
             Log.d(TAG, "keymapping-read-again");
         }
-
+        /*
         Config components = new Config(Static.configPath, Static.configCompFileName + Static.configFileSufffix, telemetry, "components");
         Log.d(TAG, "components");
         if (components.read() == Config.State.DEFAULT_EXISTS) {
@@ -112,6 +119,7 @@ public class FinalTeleOp extends OpMode{
                 components.read(true);
             Log.d(TAG, "components-read-again");
         }
+        */
 
         rawSettings = new Config(Static.configPath, Static.configVarFileName + Static.configFileSufffix, telemetry, "settings");
         Log.d(TAG, "settings");
@@ -130,10 +138,12 @@ public class FinalTeleOp extends OpMode{
         initialX = settings.subData("robot").subData("initial_position").getFloat("x");
         initialY = settings.subData("robot").subData("initial_position").getFloat("y");
 
+        /*
         this.components = new Components(hardwareMap, telemetry, components);
         Log.d(TAG, "components-object");
         this.components.initialize();
         Log.d(TAG, "components-init");
+        */
         controls = new Controllers(gamepad1, gamepad2, keymapping);
         controls.initialize();
         Log.d(TAG, "controllers-init");
@@ -212,15 +222,17 @@ public class FinalTeleOp extends OpMode{
 
         lastTime = System.currentTimeMillis();
         drive.startVelocity();
-
+        //fixme if catapult crashes the app, comment this and uncomment the other one in startOpMode()
+        catapult.start();
         Log.d(TAG, "THREAD STARTS DONE");
     }
 
-    public void start(){
-        catapult.start();
+    public void startOpMode(){
+        //catapult.start();
+        return;
     }
 
-    public void loop(){
+    public void loopOpMode(){
         imuHandler.streamIMUData();
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
@@ -313,8 +325,7 @@ public class FinalTeleOp extends OpMode{
         telemetry.update();
     }
 
-    @Override
-    public void stop() {
+    public void stopOpMode(){
         catapult.stop();
         drive.startVelocity();
         imu.close();
