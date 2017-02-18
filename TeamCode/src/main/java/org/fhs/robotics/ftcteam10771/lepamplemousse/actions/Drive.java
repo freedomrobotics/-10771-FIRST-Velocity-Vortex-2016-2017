@@ -309,9 +309,10 @@ public class Drive {
     }
 
     /**
-     * Gets the x coordinate of the robot using the 4 encoders
-     * assuming that the robot does not rotate
-     * @return the x coordinate
+     * Uses Encoders and roller angle
+     * to obtain X coordinate in centimeter
+     * Note: Only accurate when robot is not rotated at all
+     * @return X coodinate in centimeters
      */
     private float getX(){
         //todo put in config file
@@ -328,10 +329,10 @@ public class Drive {
     }
 
     /**
-     * Gets the y coordinate of the robot using the 4 encoders
-     * assuming that the robot does not rotate
-     * @return the y coordinate
-     *///todo fix math
+     * Uses Encoder outputs to obtain y coordinate
+     * Note: only works if robot does not rotate
+     * @return Y coordinate of the robot
+     */
     private float getY(){
         float centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
         float A = -frMotor.getCurrentPosition()*centimeters_per_pulse;

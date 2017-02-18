@@ -1,7 +1,8 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled_tests;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -17,6 +18,7 @@ import java.util.List;
 /**
  * Created by joelv on 2/7/2017.
  */
+@Disabled
 @TeleOp(name="CatapultOld Test", group = "Test")
 public class CatapultTest extends OpMode{
 

@@ -1,6 +1,7 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled_tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -12,6 +13,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 /**
  * Created by joelv on 2/16/2017.
  */
+@Disabled
 @Autonomous(name="Camera Switch Test")
 public class CameraTest extends OpMode{
     private Controllers controls;
