@@ -46,8 +46,6 @@ public class FinalTeleOp extends OpMode{
     private Servo ballDropper;
 
     private double intakePower = 0.0;
-    private boolean intakeF = false, intakeB = false;
-    private List<String> toggle = new LinkedList<>();
     private Config rawSettings;
     private Config.ParsedData settings;
     private Config.ParsedData bumpers;
@@ -60,7 +58,8 @@ public class FinalTeleOp extends OpMode{
 
     private Catapult catapult;
     private Drive drive;
-    private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
+    private VectorR driveVector = new VectorR();
+    private Robot robot = new Robot();
     //private IMU.Gyrometer gyrometer;
     //private IMU imuHandler;
 
@@ -78,8 +77,6 @@ public class FinalTeleOp extends OpMode{
 
     //Flags
     private boolean blueTeam;
-    private boolean armToggle = false;
-    private boolean dropBalls = false;
 
     //Time archive variable
     private long lastTime = 0;
@@ -212,6 +209,7 @@ public class FinalTeleOp extends OpMode{
 
         lastTime = System.currentTimeMillis();
         drive.startVelocity();
+        drive.setRelative(false);
 
         Log.d(TAG, "THREAD STARTS DONE");
     }
@@ -231,57 +229,20 @@ public class FinalTeleOp extends OpMode{
         }
         intakePower += gamepad1.right_stick_y / settings.getInt("intake_divisor");
 
-        double joystickTheta = Math.atan2((controls.getAnalog("drivetrain_y")),(controls.getAnalog("drivetrain_x"))); //declares the angle of joystick position in standard polar coordinates
+        driveVector.setX(controls.getAnalog("drivetrain_x"));
+        driveVector.setY(controls.getAnalog("drivetrain_y"));
         joystickTheta -= (Math.PI * 2.0) + gyrometer.getOrientation(IMU.Axis.Z);
 
-        //todo see if this works for the driver
-        while (joystickTheta<0){
-            joystickTheta += (Math.PI * 2.0);
-        }
-        if (joystickTheta > (2.0 * Math.PI)){
-            joystickTheta = joystickTheta % (Math.PI * 2.0);
-        }
+        driveVector.setRad(controls.getAnalog("drivetrain_rotate"));
 
-
-        double joystickRadius = Math.sqrt((controls.getAnalog("drivetrain_x"))*(controls.getAnalog("drivetrain_x"))+
-                (controls.getAnalog("drivetrain_y"))*(controls.getAnalog("drivetrain_y"))); //declares the magnitude of the radius of the joystick position
-        // Halved rotationPower value to allow for simultaneous translation and rotation when fully depressed - Adam Li
-        double rotationalPower = controls.getAnalog("drivetrain_rotate"); //sets the power of rotation by finding the difference between the left and right triggers
-        driveVector.setPolar((float)joystickRadius, (float)joystickTheta);
-        driveVector.setRad((float)rotationalPower);
-
-        //sets the motor power where the ratio of input from translational motion is dictated by the magnitude of the rotational motion
-            /*
-            We know the right side needs to be driven in reverse to rotate right, so motors A
-             and D have negative rotationalPower values. We also know forward translation
-             involves positive motor values for all when rotation is disregarded, so motors C
-             and D have signage on shaft power changed to positive again.
-             */
-
-        if (gamepad1.a && !toggle.contains("intakeF")){
-            intakeF = !intakeF;
-            intakeB = false;
-            toggle.add("intakeF");
-        } if (!gamepad1.a && toggle.contains("intakeF")){
-            toggle.remove("intakeF");
-        }
-
-
-        if (controls.getDigital("drop") && !toggle.contains("drop")){
-            dropBalls = !dropBalls;
-            toggle.add("drop");
-        } if (!controls.getDigital("drop") && toggle.contains("drop")){
-            toggle.remove("drop");
-        }
-
-        if (intakeF){
+        if (controls.getToggle("intake")){
             intakeMotor.setPower(-Range.scale(intakePower, 0, 1, -.778, .778));
         } else {
             intakeMotor.setPower(0);
         }
 
         //servo
-        dropBalls();
+        dropBalls(controls.getToggle("drop"));
 
         bumperPos += controls.getAnalog("bumper_angle") * (bumperVel / bumperRange) * ((float) changeTime / 1000.0f);
         if (bumperPos > bumperMax / bumperRange){
@@ -324,7 +285,7 @@ public class FinalTeleOp extends OpMode{
      * Lifts plow if it is down
      * Drops plow if it is lifted
      */
-    public void dropBalls(){
+    public void dropBalls(boolean dropBalls){
         Config.ParsedData drop = settings.subData("drop");
         float fullRange = drop.getFloat("full_rotate");
         float offset = drop.getFloat("offset") / fullRange;
