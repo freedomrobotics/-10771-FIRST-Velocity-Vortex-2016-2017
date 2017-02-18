@@ -1,9 +1,9 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -19,17 +19,16 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
-import java.util.List;
-
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis.Z;
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.LEFT;
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.RIGHT;
 
 /**
- * Created by joelv on 2/9/2017.
+ * Created by joelv on 2/10/2017.
  */
-@Autonomous (name="Pampletonomous")
-public class PamplemouseAuto extends LinearOpMode {
+@Disabled
+@Autonomous(name="Method Testing")
+public class MethodTesting extends LinearOpMode{
 
     private Config rawSettings;
     private Config.ParsedData settings;
@@ -54,6 +53,8 @@ public class PamplemouseAuto extends LinearOpMode {
             while (!Thread.currentThread().isInterrupted()) {
                 telemetry.addData("Team", team);
                 telemetry.addData("cameraZ", cameraVision.getZ());
+                telemetry.addData("Radius", driveVector.getRadius());
+                telemetry.addData("Theta", driveVector.getTheta());
                 telemetry.addData("FR", drive.getMotorPower(1));
                 telemetry.addData("FL", drive.getMotorPower(2));
                 telemetry.addData("BL", drive.getMotorPower(3));
@@ -117,41 +118,12 @@ public class PamplemouseAuto extends LinearOpMode {
         imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
         gyroOutput = imuHandler.getGyrometer();
         telemetryThread.start();
-        cameraVision.cameraThread.start();
         waitForStart();
-        imuHandler.imuThread.start();
-        drive.setRelative(true);
         drive.startPosition();
-        wait(settings.subData("drive").getInt("wait_time"));
-        if (!parsedField.getString("beacon1").equals("null")){
-            claimBeacon(parsedField.getString("beacon1"));
-        }
-        if (!parsedField.getString("beacon2").equals("null")){
-            claimBeacon(parsedField.getString("beacon2"));
-        }
-        driveVector.setX(drive.getCurrentX());
-        driveVector.setY(drive.getCurrentY());
-        drive.startPosition();
-        cameraVision.cameraThread.interrupt();
-        /*
-        if (parsedField.getBool("knock_ball")){
-            driveTo("center");
-            while(!proceed){
-                proceed = drive.isAtPosition();
-            }
-        }
-        driveTo(parsedField.getString("park"));
-        proceed = false;
-        while(!proceed){
-            proceed = drive.isAtPosition();
-        }
-        driveVector.setX(drive.getCurrentX());
-        driveVector.setY(drive.getCurrentY());
-        *///todo complete imu code before making uncommenting
-        imuHandler.imuThread.interrupt();
+        //drive.startVelocity();
+        rotate((float)Math.toRadians(90.0));
         telemetryThread.interrupt();
         drive.stop();
-        //add the imu and possibly catapult if there is time
     }
 
     private void claimBeacon(String beacon){
@@ -168,7 +140,7 @@ public class PamplemouseAuto extends LinearOpMode {
         int waitTime = settings.subData("drive").subData("camera_settings").getInt("detect_time");
         //todo put in config file
         boolean detected = false;
-        while(System.currentTimeMillis()-currentTime<waitTime && !detected){
+        while(System.currentTimeMillis()-currentTime<waitTime){
             detected = cameraVision.countTrackedImages()==1;
         }
         if (detected){
@@ -259,7 +231,7 @@ public class PamplemouseAuto extends LinearOpMode {
             }
             driveVector.setRad(gyroOutput.convert(Z, gyroOutput.getOrientation(Z)));
         }
-        //drive.refresh();
+        drive.refresh();
     }
 
     /**
@@ -315,7 +287,6 @@ public class PamplemouseAuto extends LinearOpMode {
                     driveVector.setPolar(radius, theta);
                 }
             }
-            driveVector.setPolar(0.0f, 0.0f);
             return rgb.isSide(alliance, direction);
         }
         else return false;
@@ -330,7 +301,6 @@ public class PamplemouseAuto extends LinearOpMode {
         while(System.currentTimeMillis()-currentTime<waitTime){
             driveVector.setPolar(radius, theta);
         }
-        driveVector.setPolar(0.0f, 0.0f);
     }
 
     private boolean targeted(){
@@ -344,4 +314,5 @@ public class PamplemouseAuto extends LinearOpMode {
         driveVector.setX(parsedField.subData(location).getFloat("x"));
         driveVector.setY(parsedField.subData(location).getFloat("y"));
     }
+
 }

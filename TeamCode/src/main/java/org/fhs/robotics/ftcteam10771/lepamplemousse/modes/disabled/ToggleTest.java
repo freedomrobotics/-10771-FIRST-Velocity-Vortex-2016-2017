@@ -1,5 +1,6 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,6 +12,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 /**
  * Created by Adam Li on 2/17/2017.
  */
+@Disabled
 @TeleOp(name = "ToggleTest")
 public class ToggleTest extends OpMode {
     private Controllers controls;

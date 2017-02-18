@@ -1,4 +1,4 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled_tests;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled;
 
 import android.util.Log;
 

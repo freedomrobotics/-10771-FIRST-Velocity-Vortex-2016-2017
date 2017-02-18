@@ -218,8 +218,11 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     }
 
     /**
-     *
-     * @param degrees
+     * Rotates the robot a certain amount of angle
+     * or to a certain orientation
+     * @param degrees  provided angle in degrees
+     * @param relative true = rotate a certain amount of degrees
+     *                 false = rotate to a certain orientation from 0 to 360 degrees
      */
     private void rotate(double degrees, boolean relative){
         drive.startVelocity();

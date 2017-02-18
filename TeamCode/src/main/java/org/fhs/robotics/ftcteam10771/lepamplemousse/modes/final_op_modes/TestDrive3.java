@@ -12,6 +12,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 
@@ -38,7 +39,7 @@ public class TestDrive3 extends LinearOpMode{
     private Config.ParsedData settings;
     private Components components;
     private Controllers controls;
-    private CatapultOld catapult;
+    private Catapult catapult;
     private Servo arm;
     //private IMU.Gyrometer gyrometer;
     //private IMU imuHandler;
@@ -179,12 +180,13 @@ public class TestDrive3 extends LinearOpMode{
             bumperRight.setDirection(Servo.Direction.REVERSE);
 
         float power = settings.subData("drivetrain").getFloat("motor_scale");
-        catapult = new CatapultOld(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
-        //imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
+        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")),
+                hardwareMap.opticalDistanceSensor.get(settings.subData("catapult")
+                        .subData("light_sensor").getString("map_name")), settings.subData("catapult"));        //imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, "imu"));
         //gyrometer = imuHandler.getGyrometer();
         //gyrometer.enableStream(true);
         lastTime = System.currentTimeMillis();
-        catapult.catapultThread.start();
+        catapult.start();
         waitForStart();
         while(opModeIsActive()){
             //imuHandler.streamIMUData();
@@ -275,13 +277,15 @@ public class TestDrive3 extends LinearOpMode{
             telemetry.addData("Y inches", getY());
             telemetry.update();
 
-            catapult.setLaunch(controls.getDigital("launch"));
+            if (controls.getDigital("launch")){
+                catapult.launch();
+            }
 
             //idle();
 
         }
         //fixme threads not allowed after loop
-        catapult.catapultThread.interrupt();
+        catapult.stop();
         Aliases.clearAll();
     }
 

@@ -1,4 +1,4 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled_tests;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.Camera;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 

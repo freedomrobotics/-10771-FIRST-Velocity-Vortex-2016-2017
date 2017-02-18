@@ -3,6 +3,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 import android.util.Log;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -29,7 +30,6 @@ import java.util.List;
 /**
  * Created by Matthew on 11/14/2016.
  */
-
 @TeleOp(name = "Pamplemousse Drive")
 public class FinalTeleOp extends OpMode{
 
