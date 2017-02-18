@@ -96,16 +96,16 @@ public class PositionalOpMode extends LinearOpMode {
         boolean proceed = false;
         drive.setRelative(true);
         drive.startPosition();
-        driveTo("custom1");
-        while(!proceed){
+        if (opModeIsActive()) driveTo("custom1");
+        while(!proceed && opModeIsActive()){
             proceed = distance() < 3.0;
         } proceed = false;
-        driveTo("custom2");
-        while(!proceed){
+        if (opModeIsActive()) driveTo("custom2");
+        while(!proceed && opModeIsActive()){
             proceed = distance() < 3.0;
         } proceed = false;
-        driveTo("custom3");
-        while(!proceed){
+        if (opModeIsActive()) driveTo("custom3");
+        while(!proceed && opModeIsActive()){
             proceed = distance() < 3.0;
         }
         telemetryThread.interrupt();

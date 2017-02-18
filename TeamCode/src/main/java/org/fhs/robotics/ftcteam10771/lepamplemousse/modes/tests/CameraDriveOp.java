@@ -123,9 +123,8 @@ public class CameraDriveOp extends LinearOpMode {
         drive.startVelocity();
         //drive.driveThread.start();
         centerRotate();
-        rotate();
-        center();
         approach();
+        center();
         driveVector.setRad(0);
         driveVector.setPolar(0, 0);
 
@@ -157,7 +156,7 @@ public class CameraDriveOp extends LinearOpMode {
     public void center() {
         float marginofError = settings.subData("drive").subData("camera_settings").getFloat("centering_margin");
         if (targeted()) {
-            while (Math.abs(cameraVision.getX()) > marginofError) {
+            while (Math.abs(cameraVision.getX()) > marginofError && opModeIsActive()) {
                 boolean left = backCamera ? (cameraVision.getX() > 0.0) : (cameraVision.getX() < 0.0);
                 float theta = left ? (float) Math.PI : 0.0f;
                 float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
@@ -171,7 +170,7 @@ public class CameraDriveOp extends LinearOpMode {
     public void approach() {
         distance_to_stop = settings.subData("drive").subData("camera_settings").getFloat("distance_to_stop");
         if (targeted()) {
-            while (targeted() && Math.abs(cameraVision.getZ()) > distance_to_stop) {
+            while (targeted() && Math.abs(cameraVision.getZ()) > distance_to_stop && opModeIsActive()) {
                 float theta = backCamera ? 3.0f * (float) Math.PI / 2.0f : (float) Math.PI / 2.0f;
                 float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
                 //todo put speed
@@ -201,7 +200,7 @@ public class CameraDriveOp extends LinearOpMode {
         float marginofError = settings.subData("drive").subData("camera_settings").getFloat("centering_margin");
         float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
         float rotate_factor = settings.subData("drive").subData("camera_settings").getFloat("rotate_factor");
-        while (targeted() && Math.abs(cameraVision.getX()) > marginofError && Math.abs(cameraVision.getAngleToTurn())>rotate_margin) {
+        while (targeted() && Math.abs(cameraVision.getX()) > marginofError && Math.abs(cameraVision.getAngleToTurn())>rotate_margin && opModeIsActive()) {
             boolean left = backCamera ? (cameraVision.getX() > 0.0) : (cameraVision.getX() < 0.0);
             float rotate = (float)(radius/(rotate_factor*rotate_speed) * cameraVision.getAngleToTurn());
             float theta = left ? (float) Math.PI : 0.0f;
@@ -229,7 +228,7 @@ public class CameraDriveOp extends LinearOpMode {
             }
             reached = (direction==LEFT) ? cameraVision.getX() > distance :
                     cameraVision.getX() < distance;
-            while (targeted() && reached){
+            while (targeted() && reached && opModeIsActive()){
                 float radius = distance - (float)Math.abs(cameraVision.getX());
                 //todo put power cutback ratio in settings config
                 radius *= settings.subData("drive").subData("camera_settings").getFloat("speed");
@@ -250,7 +249,7 @@ public class CameraDriveOp extends LinearOpMode {
         radius /= 4f;
         long waitTime = settings.subData("drive").subData("camera_settings").getInt("wait_for_press");
         long lastTime = System.currentTimeMillis();
-        while(System.currentTimeMillis() - lastTime < waitTime){
+        while(System.currentTimeMillis() - lastTime < waitTime && opModeIsActive()){
             driveVector.setPolar(radius, theta);
         }
         driveVector.setPolar(0f, 0f);
@@ -263,7 +262,7 @@ public class CameraDriveOp extends LinearOpMode {
         long waitTime = settings.subData("drive").subData("camera_settings").getInt("wait_for_press");
         waitTime /= 2f;
         long lastTime = System.currentTimeMillis();
-        while(System.currentTimeMillis() - lastTime < waitTime){
+        while(System.currentTimeMillis() - lastTime < waitTime && opModeIsActive()){
             driveVector.setPolar(radius, theta);
         }
     }
