@@ -15,6 +15,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
@@ -280,9 +281,9 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         imuHandler.streamIMUData();
         robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
 
-        drive.startPosition();
         driveVector.setAllRad(robot.getPosition().getX(), robot.getPosition().getY(),
-                relative ? (float) Math.toRadians(robot.getRotation().getDegrees() + degrees) : (float) Math.toRadians(degrees + 90));
+                relative ? (float) Math.toRadians(robot.getRotation().getDegrees() + degrees) : (float) Math.toRadians(degrees - 90));
+        drive.startPosition();
         while(!drive.isAtRotation() && opModeIsActive()){
             imuHandler.streamIMUData();
             robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
@@ -392,8 +393,8 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         imuHandler.streamIMUData();
         robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
 
+        driveVector.setAllRad(Coordinate.convertTo(x, Coordinate.UNIT.CM_TO_UNIT), Coordinate.convertTo(y, Coordinate.UNIT.CM_TO_UNIT), robot.getRotation().getRadians());
         drive.startPosition();
-        driveVector.setAllRad(x, y, robot.getRotation().getRadians());
         while(!drive.isAtPosition() && opModeIsActive()){
             imuHandler.streamIMUData();
             robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));

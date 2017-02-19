@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -37,6 +38,7 @@ public class Drive {
     //Flags
     private boolean vectorDriveActive;
     private boolean relativeDrive;
+    private boolean pause;
     // TODO: 2/19/2017 change to alliance
     private final boolean blueTeam;
 
@@ -88,6 +90,8 @@ public class Drive {
 
             while (!Thread.currentThread().isInterrupted()) {
 
+                if (pause) continue;
+
                 float theta = vectorR.getTheta();
                 float velocity;
                 float rotation;
@@ -105,7 +109,7 @@ public class Drive {
                     theta = difference.getTheta();
 
                     //todo put drivetrain/positional/position_margin
-                    atPosition = difference.getRadius() < Math.abs(position_tolerance);
+                    atPosition = Coordinate.convertTo(difference.getRadius(), Coordinate.UNIT.UNIT_TO_CM) < Math.abs(position_tolerance);
 
                     if (!atPosition)
                         velocity = position_speed;
@@ -205,6 +209,7 @@ public class Drive {
         this.blMotor = blMotor;
         this.driveSettings = settings.subData("drivetrain");
         this.vectorDriveActive = true;
+        pause = false;
 
         this.blueTeam = settings.getString("alliance").equals("blue");
         this.relativeDrive = false;
@@ -259,6 +264,7 @@ public class Drive {
      * Starts driveThread and changes vectorDriveActive to true
      */
     public void startVelocity(){
+        pause = false;
         vectorDriveActive = true;
         if (!driveThread.isAlive())
             driveThread.start();
@@ -268,6 +274,7 @@ public class Drive {
      * Uses driveThread to move robot to position
      */
     public void startPosition(){
+        pause = false;
         //this flag should be enough to announce that a math change is needed. Robot's current
         // position can be gained from getVectorR and the vectorR provided is the aim position.
         vectorDriveActive = false;
@@ -277,13 +284,18 @@ public class Drive {
             driveThread.start();
     }
 
+    public void pause(){
+        pause = true;
+    }
+
     /**
      * Stops driveThread and changes vectorDriveActive to false
      * Resets relativeDrive to true
      */
     public void stop(){
-        relativeDrive = true;
-        vectorDriveActive = false;
+        pause = true;
+        relativeDrive = false;
+        vectorDriveActive = true;
         if(driveThread.isAlive())
             driveThread.interrupt();
     }
@@ -310,14 +322,14 @@ public class Drive {
     public void updatePosition(){
         float xPos = getEncoderX();
         float yPos = getEncoderY();
-        float x = xPos - lastPosition.getX();
-        float y = yPos - lastPosition.getY();
+        float x = xPos - Coordinate.convertTo(lastPosition.getX(), Coordinate.UNIT.UNIT_TO_CM);
+        float y = yPos - Coordinate.convertTo(lastPosition.getY(), Coordinate.UNIT.UNIT_TO_CM);
         double theta = Math.atan2(y, x);
         double radius = Math.sqrt(x*x + y*y);
         theta -= (float)((Math.PI * 2.0) + robot.getRotation().getHeading());
-        robot.getPosition().movePolar((float)radius, (float)theta);
-        lastPosition.setX(xPos);
-        lastPosition.setY(yPos);
+        robot.getPosition().movePolar(Coordinate.convertTo((float)radius, Coordinate.UNIT.CM_TO_UNIT), (float)theta);
+        lastPosition.setX(Coordinate.convertTo(xPos, Coordinate.UNIT.CM_TO_UNIT));
+        lastPosition.setY(Coordinate.convertTo(yPos, Coordinate.UNIT.CM_TO_UNIT));
     }
 
     /**
@@ -393,12 +405,18 @@ public class Drive {
         return 0;
     }
 
+    @Deprecated
     public float getCurrentX(){
         return robot.getPosition().getX();
     }
 
+    @Deprecated
     public float getCurrentY(){
         return robot.getPosition().getY();
+    }
+
+    public Robot getRobot(){
+        return robot;
     }
 
     public boolean isVectorDriveActive(){
