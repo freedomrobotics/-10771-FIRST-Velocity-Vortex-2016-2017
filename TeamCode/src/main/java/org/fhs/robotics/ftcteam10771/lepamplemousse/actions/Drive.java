@@ -17,6 +17,7 @@ import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis
 /**
  * Created by Adam Li on 10/27/2016.
  * Class to manage how the robot drives (smart control schemes, drivetrain types, etc.)
+ * todo CLEANUP
  */
 public class Drive {
     private final Telemetry telemetry;
@@ -38,6 +39,7 @@ public class Drive {
     long pastPositionTime;
 
     VectorR velocityFeedback = new VectorR();
+    VectorR lastPosition = new VectorR();
 
     //Positional drive stuff
     private float initialX = 0.0f;
@@ -77,7 +79,7 @@ public class Drive {
                         }
 
                         robotTheta = absoluteTheta + robotRotation;*/
-                        robotTheta = joystickTheta - (float)((Math.PI * 2.0) + robot.getRotation().getRadians());
+                        robotTheta = joystickTheta - (float)((Math.PI * 2.0) + robot.getRotation().getHeading());
                     }
                 } else {
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();
@@ -98,6 +100,8 @@ public class Drive {
                     robotVelocity = driveSettings.subData("positional").getFloat("speed");
 
                     float rotationalMagnitude = driveSettings.subData("positional").getFloat("rotation");
+                    float rotationalMagnitudeMin = driveSettings.subData("positional").getFloat("rotation_min");
+                    /*
                     if (vectorR.getRad() > robot.getVectorR().getRad()){
                         if(Math.abs(vectorR.getRad()-robot.getVectorR().getRad())<(Math.PI/4)){
                             rotationalPower = (float) (rotationalMagnitude * (Math.PI/4 - Math.abs(vectorR.getRad()-robot.getVectorR().getRad())));
@@ -112,7 +116,14 @@ public class Drive {
                         }
                     } else {
                         rotationalPower = 0;
-                    }
+                    }*/
+
+                    float difference = robot.getVectorR().getRad() - vectorR.getRad();
+                    float factor = Math.abs(difference);
+                    difference = factor > 3.1415927f ? - difference : difference;
+                    factor = factor > 3.1415927f ? (6.2831854f - factor) / 3.1415927f : factor / 3.1415927f;
+                    rotationalPower = (float)Math.copySign(Range.scale(factor, 0, 1,
+                            rotationalMagnitudeMin, rotationalMagnitude), difference);
                 }
 
                 //calculates the shaft magnitude (AC shaft has diagonal motors "A" and "C")
@@ -128,12 +139,17 @@ public class Drive {
                 double bl = (ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
                 double br = (-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
 
+                double frPow = Range.scale(fr, -1, 1, -motorScale, motorScale);
+                double flPow = Range.scale(fl, -1, 1, -motorScale, motorScale);
+                double blPow = Range.scale(bl, -1, 1, -motorScale, motorScale);
+                double brPow = Range.scale(br, -1, 1, -motorScale, motorScale);
+
                 //calculates the motor powers
                 if (!Thread.currentThread().isInterrupted()){
-                    frMotor.setPower(Range.scale(fr, -1, 1, -motorScale, motorScale));
-                    flMotor.setPower(Range.scale(fl, -1, 1, -motorScale, motorScale));
-                    blMotor.setPower(Range.scale(bl, -1, 1, -motorScale, motorScale));
-                    brMotor.setPower(Range.scale(br, -1, 1, -motorScale, motorScale));
+                    frMotor.setPower(frPow);
+                    flMotor.setPower(flPow);
+                    blMotor.setPower(blPow);
+                    brMotor.setPower(brPow);
                 }
                 else{
                     frMotor.setPower(0.0f);
@@ -302,8 +318,16 @@ public class Drive {
         Test_drive3, where the encoder outputs are calculated into X and Y coordinates
     */
     public void updatePosition(){
-        robot.getPosition().setX(getX());
-        robot.getPosition().setY(getY());
+        float xPos = getX();
+        float yPos = getY();
+        float x = xPos - lastPosition.getX();
+        float y = yPos - lastPosition.getY();
+        double theta = Math.atan2(y, x);
+        double radius = Math.sqrt(x*x + y*y);
+        theta -= (float)((Math.PI * 2.0) + robot.getRotation().getHeading());
+        robot.getPosition().movePolar((float)radius, (float)theta);
+        lastPosition.setX(xPos);
+        lastPosition.setY(yPos);
     }
 
     /**

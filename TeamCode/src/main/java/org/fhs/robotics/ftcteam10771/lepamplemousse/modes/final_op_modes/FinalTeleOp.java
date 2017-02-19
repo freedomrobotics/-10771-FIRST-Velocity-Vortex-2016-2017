@@ -123,6 +123,7 @@ public class FinalTeleOp extends OpMode{
         initialY = settings.subData("robot").subData("initial_position").getFloat("y");
         initialRot = settings.subData("robot").subData("initial_position").getFloat("rot");
         robot = new Robot(initialX, initialY, initialRot, blueTeam ? Alliance.BLUE_ALLIANCE : Alliance.RED_ALLIANCE);
+        robot.getRotation().setHeading(initialRot);
 
         this.components = new Components(hardwareMap, telemetry, components);
         Log.d(TAG, "components-object");
@@ -190,7 +191,7 @@ public class FinalTeleOp extends OpMode{
         gyrometer.enableStream(true);
         imuHandler.setStreamDelay(75);
         imuHandler.streamIMUData();
-        robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z));
+        robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
         imuHandler.imuThread.start();
 
         Log.d(TAG, "IMU SETUP DONE");
@@ -208,7 +209,7 @@ public class FinalTeleOp extends OpMode{
 
     public void loop(){
         // TODO: 2/18/2017 move into imu thread
-        robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z));
+        robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
         if (intakePower < 0){
