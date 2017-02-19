@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.LED;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
 
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.BOTH;
@@ -22,6 +23,7 @@ import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Dire
  */
 public class RGB {
 
+    private Config.ParsedData beaconSettings;
     private ColorSensor leftColorSensor = null;
     private ColorSensor rightColorSensor = null;
     private LED leftLED = null;
@@ -31,39 +33,41 @@ public class RGB {
     /*
         Constructor with 2 RGB devices
      */
-    public RGB(ColorSensor leftColorSensor, ColorSensor rightColorSensor, LED leftLED, LED rightLED){
+    public RGB(ColorSensor leftColorSensor, ColorSensor rightColorSensor, LED leftLED, LED rightLED,
+               Config.ParsedData settings){
         this.leftColorSensor = leftColorSensor;
         this.rightColorSensor = rightColorSensor;
         this.leftLED = leftLED;
         this.rightLED = rightLED;
+        this.beaconSettings = settings.subData("beacon");
     }
 
     /*
         Constructor with one RGB device
      */
-    public RGB(ColorSensor sensor, LED led){
-        this(sensor, null, led, null);
+    public RGB(ColorSensor sensor, LED led, Config.ParsedData settings){
+        this(sensor, null, led, null, settings);
     }
 
     /*
         Constructor with 2 color sensors
      */
-    public RGB(ColorSensor leftColorSensor, ColorSensor rightColorSensor){
-        this(leftColorSensor, rightColorSensor, null, null);
+    public RGB(ColorSensor leftColorSensor, ColorSensor rightColorSensor, Config.ParsedData settings){
+        this(leftColorSensor, rightColorSensor, null, null, settings);
     }
 
     /*
         Constructor with 2 color sensors and a LED
      */
-    public RGB(ColorSensor sensor1, ColorSensor sensor2, LED led){
-        this(sensor1, sensor2, led, null);
+    public RGB(ColorSensor sensor1, ColorSensor sensor2, LED led, Config.ParsedData settings){
+        this(sensor1, sensor2, led, null, settings);
     }
 
     /*
         Constructor with a single color sensor
      */
-    public RGB(ColorSensor sensor){
-        this(sensor, null, null, null);
+    public RGB(ColorSensor sensor, Config.ParsedData settings){
+        this(sensor, null, null, null, settings);
     }
 
     /*

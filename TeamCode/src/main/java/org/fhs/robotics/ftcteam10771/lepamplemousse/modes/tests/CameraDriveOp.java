@@ -110,7 +110,7 @@ public class CameraDriveOp extends LinearOpMode {
         alliance = (settings.getString("alliance") == "red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
         //rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
         rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"), hardwareMap.colorSensor.get("right_rgb"),
-                hardwareMap.led.get("left_led"), hardwareMap.led.get("right_led"));
+                hardwareMap.led.get("left_led"), hardwareMap.led.get("right_led"), settings);
         cameraVision = new CameraVision();
         backCamera = cameraVision.usingBackCamera();
         cameraVision.start();

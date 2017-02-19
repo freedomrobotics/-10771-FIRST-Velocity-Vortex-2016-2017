@@ -108,7 +108,7 @@ public class MethodTesting extends LinearOpMode{
         cameraVision = new CameraVision();
         //todo complete framework_test configuration
         rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"), hardwareMap.colorSensor.get("right_rgb"),
-                hardwareMap.led.get("left_led"), hardwareMap.led.get("right_led"));
+                hardwareMap.led.get("left_led"), hardwareMap.led.get("right_led"), settings);
         drive = new Drive(driveVector, new Robot(),
                 Aliases.motorMap.get(drivetrainMotors.subData("front_right").getString("map_name")),
                 Aliases.motorMap.get(drivetrainMotors.subData("front_left").getString("map_name")),
@@ -147,11 +147,11 @@ public class MethodTesting extends LinearOpMode{
             if (cameraVision.imageInSight()){centerRotate();}
             if (cameraVision.imageInSight()){approach();}
             if (checkBeaconSide(LEFT)){
-                rgb.indicateCorrcect(LEFT, alliance);
+                //rgb.indicateCorrcect(LEFT, alliance);
                 press();
             }
             else if (checkBeaconSide(RIGHT)){
-                rgb.indicateCorrcect(RIGHT, alliance);
+                //rgb.indicateCorrcect(RIGHT, alliance);
                 press();
             }
         }
@@ -287,7 +287,7 @@ public class MethodTesting extends LinearOpMode{
                     driveVector.setPolar(radius, theta);
                 }
             }
-            return rgb.isSide(alliance, direction);
+            return true;
         }
         else return false;
     }

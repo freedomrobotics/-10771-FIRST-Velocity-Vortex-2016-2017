@@ -114,7 +114,7 @@ public class SensorTest extends LinearOpMode{
         ods = hardwareMap.opticalDistanceSensor.get("ods");
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"),
-                hardwareMap.led.get("left_led"));
+                hardwareMap.led.get("left_led"), settings);
         ultraLeft = new UltrasonicRange(hardwareMap.analogInput.get("ultrasonic_left"), hardwareMap.digitalChannel.get("switch_left"));
         ultraRight = new UltrasonicRange(hardwareMap.analogInput.get("ultrasonic_right"), hardwareMap.digitalChannel.get("switch_right"));
         ultraBack = new UltrasonicRange(hardwareMap.analogInput.get("ultrasonic_back"), hardwareMap.digitalChannel.get("switch_back"));

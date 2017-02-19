@@ -13,6 +13,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.BOTH;
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.LEFT;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.NEITHER;
 
 /**
  * Created by Adam Li on 2/17/2017.
@@ -43,7 +44,7 @@ public class ApproachBeacon {
         alliance = (settings.getString("alliance") == "red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
         //rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
         rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"),
-                hardwareMap.led.get("left_led"));
+                hardwareMap.led.get("left_led"), settings);
         cameraVision = new CameraVision(false);
         backCamera = cameraVision.usingBackCamera();
         //cameraVision.start();
@@ -172,6 +173,7 @@ public class ApproachBeacon {
         float theta = direction==LEFT ? 0.0f : (float)Math.toRadians(180.0);
         float radius = 0.3f;
         float margin = 10.0f; //todo configure
+        if (direction==NEITHER) return;
         drive.startVelocity();
         while (targeted() && linearOpMode.opModeIsActive() &&
                 Math.abs(targetX-cameraVision.getX()) > margin){
