@@ -51,7 +51,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         loadConfigurations();
 
         //PREP THE COMMAND LIST!
-        if (settings.subData("autonomous").getObject("command_list") == null)
+        if (!settings.subData("autonomous").valueExists("command_list"))
             // TODO: 2/16/2017 add more throws into framework to reduce silent errors when in development
             throw new RuntimeException("Empty command list");
 
@@ -102,9 +102,6 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
 
             ScriptLoader.CommandParser commandParser = new ScriptLoader.CommandParser(command);
 
-            //check commands
-            commandPicker(commandParser);
-
             if (commandParser.command().equalsIgnoreCase("stop")){
                 telemetry.addData("done", true);
                 break;
@@ -115,6 +112,9 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             telemetry.addData(counter + "", command);
             counter++;
             telemetry.update();
+
+            //check commands
+            commandPicker(commandParser);
         }
         telemetry.update();
         drive.stop();
@@ -200,12 +200,14 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         }
 
         if (commandParser.command().equalsIgnoreCase("coordinate")){
-            coodinate(commandParser.getArgFloat(0), commandParser.getArgFloat(1));
+            coordinate(commandParser.getArgFloat(0), commandParser.getArgFloat(1));
             return;
         }
 
-        if (settings.subData("autonomous").getObject(commandParser.command()) == null)
+        if (!settings.subData("autonomous").valueExists(commandParser.command())) {
+            telemetry.addData("ERROR", "command: \"" + commandParser.command() + "\" does not exist!");
             return;
+        }
 
         List<String> commandList = (List<String>) settings.subData("autonomous").getObject(commandParser.command());
         for(String command : commandList) {
@@ -354,7 +356,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
      * @param x coordinate
      * @param y coordinate
      */
-    private void coodinate(float x, float y){
+    private void coordinate(float x, float y){
         drive.startPosition();
         driveVector.setX(x);
         driveVector.setY(y);
