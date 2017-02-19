@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 
 import java.util.LinkedList;
@@ -19,7 +19,7 @@ import java.util.List;
  * Created by joelv on 2/7/2017.
  */
 @Disabled
-@TeleOp(name="CatapultOld Test", group = "Test")
+@TeleOp(name="Catapult Test", group = "Test")
 public class CatapultTest extends OpMode{
 
     private List<String> toggle = new LinkedList<>();
@@ -27,7 +27,7 @@ public class CatapultTest extends OpMode{
     private Config.ParsedData settings;
     private Components components;
     private Controllers controls;
-    private CatapultOld catapult;
+    private Catapult catapult;
 
     private static final String TAG = "TestDrive3Debug";
     private float bumperPos;
@@ -85,27 +85,29 @@ public class CatapultTest extends OpMode{
 
         //FIXME: not sure if this initialization will work
         //TODO: before compiling, enable motor6 and light sensor to true and configurate them or change this line of code
-        catapult = new CatapultOld(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")), hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
+        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")),
+                hardwareMap.opticalDistanceSensor.get(settings.subData("catapult")
+                        .subData("light_sensor").getString("map_name")), settings.subData("catapult"));
     }
 
     @Override
     public void start() {
-        catapult.catapultThread.start();
+        catapult.start();
     }
 
     @Override
     public void loop(){
         telemetry.addData("Position", catapult.getCatapultPosition());
-        telemetry.addData("Readiness", catapult.encoderReady());
-        telemetry.addData("Light", catapult.getLight());
-        telemetry.addData("Target", catapult.getTargetPosition());
-        telemetry.addData("ReadyPosition", catapult.getReadyPosition());
+        //telemetry.addData("Readiness", catapult.encoderReady());
+        //telemetry.addData("Light", catapult.getLight());
+        //telemetry.addData("Target", catapult.getTargetPosition());
+        //telemetry.addData("ReadyPosition", catapult.getReadyPosition());
         telemetry.update();
     }
 
 
     @Override
     public void stop() {
-        catapult.catapultThread.interrupt();
+        catapult.stop();
     }
 }
