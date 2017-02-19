@@ -121,7 +121,7 @@ public class FinalTeleOp extends OpMode{
         blueTeam = (settings.getString("alliance").equals("blue"));
         initialX = settings.subData("robot").subData("initial_position").getFloat("x");
         initialY = settings.subData("robot").subData("initial_position").getFloat("y");
-        initialRot = settings.subData("robot").subData("initial_position").getFloat("rot");
+        initialRot = settings.subData("robot").subData("initial_position").getFloat("initial_rotation");
         robot = new Robot(initialX, initialY, initialRot, blueTeam ? Alliance.BLUE_ALLIANCE : Alliance.RED_ALLIANCE);
 
         this.components = new Components(hardwareMap, telemetry, components);

@@ -61,6 +61,7 @@ public class Drive {
                 float robotRotation;
                 updatePosition();
                 if (vectorDriveActive) {
+                    atPosition = false;
                     //sets values from the vectorR needed for movement
                     joystickTheta = vectorR.getTheta();
                     robotVelocity = vectorR.getRadius();
@@ -129,7 +130,7 @@ public class Drive {
                 double br = (-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
 
                 //calculates the motor powers
-                if (!Thread.currentThread().isInterrupted()){
+                if (!Thread.currentThread().isInterrupted() && !atPosition){
                     frMotor.setPower(Range.scale(fr, -1, 1, -motorScale, motorScale));
                     flMotor.setPower(Range.scale(fl, -1, 1, -motorScale, motorScale));
                     blMotor.setPower(Range.scale(bl, -1, 1, -motorScale, motorScale));

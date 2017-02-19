@@ -357,16 +357,16 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
      * @param y coordinate
      */
     private void coordinate(float x, float y){
+        rotate(0.0, false);
         drive.startPosition();
         driveVector.setX(x);
         driveVector.setY(y);
         boolean proceed = false;
         //private float margin = settings.subData("scripted_auto").getFloat("positional_margin");
-        while(!proceed && opModeIsActive()){
-            proceed = distance() < 3.0f;//todo put in settings
+        while(!proceed){
+            proceed = drive.isAtPosition();
         }
-        driveVector.setX(drive.getCurrentX());
-        driveVector.setY(drive.getCurrentY());
+        rotate(0.0, false);
     }
 
     /**
