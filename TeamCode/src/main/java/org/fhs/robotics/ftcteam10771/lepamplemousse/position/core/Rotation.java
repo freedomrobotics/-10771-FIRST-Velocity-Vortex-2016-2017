@@ -16,7 +16,7 @@ public class Rotation {
         rot = degreesToRadians(rotDegrees);
     }
     public void setRadians(float rotRadians){
-        rot = rotRadians > 0 ? rotRadians % twopi : twopi - (rotRadians % twopi);
+        rot = rotRadians % twopi;
     }
 
     public float getDegrees(){
