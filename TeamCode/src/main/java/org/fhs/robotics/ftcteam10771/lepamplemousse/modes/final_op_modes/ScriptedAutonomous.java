@@ -363,7 +363,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         while(!proceed && opModeIsActive()){
             proceed = distance() < 3.0f;//todo put in settings
         }
-        driveVector.set;
+        driveVector.setX(drive.getCurrentX());
         driveVector.setY(drive.getCurrentY());
     }
 
