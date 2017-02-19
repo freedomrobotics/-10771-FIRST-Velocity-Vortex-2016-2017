@@ -1,7 +1,11 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors;
 
+import android.graphics.Color;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.LED;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
@@ -22,6 +26,7 @@ public class RGB {
     private ColorSensor rightColorSensor = null;
     private LED leftLED = null;
     private LED rightLED = null;
+    private float[] hsv = new float[3];
 
     /*
         Constructor with 2 RGB devices
@@ -96,19 +101,13 @@ public class RGB {
         BOTH
     };
 
-    private enum Color{
-        RED,
-        GREEN,
-        BLUE,
-    }
-
     /**
      * Converts the alliance enumeration
      * to team color enumeration
      * @param alliance status of the robot
      * @return the team color it is in
      */
-    private Color convertAllianceStatus(Alliance alliance){
+    private int convertAllianceStatus(Alliance alliance){
         if (alliance==Alliance.RED_ALLIANCE || alliance==Alliance.RED_ALLIANCE_INSIDE
                 || alliance==Alliance.RED_ALLIANCE_OUTSIDE){
             return Color.RED;
@@ -117,7 +116,7 @@ public class RGB {
                 || alliance==Alliance.BLUE_ALLIANCE_OUTSIDE){
             return Color.BLUE;
         }
-        return null;
+        return 0;
     }
 
     /**
@@ -128,7 +127,7 @@ public class RGB {
      * @param direction of the color sensor with respect to the robot
      * @return whether or not the side of beacon is correct color
      */
-    private boolean isSide(Color teamColor, Direction direction){
+    private boolean isSide(int teamColor, Direction direction){
         if (teamColor == Color.RED){
             return (red(direction) > blue(direction));
         }
@@ -139,7 +138,7 @@ public class RGB {
     }
 
     //Chooses left sensor by default
-    private boolean isSide(Color teamColor){
+    private boolean isSide(int teamColor){
         return isSide(teamColor, LEFT);
     }
 
@@ -150,7 +149,7 @@ public class RGB {
      * @return whether beacon side matches team color
      */
     public boolean isSide(Alliance alliance, Direction direction){
-        if (convertAllianceStatus(alliance) != null){
+        if (convertAllianceStatus(alliance) != 0){
             return isSide(convertAllianceStatus(alliance), direction);
         }
         else return false;
@@ -163,7 +162,7 @@ public class RGB {
      * @return whether beacon side matches team color
      */
     public boolean isSide(Alliance alliance){
-        if (convertAllianceStatus(alliance) != null){
+        if (convertAllianceStatus(alliance) != 0){
             return isSide(convertAllianceStatus(alliance));
         }
         else return false;
@@ -199,7 +198,7 @@ public class RGB {
         switchLED(LEFT, true);
     }
 
-    private void indicateCorrect(Direction direction, Color teamColor){
+    private void indicateCorrect(Direction direction, int teamColor){
         switchLED(direction, isSide(teamColor, direction));
     }
 
@@ -209,7 +208,7 @@ public class RGB {
      * @param alliace the alliance status of the robot
      */
     public void indicateCorrcect(Direction direction, Alliance alliace){
-        if (convertAllianceStatus(alliace) != null){
+        if (convertAllianceStatus(alliace) != 0){
             indicateCorrect(direction, convertAllianceStatus(alliace));
         }
     }
@@ -341,29 +340,42 @@ public class RGB {
         testRGB(LEFT, opMode, updateTelemetry);
     }
 
+    public void convertToHSV(Direction direction){
+        Color.RGBToHSV(red(direction), green(direction), blue(direction), hsv);
+    }
+
     /**
-     * Tests a chosen led in the class
-     * by blinking on and off every second
-     *
-     * @param direction Choose between left and right LEDs
-     * @throws InterruptedException
+     * Indicate which alliance the beacon side
+     * belongs to
+     * @param direction of which color sensor to use
+     * @return the alliance it belongs to
      */
-    public void testLED(Direction direction) throws InterruptedException{
-        if (direction==LEFT){
-            if (leftLED!=null){
-                for (int i=0; i < 11; i++){
-                    leftLED.enable(i%2==0);
-                    wait(1000);
-                }
-            }
+    public Alliance beaconSide(Direction direction){
+        convertToHSV(direction);
+        if (hsv[2]<3 || hsv[1]<3){
+            return Alliance.UNKNOWN;
         }
-        else if(direction==RIGHT){
-            if (rightLED!=null){
-                for (int i=0; i < 11; i++){
-                    rightLED.enable(i%2==0);
-                    wait(1000);
-                }
-            }
+        if (hsv[0] < 10 || hsv[0] > 350) {
+            return Alliance.RED_ALLIANCE;
         }
+        else if (hsv[0] > 225 || hsv[0] < 250){
+            return Alliance.BLUE_ALLIANCE;
+        }
+        return Alliance.UNKNOWN;
+    }
+
+    public float getHue(Direction direction){
+        convertToHSV(direction);
+        return (hsv[0]);
+    }
+
+    public float getSaturation(Direction direction){
+        convertToHSV(direction);
+        return (hsv[1]);
+    }
+
+    public float getBrightness(Direction direction){
+        convertToHSV(direction);
+        return (hsv[2]);
     }
 }

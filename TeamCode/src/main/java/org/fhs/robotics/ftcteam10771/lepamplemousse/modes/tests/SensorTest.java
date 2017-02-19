@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
@@ -43,6 +44,7 @@ public class SensorTest extends LinearOpMode{
     private UltrasonicRange ultraLeft;
     private UltrasonicRange ultraRight;
     private UltrasonicRange ultraBack;
+    private Alliance alliance = Alliance.UNKNOWN;
 
     private Drive drive;
     private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
@@ -117,6 +119,14 @@ public class SensorTest extends LinearOpMode{
         imuHandler = new IMU(imu);
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
+
+        if (settings.getString("alliance").equals("red")){
+            alliance = Alliance.RED_ALLIANCE;
+        }
+        else if (settings.getString("alliance").equals("blue")){
+            alliance = Alliance.BLUE_ALLIANCE;
+        }
+
         waitForStart();
         ultraLeft.enable();
         ultraRight.enable();
@@ -148,15 +158,19 @@ public class SensorTest extends LinearOpMode{
                 driveVector.setPolar((float)joystickRadius, (float)joystickTheta);
                 driveVector.setRad((float)rotationalPower);
 
+                telemetry.addData("Alliance", settings.getString("alliance"));
+                telemetry.addData("===========", "==============");
                 telemetry.addData("UltrasonicL", ultraLeft.getDistance());
                 telemetry.addData("UltrasonicR", ultraRight.getDistance());
                 telemetry.addData("UltrasonicB", ultraBack.getDistance());
                 telemetry.addData("===========", "==============");
-                telemetry.addData("Red-L", rgb.red(RGB.Direction.LEFT));
-                telemetry.addData("Blue-L", rgb.blue(RGB.Direction.LEFT));
+                telemetry.addData("Hue-L", rgb.getHue(RGB.Direction.LEFT));
+                telemetry.addData("Saturation-L", rgb.getSaturation(RGB.Direction.LEFT));
+                telemetry.addData("Brightness-L", rgb.getBrightness(RGB.Direction.LEFT));
                 telemetry.addData("===========", "==============");
-                telemetry.addData("Red-R", rgb.red(RGB.Direction.RIGHT));
-                telemetry.addData("Blue-R", rgb.blue(RGB.Direction.RIGHT));
+                telemetry.addData("Hue-R", rgb.getHue(RGB.Direction.RIGHT));
+                telemetry.addData("Saturation-R", rgb.getSaturation(RGB.Direction.RIGHT));
+                telemetry.addData("Brightness-R", rgb.getBrightness(RGB.Direction.RIGHT));
                 telemetry.addData("===========", "==============");
                 telemetry.addData("Gyro-Z", Math.abs(gyrometer.convert(Z, gyrometer.getOrientation(Z))));
                 telemetry.addData("ODS", ods.getLightDetected());

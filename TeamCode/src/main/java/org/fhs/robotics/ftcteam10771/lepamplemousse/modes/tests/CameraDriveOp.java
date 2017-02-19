@@ -127,7 +127,7 @@ public class CameraDriveOp extends LinearOpMode {
         center();
         driveVector.setRad(0);
         driveVector.setPolar(0, 0);
-
+        /*
         if ((checkBeaconSide(RGB.Direction.LEFT))){
             rgb.indicateCorrcect(LEFT, alliance);
             leftBeacon = true;
@@ -148,6 +148,7 @@ public class CameraDriveOp extends LinearOpMode {
         driveVector.setRadius(0);
         driveVector.setPolar(0, 0);
         updatePosition();
+        */
         drive.stop();
         telemetryThread.interrupt();
         cameraVision.stop();
@@ -211,36 +212,29 @@ public class CameraDriveOp extends LinearOpMode {
         driveVector.setPolar(0, 0);
     }
 
-    public boolean checkBeaconSide(RGB.Direction direction){
+    //todo: test out the HSV method and come up with values for config
+    //todo: Finish the method
+    public void claimBeacon(){
         if (targeted()){
-            boolean reached = false;
-            float distance = settings.subData("drive").subData("camera_settings").getFloat("beacon_check_distance");
-            float theta = 0.0f;
-            switch (direction){
-                case LEFT:
-                    theta = backCamera ? (float)Math.PI : 0.0f;
-                    break;
-                case RIGHT:
-                    theta = backCamera ? 0.0f : (float)Math.PI;
-                    break;
-                default:
-                    theta = 0.0f;
+            boolean leftSide = false;
+            boolean rightSide = false;
+            drive.startVelocity();
+            float power = 0.3f; //todo get power in settings
+            if (cameraVision.target()== CameraVision.Image.WHEELS ||
+                    cameraVision.target()== CameraVision.Image.TOOLS){
+                while (rgb.beaconSide(LEFT)==Alliance.UNKNOWN){
+                    driveVector.setPolar(power, 0.0f);
+                }
+                driveVector.setPolar(0.0f, 0.0f);
+                rightSide = alliance.equals(rgb.beaconSide(LEFT));
+                float distance = 30.0f; //todo put in settings
+                float targetX = (float)cameraVision.getX() + distance;
+                while (cameraVision.getX()<targetX){
+                    driveVector.setPolar(power, 0.0f);
+                }
+                leftSide = alliance.equals(rgb.beaconSide(LEFT));
             }
-            reached = (direction==LEFT) ? cameraVision.getX() > distance :
-                    cameraVision.getX() < distance;
-            while (targeted() && reached && opModeIsActive()){
-                float radius = distance - (float)Math.abs(cameraVision.getX());
-                //todo put power cutback ratio in settings config
-                radius *= settings.subData("drive").subData("camera_settings").getFloat("speed");
-                //todo put speed under camera_settings under drive
-                driveVector.setTheta(theta);
-                driveVector.setRadius(radius);
-                reached = (direction==LEFT) ? cameraVision.getX() > distance :
-                        cameraVision.getX() < distance;
-            }
-            return rgb.isSide(alliance, direction);
         }
-        else return false;
     }
 
     private void press(){

@@ -40,10 +40,8 @@ public class PositionalOpMode extends LinearOpMode {
             while (!Thread.currentThread().isInterrupted()) {
                 telemetry.addData("Radius", driveVector.getRadius());
                 telemetry.addData("Theta", driveVector.getTheta());
-                telemetry.addData("FR", drive.getMotorPower(1));
-                telemetry.addData("FL", drive.getMotorPower(2));
-                telemetry.addData("BL", drive.getMotorPower(3));
-                telemetry.addData("BR", drive.getMotorPower(4));
+                telemetry.addData("X", drive.getCurrentX());
+                telemetry.addData("Y", drive.getCurrentY());
                 telemetry.update();
             }
         }
