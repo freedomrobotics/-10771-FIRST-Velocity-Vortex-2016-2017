@@ -288,7 +288,7 @@ public class VectorR {
         vectorR.setAllRaw(vectorR1.getX() + vectorR2.getX(),
                 vectorR1.getY() + vectorR2.getY(),
                 vectorR1.getRawR() + vectorR2.getRawR());
-        return new VectorR();
+        return vectorR;
     }
 
     public static void add(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
@@ -309,7 +309,7 @@ public class VectorR {
         vectorR.setAllRaw(vectorR1.getX() + vectorR2.getX(),
                 vectorR1.getY() + vectorR2.getY(),
                 0);
-        return new VectorR();
+        return vectorR;
     }
 
     public static void addV(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
@@ -328,7 +328,7 @@ public class VectorR {
     public static VectorR addR(VectorR vectorR1, VectorR vectorR2){
         VectorR vectorR = new VectorR();
         vectorR.setRawR(vectorR1.getRawR() + vectorR2.getRawR());
-        return new VectorR();
+        return vectorR;
     }
 
     public static void addR(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
@@ -345,7 +345,7 @@ public class VectorR {
         vectorR.setAllRaw(vectorR1.getX() - vectorR2.getX(),
                 vectorR1.getY() - vectorR2.getY(),
                 vectorR1.getRawR() - vectorR2.getRawR());
-        return new VectorR();
+        return vectorR;
     }
 
     public static void sub(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
@@ -366,7 +366,7 @@ public class VectorR {
         vectorR.setAllRaw(vectorR1.getX() - vectorR2.getX(),
                 vectorR1.getY() - vectorR2.getY(),
                 0);
-        return new VectorR();
+        return vectorR;
     }
 
     public static void subV(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
@@ -385,7 +385,7 @@ public class VectorR {
     public static VectorR subR(VectorR vectorR1, VectorR vectorR2){
         VectorR vectorR = new VectorR();
         vectorR.setRawR(vectorR1.getRawR() - vectorR2.getRawR());
-        return new VectorR();
+        return vectorR;
     }
 
     public static void subR(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
