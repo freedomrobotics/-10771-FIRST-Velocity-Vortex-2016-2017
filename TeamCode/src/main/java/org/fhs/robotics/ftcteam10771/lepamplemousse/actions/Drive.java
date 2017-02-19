@@ -87,20 +87,22 @@ public class Drive {
 
                     robotTheta = (float) Math.atan2(vectorY, vectorX);
 
-                    if(Math.abs(robotTheta) < Math.toRadians(driveSettings.subData("positional").getFloat("rotational_tolerance")/360)){
-                        atRotation = true;
-                    }
-
                     float radius = (float)Math.sqrt((vectorX*vectorX)+(vectorY*vectorY));
                     //todo put drivetrain/positional/position_margin
-                    if(radius<Math.abs(driveSettings.subData("positional").getFloat("position_tolerance"))){
-                        atPosition = true;
-                    } else atPosition = false;
+                    atPosition = radius < Math.abs(driveSettings.subData("positional").getFloat("position_tolerance"));
 
                     robotVelocity = driveSettings.subData("positional").getFloat("speed");
 
-                    float rotationalMagnitude = driveSettings.subData("positional").getFloat("rotation");
-                    float rotationalMagnitudeMin = driveSettings.subData("positional").getFloat("rotation_min");
+
+                    float difference = robot.getVectorR().getRad() - vectorR.getRad();
+                    float factor = Math.abs(difference);
+                    difference = factor > 3.1415927f ? -difference : difference;
+                    factor = factor > 3.1415927f ? (6.2831854f - factor) / 3.1415927f : factor / 3.1415927f;
+                    atRotation = Math.abs(difference) < Math.toRadians(driveSettings.subData("positional").getFloat("rotational_tolerance"));
+
+                    if (!atRotation) {
+                        float rotationalMagnitude = driveSettings.subData("positional").getFloat("rotation");
+                        float rotationalMagnitudeMin = driveSettings.subData("positional").getFloat("rotation_min");
                     /*
                     if (vectorR.getRad() > robot.getVectorR().getRad()){
                         if(Math.abs(vectorR.getRad()-robot.getVectorR().getRad())<(Math.PI/4)){
@@ -118,12 +120,9 @@ public class Drive {
                         rotationalPower = 0;
                     }*/
 
-                    float difference = robot.getVectorR().getRad() - vectorR.getRad();
-                    float factor = Math.abs(difference);
-                    difference = factor > 3.1415927f ? - difference : difference;
-                    factor = factor > 3.1415927f ? (6.2831854f - factor) / 3.1415927f : factor / 3.1415927f;
-                    rotationalPower = (float)Math.copySign(Range.scale(factor, 0, 1,
-                            rotationalMagnitudeMin, rotationalMagnitude), difference);
+                        rotationalPower = (float) Math.copySign(Range.scale(factor, 0, 1,
+                                rotationalMagnitudeMin, rotationalMagnitude), difference);
+                    } else rotationalPower = 0;
                 }
 
                 //calculates the shaft magnitude (AC shaft has diagonal motors "A" and "C")
@@ -429,6 +428,10 @@ public class Drive {
 
     public boolean isAtPosition(){
         return atPosition;
+    }
+
+    public boolean isAtRotation(){
+        return atRotation;
     }
 
     public Runnable getDriveRunnable(){
