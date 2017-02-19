@@ -15,6 +15,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
@@ -230,7 +231,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
      * @param relative true = rotate a certain amount of degrees
      *                 false = rotate to a certain orientation from 0 to 360 degrees
      */
-    private void rotate(double degrees, boolean relative){
+    /*private void rotate(double degrees, boolean relative){
         drive.startVelocity();
         drive.setRelative(true);
         driveVector.setRad(0);
@@ -271,6 +272,19 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         //telemetry.update();
         driveVector.setRad(0);
         driveVector.setPolar(0, 0);
+    }*/
+
+    private void rotate(float degrees, boolean relative){
+        drive.startPosition();
+        driveVector.setAllRad(robot.getPosition().getX(), robot.getPosition().getY(), robot.getRotation().getRadians());
+        if (relative){
+            driveVector.setRad(Rotation.degreesToRadians(robot.getRotation().getDegrees() + degrees));
+        } else {
+            driveVector.setRad(Rotation.degreesToRadians(degrees));
+        }
+        while(!drive.isAtRotation() && opModeIsActive());
+        drive.startVelocity();
+        driveVector.setAllRad(0, 0, 0);
     }
 
     /**
@@ -356,7 +370,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
      * @param x coordinate
      * @param y coordinate
      */
-    private void coordinate(float x, float y){
+    /*private void coordinate(float x, float y){
         drive.startPosition();
         driveVector.setX(x);
         driveVector.setY(y);
@@ -367,6 +381,14 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         }
         driveVector.setX(drive.getCurrentX());
         driveVector.setY(drive.getCurrentY());
+    }*/
+
+    private void coordinate(float x, float y){
+        drive.startPosition();
+        driveVector.setAllRad(x, y, robot.getRotation().getRadians());
+        while(!drive.isAtPosition() && opModeIsActive());
+        drive.startVelocity();
+        driveVector.setAllRad(0, 0, 0);
     }
 
     /**
