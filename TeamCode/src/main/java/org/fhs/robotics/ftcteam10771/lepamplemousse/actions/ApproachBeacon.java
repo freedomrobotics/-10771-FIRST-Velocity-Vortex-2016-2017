@@ -1,6 +1,7 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -10,6 +11,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.Ca
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.BOTH;
+import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.LEFT;
 
 /**
  * Created by Adam Li on 2/17/2017.
@@ -28,6 +30,7 @@ public class ApproachBeacon {
     private VectorR driveVector;
     private final LinearOpMode linearOpMode;
     private final HardwareMap hardwareMap;
+    private boolean rightSideChecked = false;
 
     public ApproachBeacon(Config.ParsedData settings, Drive drive, LinearOpMode linearOpMode){
         this.drive = drive;
@@ -119,5 +122,60 @@ public class ApproachBeacon {
 
     private boolean targeted(){
         return cameraVision.imageInSight(cameraVision.target());
+    }
+
+    public Alliance checkRightSide(){
+        float theta = 0f;
+        float radius = 0.3f; // todo put speed in config
+        drive.startVelocity();
+        //while (the color sensor does not see a bright color)
+        while (linearOpMode.opModeIsActive()){
+            driveVector.setPolar(radius, theta);
+        }
+        driveVector.setPolar(0f, 0f);
+        rightSideChecked = true;
+        rgb.convertToHSV();
+        return rgb.beaconSide();
+    }
+
+    public Alliance checkLeftSide(){
+        float targetX = 0.0f;
+        if (rightSideChecked && targeted()){
+            float distance = 8.0f; //todo put in config
+            targetX = (float)cameraVision.getX() + distance;
+        }
+        else if (!rightSideChecked) targetX = (float)3.0; //todo put number in config
+        drive.startVelocity();
+        while (cameraVision.getX() < targetX && targeted() && linearOpMode.opModeIsActive()){
+            float theta = 0.0f;
+            if (!rightSideChecked){
+                theta = cameraVision.getX() > targetX ? (float)Math.toRadians(180.0) : 0.0f;
+            }
+            driveVector.setPolar(0.3f, theta);//todo put power in config
+        }
+        rgb.convertToHSV();
+        return rgb.beaconSide();
+    }
+
+    public void press(){
+        long waitTime = 1500; //todo put in config file
+        long lastTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
+            driveVector.setPolar(0.3f, (float)Math.toRadians(270.0));
+        }
+    }
+
+    public void chooseSide(RGB.Direction direction){
+        float distance = Math.abs(180.0f); //todo put in config file
+        float targetX = direction==LEFT ? distance : -distance;
+        float theta = direction==LEFT ? 0.0f : (float)Math.toRadians(180.0);
+        float radius = 0.3f;
+        float margin = 10.0f; //todo configure
+        drive.startVelocity();
+        while (targeted() && linearOpMode.opModeIsActive() &&
+                Math.abs(targetX-cameraVision.getX()) > margin){
+            driveVector.setPolar(radius, theta);
+        }
+        driveVector.setPolar(0.0f, 0.0f);
     }
 }

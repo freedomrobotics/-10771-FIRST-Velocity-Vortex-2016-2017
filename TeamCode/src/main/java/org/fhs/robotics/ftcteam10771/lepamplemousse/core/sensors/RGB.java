@@ -53,13 +53,6 @@ public class RGB {
     }
 
     /*
-        Constructor with 2 LEDs
-     */
-    public RGB(LED leftLED, LED rightLED){
-        this(null, null, leftLED, rightLED);
-    }
-
-    /*
         Constructor with 2 color sensors and a LED
      */
     public RGB(ColorSensor sensor1, ColorSensor sensor2, LED led){
@@ -67,24 +60,10 @@ public class RGB {
     }
 
     /*
-        Constructor with a color sensor and 2 LEDs
-     */
-    public RGB(ColorSensor sensor, LED led1, LED led2){
-        this(sensor, null, led1, led2);
-    }
-
-    /*
         Constructor with a single color sensor
      */
     public RGB(ColorSensor sensor){
         this(sensor, null, null, null);
-    }
-
-    /*
-        Constructor with a single LED
-     */
-    public RGB(LED led){
-        this(null, null, led, null);
     }
 
     /*
@@ -120,55 +99,6 @@ public class RGB {
     }
 
     /**
-     * Determines if the beacon side pointed by chosen sensor
-     * is the color of choice
-     *
-     * @param teamColor the color of the alliance
-     * @param direction of the color sensor with respect to the robot
-     * @return whether or not the side of beacon is correct color
-     */
-    private boolean isSide(int teamColor, Direction direction){
-        if (teamColor == Color.RED){
-            return (red(direction) > blue(direction));
-        }
-        else if (teamColor == Color.BLUE){
-            return (blue(direction) > red(direction));
-        }
-        else return false;
-    }
-
-    //Chooses left sensor by default
-    private boolean isSide(int teamColor){
-        return isSide(teamColor, LEFT);
-    }
-
-    /**
-     * Method to determine if beacon side is correct using alliance enum
-     * @param alliance the status of alliance
-     * @param direction LEFT or RIGHT sensor
-     * @return whether beacon side matches team color
-     */
-    public boolean isSide(Alliance alliance, Direction direction){
-        if (convertAllianceStatus(alliance) != 0){
-            return isSide(convertAllianceStatus(alliance), direction);
-        }
-        else return false;
-    }
-
-    /**
-     * Method to determine if beacon side is correct using alliance enum
-     * Default sensor: LEFT
-     * @param alliance the status of alliance
-     * @return whether beacon side matches team color
-     */
-    public boolean isSide(Alliance alliance){
-        if (convertAllianceStatus(alliance) != 0){
-            return isSide(convertAllianceStatus(alliance));
-        }
-        else return false;
-    }
-
-    /**
      * Switches the beacon on or off
      *
      * @param direction which LED to use
@@ -194,23 +124,8 @@ public class RGB {
     }
 
     //Turns left LED on by default
-    public void swtichLED(){
+    public void switchLED(){
         switchLED(LEFT, true);
-    }
-
-    private void indicateCorrect(Direction direction, int teamColor){
-        switchLED(direction, isSide(teamColor, direction));
-    }
-
-    /**
-     * Turns the led on after determining that the beacon side matches
-     * @param direction which sensor to use
-     * @param alliace the alliance status of the robot
-     */
-    public void indicateCorrcect(Direction direction, Alliance alliace){
-        if (convertAllianceStatus(alliace) != 0){
-            indicateCorrect(direction, convertAllianceStatus(alliace));
-        }
     }
 
     /**
@@ -300,48 +215,12 @@ public class RGB {
         return blue(LEFT);
     }
 
-    /**
-     * Tests to see if the LEFT and RIGHT enumerations
-     * work
-     *
-     * @param direction The chosen enumeration
-     * @return The value associated with enumeration
-     */
-    public int testEnumeration(Direction direction){
-        if (direction==LEFT){
-            return 1;
-        }
-        else if (direction==RIGHT){
-            return 2;
-        }
-        else return 0;
-    }
-
-    /**
-     * Tests a chosen RGB in an op mode
-     *
-     * @param direction which RGB sensor
-     * @param opMode the op mode used to test
-     */
-    public void testRGB(Direction direction, LinearOpMode opMode, boolean updateTelemetry){
-        opMode.telemetry.addData("red", red(direction));
-        opMode.telemetry.addData("green", green(direction));
-        opMode.telemetry.addData("blue", blue(direction));
-        if (updateTelemetry) opMode.telemetry.update();
-    }
-
-    //Chooses left RGB sensor by default and not to update the telemetry imediately
-    public void testRGB(LinearOpMode opMode){
-        testRGB(LEFT, opMode, false);
-    }
-
-    //Chooses left sensor by default
-    public void testRGB(LinearOpMode opMode, boolean updateTelemetry){
-        testRGB(LEFT, opMode, updateTelemetry);
-    }
-
     public void convertToHSV(Direction direction){
         Color.RGBToHSV(red(direction), green(direction), blue(direction), hsv);
+    }
+
+    public void convertToHSV(){
+        convertToHSV(LEFT);
     }
 
     /**
@@ -364,6 +243,10 @@ public class RGB {
         return Alliance.UNKNOWN;
     }
 
+    public Alliance beaconSide(){
+        return beaconSide(LEFT);
+    }
+
     public float getHue(Direction direction){
         convertToHSV(direction);
         return (hsv[0]);
@@ -377,5 +260,17 @@ public class RGB {
     public float getBrightness(Direction direction){
         convertToHSV(direction);
         return (hsv[2]);
+    }
+
+    public float getHue(){
+        return getHue(LEFT);
+    }
+
+    public float getSaturation(){
+        return getSaturation(LEFT);
+    }
+
+    public float getBrightness(){
+        return getBrightness(LEFT);
     }
 }
