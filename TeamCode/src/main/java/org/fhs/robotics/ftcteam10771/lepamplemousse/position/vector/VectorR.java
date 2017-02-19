@@ -282,4 +282,118 @@ public class VectorR {
     public void setRotationAsRotation(Rotation rotation){
         this.rotation = rotation;
     }
+
+    public static VectorR add(VectorR vectorR1, VectorR vectorR2){
+        VectorR vectorR = new VectorR();
+        vectorR.setAllRaw(vectorR1.getX() + vectorR2.getX(),
+                vectorR1.getY() + vectorR2.getY(),
+                vectorR1.getRawR() + vectorR2.getRawR());
+        return vectorR;
+    }
+
+    public static void add(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
+        resultVectorR.setAllRaw(vectorR1.getX() + vectorR2.getX(),
+                vectorR1.getY() + vectorR2.getY(),
+                vectorR1.getRawR() + vectorR2.getRawR());
+    }
+
+    public VectorR add(VectorR vectorR){
+        setAllRaw(getX() + vectorR.getX(),
+                getY() + vectorR.getY(),
+                getRawR() + vectorR.getRawR());
+        return this;
+    }
+
+    public static VectorR addV(VectorR vectorR1, VectorR vectorR2){
+        VectorR vectorR = new VectorR();
+        vectorR.setAllRaw(vectorR1.getX() + vectorR2.getX(),
+                vectorR1.getY() + vectorR2.getY(),
+                0);
+        return vectorR;
+    }
+
+    public static void addV(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
+        resultVectorR.setAllRaw(vectorR1.getX() + vectorR2.getX(),
+                vectorR1.getY() + vectorR2.getY(),
+                resultVectorR.getRawR());
+    }
+
+    public VectorR addV(VectorR vectorR){
+        setAllRaw(getX() + vectorR.getX(),
+                getY() + vectorR.getY(),
+                getRawR());
+        return this;
+    }
+
+    public static VectorR addR(VectorR vectorR1, VectorR vectorR2){
+        VectorR vectorR = new VectorR();
+        vectorR.setRawR(vectorR1.getRawR() + vectorR2.getRawR());
+        return vectorR;
+    }
+
+    public static void addR(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
+        resultVectorR.setRawR(vectorR1.getRawR() + vectorR2.getRawR());
+    }
+
+    public VectorR addR(VectorR vectorR){
+        setRawR(getRawR() + vectorR.getRawR());
+        return this;
+    }
+
+    public static VectorR sub(VectorR vectorR1, VectorR vectorR2){
+        VectorR vectorR = new VectorR();
+        vectorR.setAllRaw(vectorR1.getX() - vectorR2.getX(),
+                vectorR1.getY() - vectorR2.getY(),
+                vectorR1.getRawR() - vectorR2.getRawR());
+        return vectorR;
+    }
+
+    public static void sub(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
+        resultVectorR.setAllRaw(vectorR1.getX() - vectorR2.getX(),
+                vectorR1.getY() - vectorR2.getY(),
+                vectorR1.getRawR() - vectorR2.getRawR());
+    }
+
+    public VectorR sub(VectorR vectorR){
+        setAllRaw(getX() - vectorR.getX(),
+                getY() - vectorR.getY(),
+                getRawR() - vectorR.getRawR());
+        return this;
+    }
+
+    public static VectorR subV(VectorR vectorR1, VectorR vectorR2){
+        VectorR vectorR = new VectorR();
+        vectorR.setAllRaw(vectorR1.getX() - vectorR2.getX(),
+                vectorR1.getY() - vectorR2.getY(),
+                0);
+        return vectorR;
+    }
+
+    public static void subV(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
+        resultVectorR.setAllRaw(vectorR1.getX() - vectorR2.getX(),
+                vectorR1.getY() - vectorR2.getY(),
+                resultVectorR.getRawR());
+    }
+
+    public VectorR subV(VectorR vectorR){
+        setAllRaw(getX() - vectorR.getX(),
+                getY() - vectorR.getY(),
+                getRawR());
+        return this;
+    }
+
+    public static VectorR subR(VectorR vectorR1, VectorR vectorR2){
+        VectorR vectorR = new VectorR();
+        vectorR.setRawR(vectorR1.getRawR() - vectorR2.getRawR());
+        return vectorR;
+    }
+
+    public static void subR(VectorR vectorR1, VectorR vectorR2, VectorR resultVectorR){
+        resultVectorR.setRawR(vectorR1.getRawR() - vectorR2.getRawR());
+    }
+
+    public VectorR subR(VectorR vectorR){
+        setRawR(getRawR() - vectorR.getRawR());
+        return this;
+    }
 }

@@ -8,11 +8,15 @@ public class Rotation {
 
     protected float rot = 0.0f;
 
+    private static final float threepitwo = (float)(3 * Math.PI / 2);
+    private static final float pitwo = (float)(Math.PI / 2);
+    private static final float twopi = (float)(Math.PI * 2);
+
     public void setDegrees(float rotDegrees){
         rot = degreesToRadians(rotDegrees);
     }
     public void setRadians(float rotRadians){
-        rot = rotRadians;
+        rot = rotRadians % twopi;
     }
 
     public float getDegrees(){
@@ -20,6 +24,24 @@ public class Rotation {
     }
     public float getRadians(){
         return rot;
+    }
+
+    /** for heading from -2pi to 0 */
+    public void setHeading(float headingRadius) {
+        rot = headingRadius <= -(threepitwo) ? -(headingRadius + threepitwo) : (pitwo - headingRadius);
+    }
+    /** for heading from -360 to 0 */
+    public void setHeadinDeg(float headingDegrees) {
+        setHeading(degreesToRadians(headingDegrees));
+    }
+
+    /** for heading from -2pi to 0 */
+    public float getHeading(){
+        return rot <= (pitwo) ? -(rot + threepitwo) : (pitwo - rot);
+    }
+    /** for heading from -360 to 0 */
+    public float getHeadingDeg(){
+        return radiansToDegrees(getHeading());
     }
 
     public static float radiansToDegrees(float rad){
