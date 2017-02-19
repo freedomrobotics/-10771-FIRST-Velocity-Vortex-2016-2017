@@ -12,7 +12,9 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptLoader;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptRunner;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
@@ -40,6 +42,8 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     private Catapult catapult;
     private DcMotor intakeMotor;
     private ApproachBeacon approachBeacon;
+    private Alliance alliance;
+    private String teamColor;
 
     /**
      * Override this method and place your code here.
@@ -52,6 +56,13 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     @Override
     public void runOpMode() throws InterruptedException {
         loadConfigurations();
+
+        teamColor = settings.getString("alliance");
+
+        alliance = settings.getString("alliance").equals("red") ? Alliance.RED_ALLIANCE : Alliance.UNKNOWN;
+        if (alliance!=Alliance.RED_ALLIANCE)
+            alliance = settings.getString("alliance").equals("blue")
+                    ? Alliance.BLUE_ALLIANCE : Alliance.UNKNOWN;
 
         //PREP THE COMMAND LIST!
         if (!settings.subData("autonomous").valueExists("command_list"))
@@ -398,6 +409,21 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             proceed = drive.isAtPosition();
         }
         rotate(0.0, false);
+    }
+
+    /**
+     * Claim beacon
+     */
+    private void claimBeacon(){
+        Alliance rightSide = approachBeacon.checkRightSide();
+        Alliance leftSide = approachBeacon.checkLeftSide();
+        if (leftSide==rightSide) return;
+        RGB.Direction direction = alliance==leftSide ? RGB.Direction.LEFT : RGB.Direction.NEITHER;
+        if (direction!= RGB.Direction.LEFT){
+            direction = alliance==rightSide ? RGB.Direction.RIGHT : RGB.Direction.NEITHER;
+        }
+        approachBeacon.chooseSide(direction);
+        approachBeacon.press();
     }
 
 }

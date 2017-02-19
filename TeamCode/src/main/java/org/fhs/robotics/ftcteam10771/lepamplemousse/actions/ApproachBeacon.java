@@ -8,6 +8,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.BOTH;
@@ -177,5 +178,37 @@ public class ApproachBeacon {
             driveVector.setPolar(radius, theta);
         }
         driveVector.setPolar(0.0f, 0.0f);
+    }
+
+    /**
+     *
+     */
+    public void reverse(){
+        float theta = (float)Math.toRadians(90.0);
+        float power = 0.3f;//todo config
+        float distance = 800.9f;//todo config
+        float waitTime = 1500f;
+        float lastTime = System.currentTimeMillis();
+        if (targeted()){
+            while (targeted() && linearOpMode.opModeIsActive() &&
+                    Math.abs(cameraVision.getZ()) < distance){
+                driveVector.setPolar(power, theta);
+            }
+        }
+        else while(linearOpMode.opModeIsActive() && System.currentTimeMillis()
+                - lastTime < waitTime){
+            driveVector.setPolar(power, theta);
+        }
+        driveVector.setPolar(0.0f, 0.0f);
+    }
+
+    /**
+     *
+     */
+    public void updateCoordinates(){
+        if (targeted()){
+            Coordinate coordinate = cameraVision.updateCoordinates();
+            drive.initPosition(coordinate.getX(), coordinate.getY());
+        }
     }
 }
