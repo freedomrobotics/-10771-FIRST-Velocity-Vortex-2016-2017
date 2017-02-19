@@ -275,6 +275,10 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     }*/
 
     private void rotate(float degrees, boolean relative){
+        // FIXME: 2/19/2017 put in thread maybe?
+        imuHandler.streamIMUData();
+        robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
+
         drive.startPosition();
         driveVector.setAllRad(robot.getPosition().getX(), robot.getPosition().getY(), robot.getRotation().getRadians());
         if (relative){
@@ -282,7 +286,10 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         } else {
             driveVector.setRad(Rotation.degreesToRadians(degrees));
         }
-        while(!drive.isAtRotation() && opModeIsActive());
+        while(!drive.isAtRotation() && opModeIsActive()){
+            imuHandler.streamIMUData();
+            robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
+        }
         drive.startVelocity();
         driveVector.setAllRad(0, 0, 0);
     }
@@ -384,9 +391,15 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     }*/
 
     private void coordinate(float x, float y){
+        imuHandler.streamIMUData();
+        robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
+
         drive.startPosition();
         driveVector.setAllRad(x, y, robot.getRotation().getRadians());
-        while(!drive.isAtPosition() && opModeIsActive());
+        while(!drive.isAtPosition() && opModeIsActive()){
+            imuHandler.streamIMUData();
+            robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
+        }
         drive.startVelocity();
         driveVector.setAllRad(0, 0, 0);
     }
