@@ -55,14 +55,14 @@ public class MethodTesting extends LinearOpMode{
                 telemetry.addData("cameraZ", cameraVision.getZ());
                 telemetry.addData("Radius", driveVector.getRadius());
                 telemetry.addData("Theta", driveVector.getTheta());
-                telemetry.addData("FR", drive.getMotorPower(1));
-                telemetry.addData("FL", drive.getMotorPower(2));
-                telemetry.addData("BL", drive.getMotorPower(3));
-                telemetry.addData("BR", drive.getMotorPower(4));
-                telemetry.addData("FR", drive.getMotorEncoder(1));
-                telemetry.addData("FL", drive.getMotorEncoder(2));
-                telemetry.addData("BL", drive.getMotorEncoder(3));
-                telemetry.addData("BR", drive.getMotorEncoder(4));
+                telemetry.addData("FR", drive.getMotorPower(Drive.Motors.FRONT_RIGHT));
+                telemetry.addData("FL", drive.getMotorPower(Drive.Motors.FRONT_LEFT));
+                telemetry.addData("BL", drive.getMotorPower(Drive.Motors.BACK_LEFT));
+                telemetry.addData("BR", drive.getMotorPower(Drive.Motors.BACK_RIGHT));
+                telemetry.addData("FR", drive.getMotorEncoder(Drive.Motors.FRONT_RIGHT));
+                telemetry.addData("FL", drive.getMotorEncoder(Drive.Motors.FRONT_LEFT));
+                telemetry.addData("BL", drive.getMotorEncoder(Drive.Motors.BACK_LEFT));
+                telemetry.addData("BR", drive.getMotorEncoder(Drive.Motors.BACK_RIGHT));
                 telemetry.addData("Distance", distance_to_stop);
                 telemetry.update();
             }
