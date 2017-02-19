@@ -53,6 +53,25 @@ public class Drive {
     private float initialX = 0.0f;
     private float initialY = 0.0f;
 
+    //Remove magic number!
+    public enum Motors {
+        FRONT_RIGHT,
+        FRONT_LEFT,
+        BACK_LEFT,
+        BACK_RIGHT,
+    }
+
+    //Motor Percents
+    double fr;
+    double fl;
+    double bl;
+    double br;
+
+    //Motor Powers
+    double frPow;
+    double flPow;
+    double blPow;
+    double brPow;
 
     private Runnable driveRunnable = new Runnable() {
         @Override
@@ -105,15 +124,15 @@ public class Drive {
                 double ACRotationalPower = (rotation+ACShaftPower) == 0 ? 0 : (rotation*Math.abs(rotation))/(Math.abs(rotation)+Math.abs(ACShaftPower));
                 double BDRotationalPower = (rotation+BDShaftPower) == 0 ? 0 : (rotation*Math.abs(rotation))/(Math.abs(rotation)+Math.abs(BDShaftPower));
 
-                double fr = (-ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
-                double fl = (BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
-                double bl = (ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
-                double br = (-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
+                fr = (-ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
+                fl = (BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
+                bl = (ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
+                br = (-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
 
-                double frPow = Range.scale(fr, -1, 1, -motorScale, motorScale);
-                double flPow = Range.scale(fl, -1, 1, -motorScale, motorScale);
-                double blPow = Range.scale(bl, -1, 1, -motorScale, motorScale);
-                double brPow = Range.scale(br, -1, 1, -motorScale, motorScale);
+                frPow = Range.scale(fr, -1, 1, -motorScale, motorScale);
+                flPow = Range.scale(fl, -1, 1, -motorScale, motorScale);
+                blPow = Range.scale(bl, -1, 1, -motorScale, motorScale);
+                brPow = Range.scale(br, -1, 1, -motorScale, motorScale);
 
                 //calculates the motor powers
                 if (!Thread.currentThread().isInterrupted()){
@@ -245,6 +264,8 @@ public class Drive {
         //this flag should be enough to announce that a math change is needed. Robot's current
         // position can be gained from getVectorR and the vectorR provided is the aim position.
         vectorDriveActive = false;
+        atRotation = false;
+        atPosition = false;
         if (!driveThread.isAlive())
             driveThread.start();
     }
@@ -328,34 +349,46 @@ public class Drive {
         return  ((AC + BD) / 2.0f) + initialY;
     }
 
-    public float getMotorPower(int motor){
+    public float getMotorPercent(Motors motor){
         switch (motor) {
-            case 1:
-                return (float) frMotor.getPower();
-            case 2:
-                return (float) flMotor.getPower();
-            case 3:
-                return (float) blMotor.getPower();
-            case 4:
-                return (float) brMotor.getPower();
-            default:
-                return 0.0f;
+            case FRONT_RIGHT:
+                return (float) fr;
+            case FRONT_LEFT:
+                return (float) fl;
+            case BACK_LEFT:
+                return (float) bl;
+            case BACK_RIGHT:
+                return (float) br;
         }
+        return 0.0f;
     }
 
-    public int getEncoder(int motor){
+    public float getMotorPower(Motors motor){
         switch (motor) {
-            case 1:
-                return frMotor.getCurrentPosition();
-            case 2:
-                return flMotor.getCurrentPosition();
-            case 3:
-                return blMotor.getCurrentPosition();
-            case 4:
-                return brMotor.getCurrentPosition();
-            default:
-                return 0;
+            case FRONT_RIGHT:
+                return (float) frPow;
+            case FRONT_LEFT:
+                return (float) flPow;
+            case BACK_LEFT:
+                return (float) blPow;
+            case BACK_RIGHT:
+                return (float) brPow;
         }
+        return 0.0f;
+    }
+
+    public int getEncoder(Motors motor){
+        switch (motor) {
+            case FRONT_RIGHT:
+                return frMotor.getCurrentPosition();
+            case FRONT_LEFT:
+                return flMotor.getCurrentPosition();
+            case BACK_LEFT:
+                return blMotor.getCurrentPosition();
+            case BACK_RIGHT:
+                return brMotor.getCurrentPosition();
+        }
+        return 0;
     }
 
     public float getCurrentX(){

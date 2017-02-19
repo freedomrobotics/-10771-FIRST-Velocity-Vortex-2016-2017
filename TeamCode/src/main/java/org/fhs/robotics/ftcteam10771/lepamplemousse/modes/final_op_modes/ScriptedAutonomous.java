@@ -279,13 +279,14 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         imuHandler.streamIMUData();
         robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
 
-        drive.startPosition();
-        driveVector.setAllRad(robot.getPosition().getX(), robot.getPosition().getY(), robot.getRotation().getRadians());
+        float target;
         if (relative){
-            driveVector.setRad(Rotation.degreesToRadians(robot.getRotation().getDegrees() + degrees));
+            target = (float) Math.toRadians(robot.getRotation().getDegrees() + degrees);
         } else {
-            driveVector.setRad(Rotation.degreesToRadians(degrees + 90));
+            target = (float) Math.toRadians(degrees + 90);
         }
+        drive.startPosition();
+        driveVector.setAllRad(robot.getPosition().getX(), robot.getPosition().getY(), target);
         while(!drive.isAtRotation() && opModeIsActive()){
             imuHandler.streamIMUData();
             robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
