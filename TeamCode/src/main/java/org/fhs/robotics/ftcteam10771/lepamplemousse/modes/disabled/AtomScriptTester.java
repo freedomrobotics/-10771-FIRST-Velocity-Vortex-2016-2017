@@ -17,7 +17,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
@@ -46,7 +46,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
     private VectorR driveVector = new VectorR();
     private IMU imuHandler;
     private IMU.Gyrometer gyrometer;
-    private CatapultOld catapult;
+    private Catapult catapult;
     private boolean dropBalls = false;
     private Servo ballDropper;
     private DcMotor intakeMotor;
@@ -142,8 +142,10 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
 
         //setup catapult
         launcher = hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name"));
-        catapult = new CatapultOld(launcher, hardwareMap.opticalDistanceSensor.get("ods"), controls, settings);
-        catapult.catapultThread.start();
+        catapult = new Catapult(hardwareMap.dcMotor.get(settings.subData("catapult").getString("map_name")),
+                hardwareMap.opticalDistanceSensor.get(settings.subData("catapult")
+                        .subData("light_sensor").getString("map_name")), settings.subData("catapult"));
+        catapult.start();
 
         //setup ball dropper
 
@@ -189,7 +191,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         }
         drive.stop();
         imuHandler.imuThread.interrupt();
-        catapult.catapultThread.interrupt();
+        catapult.stop();
         //speech.shutdown();
     }
 
@@ -241,10 +243,7 @@ public class AtomScriptTester extends LinearOpMode implements ScriptRunner, Text
         }
 
         if (commandParser.command().equalsIgnoreCase("catapult")) {
-            catapult.setLaunch(true);
-            sleep(5);
-            catapult.setLaunch(false);
-            sleep(300);
+            catapult.launch();
             while (!catapult.catapultReady() && opModeIsActive());
             return;
         }

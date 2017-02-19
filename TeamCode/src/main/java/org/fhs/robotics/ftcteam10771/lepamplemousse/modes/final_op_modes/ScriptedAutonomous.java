@@ -13,7 +13,6 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.Scrip
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;

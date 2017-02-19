@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.ApproachBeacon;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
@@ -97,6 +98,7 @@ public class DriverOp extends LinearOpMode {
     }
 
     public void initialize(){
+        ApproachBeacon sadkjfhsadk = new ApproachBeacon(settings, drive, this);
         Log.d(TAG, "startingInitNow");
 
         Config keymapping = new Config(Static.configPath, Static.configControlFileName + Static.configFileSufffix, telemetry, "keymapping");

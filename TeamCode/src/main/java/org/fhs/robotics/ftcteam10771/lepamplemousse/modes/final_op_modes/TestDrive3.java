@@ -2,8 +2,10 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 
 import android.util.Log;
 
+import com.qualcomm.hardware.ams.AMSColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -13,7 +15,6 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 
 import java.util.LinkedList;

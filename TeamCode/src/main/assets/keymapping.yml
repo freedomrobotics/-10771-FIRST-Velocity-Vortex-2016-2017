@@ -6,11 +6,11 @@
 # drive_l_rotate        = the rotation for the drivetrain (ccw) - analog(0, 1)    - float
 # drive_r_rotate        = the rotation for the drivetrain (cw)  - analog(0, 1)    - float
 # intake_speed          = the speed control of the intake mech  - analog(-1, 1)   - float
-# intake_toggle         = toggle for intake                     - digital         - boolean
-# flywheel_on           = toggle the flywheel on                - digital         - boolean
-# flywheel_speed        = adjust the flywheel speed             - analog(-1, 1)   - float
+# intake                = toggle for intake                     - digital(toggle) - boolean
+# launch                = launch the catapult                   - digital         - boolean
+# ball_drop             = lift or drop the ball dropper         - digital         - boolean
 # bumper_angle          = adjust the bumper angle               - analog(-1, 1)   - float
-# bumper_preset         = adjust the bumper angle               - analog(-1, 1)   - float
+# bumper_preset         = move the bumper to the preset angle   - analog(-1, 1)   - float
 gamepad1:
   left_stick_x:
     function: drive_x
@@ -161,12 +161,12 @@ gamepad2:
     digital: true
 
   a_button:
-    function: intake_toggle
+    function: intake
     inverted: false
     digital: true
 
   b_button:
-    function: launch
+    function: ball_drop
     inverted: false
     digital: true
 
@@ -176,7 +176,7 @@ gamepad2:
     digital: true
 
   y_button:
-    function: null
+    function: launch
     inverted: false
     digital: true
 

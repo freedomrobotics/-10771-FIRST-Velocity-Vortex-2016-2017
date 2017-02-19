@@ -3,7 +3,6 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 import android.util.Log;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,20 +11,15 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.CatapultOld;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by Matthew on 11/14/2016.
@@ -59,7 +53,7 @@ public class FinalTeleOp extends OpMode{
     private Catapult catapult;
     private Drive drive;
     private VectorR driveVector = new VectorR();
-    private Robot robot = new Robot();
+    private Robot robot;
     //private IMU.Gyrometer gyrometer;
     //private IMU imuHandler;
 
@@ -80,6 +74,7 @@ public class FinalTeleOp extends OpMode{
 
     //Time archive variable
     private long lastTime = 0;
+    private float initialRot;
 
     public void init() {
 
@@ -126,6 +121,8 @@ public class FinalTeleOp extends OpMode{
         blueTeam = (settings.getString("alliance").equals("blue"));
         initialX = settings.subData("robot").subData("initial_position").getFloat("x");
         initialY = settings.subData("robot").subData("initial_position").getFloat("y");
+        initialRot = settings.subData("robot").subData("initial_position").getFloat("rot");
+        robot = new Robot(initialX, initialY, initialRot, blueTeam ? Alliance.BLUE_ALLIANCE : Alliance.RED_ALLIANCE);
 
         this.components = new Components(hardwareMap, telemetry, components);
         Log.d(TAG, "components-object");
@@ -148,7 +145,7 @@ public class FinalTeleOp extends OpMode{
         Log.d(TAG, settings.subData("drivetrain").subData("motor").subData("back_left").getString("map_name"));
         Log.d(TAG, settings.subData("drivetrain").subData("motor").subData("back_right").getString("map_name"));
 
-        drive = new Drive(driveVector, new Robot(), motorFR, motorFL, motorBL, motorBR, settings, telemetry);
+        drive = new Drive(driveVector, robot, motorFR, motorFL, motorBL, motorBR, settings, telemetry);
 
         Log.d(TAG, "DRIVETRAIN SETUP DONE");
 
@@ -161,19 +158,6 @@ public class FinalTeleOp extends OpMode{
         }
 
         Log.d(TAG, "INTAKE AND ARM DONE");
-
-        /*
-        In our mecanum setup, the two front wheels are chain driven and the two rear wheels are
-         direct gear driven. What this means is that the two front wheels are spinning the same
-         direction as the motor and the two rear wheels are spinning the opposite. Since the
-         motors on the right need to be spinning clockwise to move forward, the motors on the
-         right need to be reversed. Thus the front right and the back left motors need to be
-         reversed. That is, motors A and C. - Adam Li
-         */
-        /*motorFR.setDirection(DcMotor.Direction.REVERSE);
-        motorFL.setDirection(DcMotor.Direction.FORWARD);
-        motorBL.setDirection(DcMotor.Direction.REVERSE);
-        motorBR.setDirection(DcMotor.Direction.FORWARD);*/
 
         bumpers = settings.subData("bumper");
 
@@ -238,6 +222,8 @@ public class FinalTeleOp extends OpMode{
         driveVector.setY(controls.getAnalog("drivetrain_y"));
 
         driveVector.setRad(controls.getAnalog("drivetrain_rotate"));
+
+        drive.setRelative(controls.getToggle("drive_mode"));
 
         if (controls.getToggle("intake")){
             intakeMotor.setPower(-Range.scale(intakePower, 0, 1, -.778, .778));
