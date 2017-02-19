@@ -200,6 +200,11 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             return;
         }
 
+        if (commandParser.command().equalsIgnoreCase("coordinate")){
+            coodinate(commandParser.getArgFloat(0), commandParser.getArgFloat(1));
+            return;
+        }
+
         if (settings.subData("autonomous").getObject(commandParser.command()) == null)
             return;
 
@@ -343,5 +348,38 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             ballDropper.setPosition(down + offset);
             telemetry.addData("dropper", "down");
         }
+    }
+
+    /**
+     * Direct the robot to FTC field coordinate (x,y)
+     * @param x coordinate
+     * @param y coordinate
+     */
+    private void coodinate(float x, float y){
+        drive.startPosition();
+        driveVector.setX(x);
+        driveVector.setY(y);
+        boolean proceed = false;
+        //private float margin = settings.subData("scripted_auto").getFloat("positional_margin");
+        while(!proceed && opModeIsActive()){
+            proceed = distance() < 3.0f;//todo put in settings
+        }
+        driveVector.set;
+        driveVector.setY(drive.getCurrentY());
+    }
+
+    /**
+     * The method that calculates the distance between the robot's position
+     * and its target position
+     * @return the position
+     */
+    public double distance(){
+        double currentX = drive.getCurrentX();
+        double currentY = drive.getCurrentY();
+        double targetX = driveVector.getX();
+        double targetY = driveVector.getY();
+        double xDistance = Math.abs(currentX-targetX);
+        double yDistance = Math.abs(currentY-targetY);
+        return Math.sqrt((xDistance*xDistance)+(yDistance*yDistance));
     }
 }

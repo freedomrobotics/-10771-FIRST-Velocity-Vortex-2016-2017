@@ -128,6 +128,7 @@ public class SensorTest extends LinearOpMode{
         }
 
         waitForStart();
+        rgb.switchLED(RGB.Direction.BOTH, false);
         ultraLeft.enable();
         ultraRight.enable();
         ultraBack.enable();
@@ -157,6 +158,7 @@ public class SensorTest extends LinearOpMode{
                 double rotationalPower = controls.getAnalog("drivetrain_rotate"); //sets the power of rotation by finding the difference between the left and right triggers
                 driveVector.setPolar((float)joystickRadius, (float)joystickTheta);
                 driveVector.setRad((float)rotationalPower);
+
 
                 telemetry.addData("Alliance", settings.getString("alliance"));
                 telemetry.addData("===========", "==============");

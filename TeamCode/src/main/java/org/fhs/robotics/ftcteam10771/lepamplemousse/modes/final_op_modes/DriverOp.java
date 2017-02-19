@@ -3,7 +3,9 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
 import android.util.Log;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -29,7 +31,7 @@ import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis
 /**
  * Created by joelv on 2/17/2017.
  */
-
+@TeleOp(name="Driver Op")
 public class DriverOp extends LinearOpMode {
 
     //initializes motors in order of standard graph quadrants
@@ -198,8 +200,8 @@ public class DriverOp extends LinearOpMode {
         bumperVel = bumpers.getFloat("max_ang_vel");
         bumperMax = bumpers.getFloat("max_rotate");
 
-        bumperLeft = Aliases.servoMap.get(bumpers.subData("left_servo").getString("map_name"));
-        bumperRight = Aliases.servoMap.get(bumpers.subData("right_servo").getString("map_name"));
+        bumperLeft = hardwareMap.servo.get(bumpers.subData("left_servo").getString("map_name"));
+        bumperRight = hardwareMap.servo.get(bumpers.subData("right_servo").getString("map_name"));
         if (bumpers.subData("left_servo").getBool("reversed"))
             bumperLeft.setDirection(Servo.Direction.REVERSE);
         if (bumpers.subData("right_servo").getBool("reversed"))
@@ -217,7 +219,7 @@ public class DriverOp extends LinearOpMode {
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imuHandler = new IMU(imu);//todo put in config
-        //imuHandler.imuInit(); //todo remember to init imu
+        imuHandler.imuInit(); //todo remember to init imu
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
 
@@ -246,14 +248,11 @@ public class DriverOp extends LinearOpMode {
         intakePower += gamepad1.right_stick_y / settings.getInt("intake_divisor");
 
         imuOn = controls.getToggle("imu");
-        if (imuOn){
-            imuHandler.imuInit();
-        }else imuHandler.close();
 
         double joystickTheta = Math.atan2((controls.getAnalog("drivetrain_y")),(controls.getAnalog("drivetrain_x"))); //declares the angle of joystick position in standard polar coordinates
         //todo see if toggle imuworks
 
-        if (imuHandler.isImuInit()){
+        if (imuOn){
             imuHandler.streamIMUData();
             joystickTheta -= (Math.PI * 2.0) + gyrometer.getOrientation(Z);
         }
@@ -324,20 +323,22 @@ public class DriverOp extends LinearOpMode {
             catapult.launch();
 
         double orientation = 0.1;
-        if (imuHandler.isImuInit()) {
+        if (imuOn) {
             final double full = 2.0 * Math.PI;
             orientation = full + gyrometer.getOrientation(Z);
         }
         telemetry.addData("IMU", orientation);
         telemetry.addData("ImuStatus", imuHandler.isImuInit());
         telemetry.addData("IMUToggle", imuOn);
+        telemetry.addData("Radius", driveVector.getRadius());
+        telemetry.addData("Theta", driveVector.getTheta());
         telemetry.addData("IntakeSpeed", intakePower);
         telemetry.update();
     }
 
     public void stopOpMode(){
         catapult.stop();
-        drive.startVelocity();
+        drive.stop();
         imuHandler.close();
     }
 

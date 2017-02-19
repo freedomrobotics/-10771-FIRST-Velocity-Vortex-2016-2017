@@ -123,8 +123,9 @@ public class CameraDriveOp extends LinearOpMode {
         drive.startVelocity();
         //drive.driveThread.start();
         centerRotate();
-        approach();
+        rotate();
         center();
+        approach();
         driveVector.setRad(0);
         driveVector.setPolar(0, 0);
         /*
