@@ -1,6 +1,6 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -10,9 +10,6 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.lang.Math;
-import java.util.List;
-
-import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis.Z;
 
 /**
  * Created by Adam Li on 10/27/2016.
@@ -20,54 +17,63 @@ import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis
  * todo CLEANUP
  */
 public class Drive {
-    private final Telemetry telemetry;
-    VectorR vectorR;
-    Robot robot;
-    DcMotor frMotor;
-    DcMotor flMotor;
-    DcMotor brMotor;
-    DcMotor blMotor;
-    Config.ParsedData driveSettings;
-    IMU.Gyrometer gyrometer;
-    boolean vectorDriveActive;
-    boolean blueTeam;
-    boolean relativeDrive;
-    boolean joystickControl;
-    float motorScale;
 
-    int pastPosition;
-    long pastPositionTime;
+    // State-related objects
+    private VectorR vectorR;
+    private Robot robot;
+    private VectorR velocityFeedback = new VectorR();
+    private VectorR lastPosition = new VectorR();
+    private int pastPosition;
+    private long pastPositionTime;
 
-    VectorR velocityFeedback = new VectorR();
-    VectorR lastPosition = new VectorR();
+    // IO
+    //private final Telemetry telemetry;
+    private DcMotor frMotor;
+    private DcMotor flMotor;
+    private DcMotor brMotor;
+    private DcMotor blMotor;
+    private final Config.ParsedData driveSettings;
+    private final Config.ParsedData settings;
 
-    //Positional drive stuff
-    private float initialX = 0.0f;
-    private float initialY = 0.0f;
-    private Config.ParsedData settings;
+    //Flags
+    private boolean vectorDriveActive;
+    private boolean relativeDrive;
+    //private boolean joystickControl;
+    // TODO: 2/19/2017 change to alliance
+    private boolean blueTeam;
 
-
+    //Positional Flags
     private boolean atPosition;
     private boolean atRotation;
-    Runnable driveRunnable = new Runnable() {
+
+    //Values
+    private final float motorScale;
+
+    //Positional drive stuff
+    // FIXME: 2/19/2017 move this stuff out
+    private float initialX = 0.0f;
+    private float initialY = 0.0f;
+
+
+    private Runnable driveRunnable = new Runnable() {
         @Override
         public void run() {
 
             while (!Thread.currentThread().isInterrupted()) {
 
                 float joystickTheta;
-                float absoluteTheta;
+                //float absoluteTheta;
                 float robotTheta;
                 float robotVelocity;
                 float rotationalPower;
-                float robotRotation;
+                //float robotRotation;
                 updatePosition();
                 if (vectorDriveActive) {
                     //sets values from the vectorR needed for movement
                     joystickTheta = vectorR.getTheta();
                     robotVelocity = vectorR.getRadius();
                     rotationalPower = vectorR.getRad();
-                    robotRotation = robot.getVectorR().getRad();
+                    //robotRotation = robot.getVectorR().getRad();
 
                     if (relativeDrive) { //if the robot drives relative to the field
                         robotTheta = joystickTheta; //the direction of the joystick is the direction of motion
@@ -205,8 +211,8 @@ public class Drive {
         this.blMotor = blMotor;
         this.driveSettings = settings.subData("drivetrain");
         this.vectorDriveActive = true;
-        this.joystickControl = false;
-        this.telemetry = telemetry;
+        //this.joystickControl = false;
+        //this.telemetry = telemetry;
 
         this.blueTeam = false;
         if (settings.getString("alliance") == "blue")
@@ -214,7 +220,7 @@ public class Drive {
         this.relativeDrive = false;
 
         this.settings = settings;
-        String team = settings.getString("alliance");
+        //String team = settings.getString("alliance");
         //if (fieldmap!=null) this.fieldmap = fieldmap.subData("coordinates").subData(team);
 
         /*
@@ -256,9 +262,11 @@ public class Drive {
         if(driveSettings.subData("motor").subData("front_left").getBool("reversed")){flMotor.setDirection(DcMotor.Direction.REVERSE);}else{flMotor.setDirection(DcMotor.Direction.FORWARD);}
         if(driveSettings.subData("motor").subData("back_left").getBool("reversed")){blMotor.setDirection(DcMotor.Direction.REVERSE);}else{blMotor.setDirection(DcMotor.Direction.FORWARD);}
         if(driveSettings.subData("motor").subData("back_right").getBool("reversed")){brMotor.setDirection(DcMotor.Direction.REVERSE);}else{brMotor.setDirection(DcMotor.Direction.FORWARD);}
+
         motorScale = driveSettings.getFloat("motor_scale");
 
         atPosition = false;
+        atRotation = false;
     }
 
     /**
@@ -289,12 +297,12 @@ public class Drive {
         this.relativeDrive = true;
         vectorDriveActive = false;
         if(driveThread.isAlive()){driveThread.interrupt();}
-        //* todo ask if this is needed
+        /* todo ask if this is needed
         frMotor.setPower(0.0);
         flMotor.setPower(0.0);
         brMotor.setPower(0.0);
         blMotor.setPower(0.0);
-        //*/
+        */
     }
 
     /**
