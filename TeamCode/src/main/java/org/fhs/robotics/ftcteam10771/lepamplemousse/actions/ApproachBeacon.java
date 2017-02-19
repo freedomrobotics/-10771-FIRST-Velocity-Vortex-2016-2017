@@ -38,13 +38,13 @@ public class ApproachBeacon {
 
         alliance = (settings.getString("alliance") == "red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
         //rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
-        rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"), hardwareMap.colorSensor.get("right_rgb"),
-                hardwareMap.led.get("left_led"), hardwareMap.led.get("right_led"));
-        cameraVision = new CameraVision();
+        rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"),
+                hardwareMap.led.get("left_led"));
+        cameraVision = new CameraVision(false);
         backCamera = cameraVision.usingBackCamera();
-        cameraVision.start();
+        //cameraVision.start();
         this.lastTime = System.nanoTime();
-        rgb.switchLED(BOTH, false);
+        rgb.switchLED(false);
     }
 
     public void center() {
@@ -52,7 +52,7 @@ public class ApproachBeacon {
         drive.startVelocity();
         float marginofError = settings.subData("drive").subData("camera_settings").getFloat("centering_margin");
         if (targeted()) {
-            while (Math.abs(cameraVision.getX()) > marginofError && linearOpMode.opModeIsActive()) {
+            while (Math.abs(cameraVision.getX()) > marginofError && linearOpMode.opModeIsActive() && targeted()) {
                 boolean left = backCamera ? (cameraVision.getX() > 0.0) : (cameraVision.getX() < 0.0);
                 float theta = left ? (float) Math.PI : 0.0f;
                 float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
@@ -68,7 +68,7 @@ public class ApproachBeacon {
         drive.startVelocity();
         double distance_to_stop = settings.subData("drive").subData("camera_settings").getFloat("distance_to_stop");
         if (targeted()) {
-            while (targeted() && Math.abs(cameraVision.getZ()) > distance_to_stop && linearOpMode.opModeIsActive()) {
+            while (targeted() && Math.abs(cameraVision.getZ()) > distance_to_stop && linearOpMode.opModeIsActive() && targeted()) {
                 float theta = backCamera ? 3.0f * (float) Math.PI / 2.0f : (float) Math.PI / 2.0f;
                 float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
                 //todo put speed
@@ -85,7 +85,7 @@ public class ApproachBeacon {
         float rotate_margin = settings.subData("drive").subData("camera_settings").getFloat("angle_margin");
         float rotate_speed = settings.subData("drive").subData("camera_settings").getFloat("rotate_speed");
         if (targeted()){
-            while(Math.toDegrees(Math.abs(cameraVision.getAngleToTurn()))>rotate_margin){
+            while(Math.toDegrees(Math.abs(cameraVision.getAngleToTurn()))>rotate_margin && targeted() && linearOpMode.opModeIsActive()){
                 driveVector.setRad((float)Math.copySign(rotate_speed, cameraVision.getAngleToTurn()));
             }
         }
@@ -102,7 +102,7 @@ public class ApproachBeacon {
         float marginofError = settings.subData("drive").subData("camera_settings").getFloat("centering_margin");
         float radius = settings.subData("drive").subData("camera_settings").getFloat("speed");
         float rotate_factor = settings.subData("drive").subData("camera_settings").getFloat("rotate_factor");
-        while (targeted() && Math.abs(cameraVision.getX()) > marginofError && Math.abs(cameraVision.getAngleToTurn())>rotate_margin && linearOpMode.opModeIsActive()) {
+        while (targeted() && (Math.abs(cameraVision.getX()) > marginofError || Math.abs(cameraVision.getAngleToTurn())>rotate_margin) && linearOpMode.opModeIsActive()) {
             boolean left = backCamera ? (cameraVision.getX() > 0.0) : (cameraVision.getX() < 0.0);
             float rotate = (float)(radius/(rotate_factor*rotate_speed) * cameraVision.getAngleToTurn());
             float theta = left ? (float) Math.PI : 0.0f;
@@ -111,6 +111,10 @@ public class ApproachBeacon {
         }
         driveVector.setRad(0);
         driveVector.setPolar(0, 0);
+    }
+
+    public CameraVision cameraVision(){
+        return  cameraVision;
     }
 
     private boolean targeted(){

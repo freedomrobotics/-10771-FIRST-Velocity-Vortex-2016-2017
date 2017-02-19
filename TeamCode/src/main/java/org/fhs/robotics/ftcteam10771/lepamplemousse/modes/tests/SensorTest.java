@@ -53,6 +53,8 @@ public class SensorTest extends LinearOpMode{
     private DcMotor motorBL;
     private DcMotor motorBR;
 
+    private boolean led = false;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -111,8 +113,8 @@ public class SensorTest extends LinearOpMode{
         drive = new Drive(driveVector, new Robot(), motorFR, motorFL, motorBL, motorBR, settings, telemetry);
         ods = hardwareMap.opticalDistanceSensor.get("ods");
         imu = hardwareMap.get(BNO055IMU.class, "imu");
-        rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"), hardwareMap.colorSensor.get("right_rgb"),
-                hardwareMap.led.get("left_led"), hardwareMap.led.get("right_led"));
+        rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"),
+                hardwareMap.led.get("left_led"));
         ultraLeft = new UltrasonicRange(hardwareMap.analogInput.get("ultrasonic_left"), hardwareMap.digitalChannel.get("switch_left"));
         ultraRight = new UltrasonicRange(hardwareMap.analogInput.get("ultrasonic_right"), hardwareMap.digitalChannel.get("switch_right"));
         ultraBack = new UltrasonicRange(hardwareMap.analogInput.get("ultrasonic_back"), hardwareMap.digitalChannel.get("switch_back"));
@@ -128,7 +130,7 @@ public class SensorTest extends LinearOpMode{
         }
 
         waitForStart();
-        rgb.switchLED(RGB.Direction.BOTH, false);
+        rgb.switchLED(false);
         ultraLeft.enable();
         ultraRight.enable();
         ultraBack.enable();
@@ -136,6 +138,10 @@ public class SensorTest extends LinearOpMode{
         drive.startVelocity();
         try {
             while (opModeIsActive()){
+
+                led = controls.getToggle("led");
+                rgb.switchLED(led);
+
                 ultraLeft.streamDistance();
                 ultraRight.streamDistance();
                 ultraBack.streamDistance();
@@ -169,10 +175,9 @@ public class SensorTest extends LinearOpMode{
                 telemetry.addData("Hue-L", rgb.getHue(RGB.Direction.LEFT));
                 telemetry.addData("Saturation-L", rgb.getSaturation(RGB.Direction.LEFT));
                 telemetry.addData("Brightness-L", rgb.getBrightness(RGB.Direction.LEFT));
-                telemetry.addData("===========", "==============");
-                telemetry.addData("Hue-R", rgb.getHue(RGB.Direction.RIGHT));
-                telemetry.addData("Saturation-R", rgb.getSaturation(RGB.Direction.RIGHT));
-                telemetry.addData("Brightness-R", rgb.getBrightness(RGB.Direction.RIGHT));
+                telemetry.addData("Blue-L", rgb.blue());
+                telemetry.addData("Red", rgb.red());
+                telemetry.addData("Green", rgb.green());
                 telemetry.addData("===========", "==============");
                 telemetry.addData("Gyro-Z", Math.abs(gyrometer.convert(Z, gyrometer.getOrientation(Z))));
                 telemetry.addData("ODS", ods.getLightDetected());

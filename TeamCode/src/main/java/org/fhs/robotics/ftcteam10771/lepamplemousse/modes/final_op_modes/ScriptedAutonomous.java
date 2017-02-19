@@ -7,11 +7,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.ApproachBeacon;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptLoader;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.scriptedconfig.ScriptRunner;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
@@ -37,6 +39,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     private Servo ballDropper;
     private Catapult catapult;
     private DcMotor intakeMotor;
+    private ApproachBeacon approachBeacon;
 
     /**
      * Override this method and place your code here.
@@ -87,6 +90,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
                                 hardwareMap.opticalDistanceSensor.get(settings.subData("catapult")
                                         .subData("light_sensor").getString("map_name")), settings.subData("catapult"));
         catapult.start();
+        approachBeacon = new ApproachBeacon(settings, drive, this);
 
         int counter = 1; //debug
         //WAIT FOR THE STARTI!@HTIOgRFOIWUQ#GQIOH
@@ -152,21 +156,48 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         }
 
 
-        if (commandParser.command().equalsIgnoreCase("approach_beacon")){
+        if (commandParser.command().equalsIgnoreCase("detect_image")) {
+            approachBeacon.cameraVision().vuforiaInit();
+            if (commandParser.getArgsSize() == 1) {
+                approachBeacon.cameraVision().setAutoTarget(false);
+                approachBeacon.cameraVision().setTargetImage(
+                        CameraVision.Image.getImage(commandParser.getArgString(0)));
+            }
+            approachBeacon.cameraVision().start();
+            long lastTime = System.currentTimeMillis();
+            long waitTime = settings.subData("drive").subData("camera_settings").getInt("wait_time");
+            boolean detected = false;
+            while (System.currentTimeMillis() - lastTime < waitTime && !detected) {
+                detected = approachBeacon.cameraVision().imageInSight();
+            }
             drive.setRelative(true);
             drive.startVelocity();
-            //drive.driveThread.start();
-            //rotate();
-            //center();
-            /*
-            while (!targeted() && System.currentTimeMillis() - lastTime < commandParser.getArgInt(0) && opModeIsActive()){}
-            if (!targeted())*/
-            // return;
-            //centerRotate();
-            //approach();
-            //
-            driveVector.setPolar(0, 0);
             return;
+        }
+
+        if (commandParser.command().equalsIgnoreCase("rotate_image")){
+            approachBeacon.rotate();
+            return;
+        }
+
+        if (commandParser.command().equalsIgnoreCase("center_image")){
+            approachBeacon.center();
+            return;
+        }
+
+        if (commandParser.command().equalsIgnoreCase("approach_image")){
+            approachBeacon.approach();
+            return;
+        }
+
+        if (commandParser.command().equalsIgnoreCase("center_rotate_image")){
+            approachBeacon.centerRotate();
+            return;
+        }
+
+        if (commandParser.command().equalsIgnoreCase("stop_camera")){
+            approachBeacon.cameraVision().toggleVuforia(false);
+            approachBeacon.cameraVision().stop();
         }
 
         if (commandParser.command().equalsIgnoreCase("rotate")){
@@ -369,18 +400,4 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         rotate(0.0, false);
     }
 
-    /**
-     * The method that calculates the distance between the robot's position
-     * and its target position
-     * @return the position
-     */
-    public double distance(){
-        double currentX = drive.getCurrentX();
-        double currentY = drive.getCurrentY();
-        double targetX = driveVector.getX();
-        double targetY = driveVector.getY();
-        double xDistance = Math.abs(currentX-targetX);
-        double yDistance = Math.abs(currentY-targetY);
-        return Math.sqrt((xDistance*xDistance)+(yDistance*yDistance));
-    }
 }

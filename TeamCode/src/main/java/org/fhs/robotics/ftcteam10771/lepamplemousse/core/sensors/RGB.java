@@ -42,49 +42,49 @@ public class RGB {
         Constructor with one RGB device
      */
     public RGB(ColorSensor sensor, LED led){
-        new RGB(sensor, null, led, null);
+        this(sensor, null, led, null);
     }
 
     /*
         Constructor with 2 color sensors
      */
     public RGB(ColorSensor leftColorSensor, ColorSensor rightColorSensor){
-        new RGB(leftColorSensor, rightColorSensor, null, null);
+        this(leftColorSensor, rightColorSensor, null, null);
     }
 
     /*
         Constructor with 2 LEDs
      */
     public RGB(LED leftLED, LED rightLED){
-        new RGB(null, null, leftLED, rightLED);
+        this(null, null, leftLED, rightLED);
     }
 
     /*
         Constructor with 2 color sensors and a LED
      */
     public RGB(ColorSensor sensor1, ColorSensor sensor2, LED led){
-        new RGB(sensor1, sensor2, led, null);
+        this(sensor1, sensor2, led, null);
     }
 
     /*
         Constructor with a color sensor and 2 LEDs
      */
     public RGB(ColorSensor sensor, LED led1, LED led2){
-        new RGB(sensor, null, led1, led2);
+        this(sensor, null, led1, led2);
     }
 
     /*
         Constructor with a single color sensor
      */
     public RGB(ColorSensor sensor){
-        new RGB(sensor, null, null, null);
+        this(sensor, null, null, null);
     }
 
     /*
         Constructor with a single LED
      */
     public RGB(LED led){
-        new RGB(null, null, led, null);
+        this(null, null, led, null);
     }
 
     /*
