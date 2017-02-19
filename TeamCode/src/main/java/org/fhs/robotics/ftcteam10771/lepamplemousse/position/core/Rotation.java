@@ -28,7 +28,7 @@ public class Rotation {
 
     /** for heading from -2pi to 0 */
     public void setHeading(float headingRadius) {
-        rot = headingRadius <= (threepitwo) ? -(headingRadius + threepitwo) : (pitwo - headingRadius);
+        rot = headingRadius <= -(threepitwo) ? -(headingRadius + threepitwo) : (pitwo - headingRadius);
     }
     /** for heading from -360 to 0 */
     public void setHeadinDeg(float headingDegrees) {
@@ -37,7 +37,7 @@ public class Rotation {
 
     /** for heading from -2pi to 0 */
     public float getHeading(){
-        return rot <= (threepitwo) ? -(rot + threepitwo) : (pitwo - rot);
+        return rot <= (pitwo) ? -(rot + threepitwo) : (pitwo - rot);
     }
     /** for heading from -360 to 0 */
     public float getHeadingDeg(){
