@@ -37,9 +37,8 @@ public class Drive {
     //Flags
     private boolean vectorDriveActive;
     private boolean relativeDrive;
-    //private boolean joystickControl;
     // TODO: 2/19/2017 change to alliance
-    private boolean blueTeam;
+    private final boolean blueTeam;
 
     //Positional Flags
     private boolean atPosition;
@@ -50,8 +49,8 @@ public class Drive {
 
     //Positional drive stuff
     // FIXME: 2/19/2017 move this stuff out
-    private float initialX = 0.0f;
-    private float initialY = 0.0f;
+    private float initialEncoderX = 0.0f;
+    private float initialEncoderY = 0.0f;
 
     //Remove magic number!
     public enum Motors {
@@ -62,16 +61,26 @@ public class Drive {
     }
 
     //Motor Percents
-    double fr;
-    double fl;
-    double bl;
-    double br;
+    private double fr;
+    private double fl;
+    private double bl;
+    private double br;
 
     //Motor Powers
-    double frPow;
-    double flPow;
-    double blPow;
-    double brPow;
+    private double frPow;
+    private double flPow;
+    private double blPow;
+    private double brPow;
+
+    //settings
+    private final float position_tolerance;
+    private final float position_speed;
+    private final float rotation_tolerance;
+    private final float rotation_speed;
+    private final float rotation_speed_min;
+
+    private final float centimeters_per_pulse;
+    private final double motorAngle;
 
     private Runnable driveRunnable = new Runnable() {
         @Override
@@ -87,7 +96,6 @@ public class Drive {
                     //sets values from the vectorR needed for movement
                     velocity = vectorR.getRadius();
                     rotation = vectorR.getRawR();
-                    //robotRotation = robot.getVectorR().getRad();
 
                     if (!relativeDrive) { //if the robot drives relative to the field
                         theta = theta - (float)((Math.PI * 2.0) + robot.getRotation().getHeading());
@@ -97,21 +105,20 @@ public class Drive {
                     theta = difference.getTheta();
 
                     //todo put drivetrain/positional/position_margin
-                    atPosition = difference.getRadius() < Math.abs(driveSettings.subData("positional").getFloat("position_tolerance"));
+                    atPosition = difference.getRadius() < Math.abs(position_tolerance);
 
                     if (!atPosition)
-                        velocity = driveSettings.subData("positional").getFloat("speed");
+                        velocity = position_speed;
                     else velocity = 0;
 
-                    float sign = vectorR.getRad() - robot.getVectorR().getRad();
+
                     float factor = difference.getRad() > 3.1415927f ? (6.2831854f - difference.getRad()) / 3.1415927f : difference.getRad() / 3.1415927f;
-                    atRotation = factor < Math.toRadians(driveSettings.subData("positional").getFloat("rotational_tolerance")) / Math.PI;
+                    atRotation = factor < rotation_tolerance;
 
                     if (!atRotation) {
-                        float rotationalMagnitude = driveSettings.subData("positional").getFloat("rotation");
-                        float rotationalMagnitudeMin = driveSettings.subData("positional").getFloat("rotation_min");
+                        float sign = vectorR.getRad() - robot.getVectorR().getRad();
                         rotation = (float) Math.copySign(Range.scale(factor, 0, 1,
-                                rotationalMagnitudeMin, rotationalMagnitude),
+                                rotation_speed_min, rotation_speed),
                                 difference.getRad() > 3.1415927f ? -sign : sign);
                     } else rotation = 0;
                 }
@@ -158,15 +165,6 @@ public class Drive {
                     velocityFeedback.setY((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
                 }
                 pastPosition = blMotor.getCurrentPosition();
-
-                // spams the console
-                /*
-                telemetry.addData("Speed-FR", fr);
-                telemetry.addData("Speed-FL", fl);
-                telemetry.addData("Speed-BL", bl);
-                telemetry.addData("Speed-BR", br);
-                */
-
             }
             frMotor.setPower(0.0);
             flMotor.setPower(0.0);
@@ -179,14 +177,25 @@ public class Drive {
         }
     };
 
-    public Thread driveThread = new Thread(driveRunnable); //initializes driveThread based on driveRunnable
+    private Thread driveThread = new Thread(driveRunnable); //initializes driveThread based on driveRunnable
+
+    /**
+     * Constructor
+     * Use Constructor without telemetry instead
+     */
+    @Deprecated
+    public Drive(VectorR vectorR, Robot robot, DcMotor frMotor,
+                 DcMotor flMotor, DcMotor blMotor, DcMotor brMotor,
+                 Config.ParsedData settings, Telemetry telemetry){
+        this(vectorR, robot, frMotor, flMotor, blMotor, brMotor, settings);
+    }
 
     /**
      * Constructor
      */
     public Drive(VectorR vectorR, Robot robot, DcMotor frMotor,
-                 DcMotor flMotor, DcMotor blMotor, DcMotor brMotor,
-                 Config.ParsedData settings, Telemetry telemetry){
+                DcMotor flMotor, DcMotor blMotor, DcMotor brMotor,
+                Config.ParsedData settings){
 
         this.vectorR = vectorR;
         this.robot = robot;
@@ -196,27 +205,16 @@ public class Drive {
         this.blMotor = blMotor;
         this.driveSettings = settings.subData("drivetrain");
         this.vectorDriveActive = true;
-        //this.joystickControl = false;
-        //this.telemetry = telemetry;
 
-        this.blueTeam = false;
-        if (settings.getString("alliance") == "blue")
-            this.blueTeam = true;
+        this.blueTeam = settings.getString("alliance").equals("blue");
         this.relativeDrive = false;
 
         this.settings = settings;
 
+        initialEncoderX = robot.getPosition().getX();
+        initialEncoderY = robot.getPosition().getY();
 
-        DcMotor.RunMode runMode = DcMotor.RunMode.RUN_USING_ENCODER;
-        DcMotor.RunMode reset = DcMotor.RunMode.STOP_AND_RESET_ENCODER;
-        frMotor.setMode(reset);
-        flMotor.setMode(reset);
-        brMotor.setMode(reset);
-        blMotor.setMode(reset);
-        frMotor.setMode(runMode);
-        flMotor.setMode(runMode);
-        brMotor.setMode(runMode);
-        blMotor.setMode(runMode);
+        reset();
 
         if(driveSettings.subData("motor").subData("front_right").getBool("reversed")){
             frMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -246,6 +244,15 @@ public class Drive {
 
         atPosition = false;
         atRotation = false;
+
+        position_tolerance = driveSettings.subData("positional").getFloat("position_tolerance");
+        position_speed = driveSettings.subData("positional").getFloat("speed");
+        rotation_tolerance = driveSettings.subData("positional").getFloat("rotational_tolerance") / 180f;
+        rotation_speed = driveSettings.subData("positional").getFloat("rotation");
+        rotation_speed_min = driveSettings.subData("positional").getFloat("rotation_min");
+
+        centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
+        motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
     }
 
     /**
@@ -301,8 +308,8 @@ public class Drive {
         Test_drive3, where the encoder outputs are calculated into X and Y coordinates
     */
     public void updatePosition(){
-        float xPos = getX();
-        float yPos = getY();
+        float xPos = getEncoderX();
+        float yPos = getEncoderY();
         float x = xPos - lastPosition.getX();
         float y = yPos - lastPosition.getY();
         double theta = Math.atan2(y, x);
@@ -319,18 +326,14 @@ public class Drive {
      * Note: Only accurate when robot is not rotated at all
      * @return X coodinate in centimeters
      */
-    private float getX(){
-        //todo put in config file
-        float centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
-        //todo put in settings settings>encoder>centimeters_per_pulse
-        double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
+    public float getEncoderX(){
         float A = -frMotor.getCurrentPosition()*centimeters_per_pulse;
         float B = -flMotor.getCurrentPosition()*centimeters_per_pulse;
         float C = -blMotor.getCurrentPosition()*centimeters_per_pulse;
         float D = -brMotor.getCurrentPosition()*centimeters_per_pulse;
         float AC = ((A*(float)Math.cos(Math.PI-motorAngle)) + (C*(float)Math.cos(Math.PI-motorAngle)))/2.0f;
         float BD = ((B*(float)Math.cos(motorAngle)) + (D*(float)Math.cos(motorAngle)))/2.0f;
-        return  ((AC + BD) / 2.0f) + initialX;
+        return  ((AC + BD) / 2.0f) + initialEncoderX;
     }
 
     /**
@@ -338,15 +341,14 @@ public class Drive {
      * Note: only works if robot does not rotate
      * @return Y coordinate of the robot
      */
-    private float getY(){
-        float centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
+    public float getEncoderY(){
         float A = -frMotor.getCurrentPosition()*centimeters_per_pulse;
         float B = -flMotor.getCurrentPosition()*centimeters_per_pulse;
         float C = -blMotor.getCurrentPosition()*centimeters_per_pulse;
         float D = -brMotor.getCurrentPosition()*centimeters_per_pulse;
         float AC = (A+C)/2.0f;
         float BD = (B+D)/2.0f;
-        return  ((AC + BD) / 2.0f) + initialY;
+        return  ((AC + BD) / 2.0f) + initialEncoderY;
     }
 
     public float getMotorPercent(Motors motor){
@@ -377,7 +379,7 @@ public class Drive {
         return 0.0f;
     }
 
-    public int getEncoder(Motors motor){
+    public int getMotorEncoder(Motors motor){
         switch (motor) {
             case FRONT_RIGHT:
                 return frMotor.getCurrentPosition();
@@ -403,9 +405,9 @@ public class Drive {
         return vectorDriveActive;
     }
 
-    public void refresh(){
-        initialX = getX();
-        initialY = getY();
+    public void reset(){
+        initialEncoderX = getEncoderX();
+        initialEncoderY = getEncoderY();
         frMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         blMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -416,10 +418,14 @@ public class Drive {
         brMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    /**
+     * delete when possible Does nothing now
+     */
+    @Deprecated
     public void initPosition(float x, float y){
-        refresh();
-        initialX = x;
-        initialY = y;
+        //reset();
+        //initialX = x;
+        //initialY = y;
     }
 
     public boolean isAtPosition(){
@@ -428,10 +434,6 @@ public class Drive {
 
     public boolean isAtRotation(){
         return atRotation;
-    }
-
-    public Runnable getDriveRunnable(){
-        return driveRunnable;
     }
 
     public VectorR getVectorR(){

@@ -276,17 +276,13 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
 
     private void rotate(float degrees, boolean relative){
         // FIXME: 2/19/2017 put in thread maybe?
+        drive.startVelocity();
         imuHandler.streamIMUData();
         robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
 
-        float target;
-        if (relative){
-            target = (float) Math.toRadians(robot.getRotation().getDegrees() + degrees);
-        } else {
-            target = (float) Math.toRadians(degrees + 90);
-        }
         drive.startPosition();
-        driveVector.setAllRad(robot.getPosition().getX(), robot.getPosition().getY(), target);
+        driveVector.setAllRad(robot.getPosition().getX(), robot.getPosition().getY(),
+                relative ? (float) Math.toRadians(robot.getRotation().getDegrees() + degrees) : (float) Math.toRadians(degrees + 90));
         while(!drive.isAtRotation() && opModeIsActive()){
             imuHandler.streamIMUData();
             robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
@@ -392,6 +388,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     }*/
 
     private void coordinate(float x, float y){
+        drive.startVelocity();
         imuHandler.streamIMUData();
         robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
 

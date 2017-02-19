@@ -4,7 +4,6 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
@@ -19,8 +18,6 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
-
-import java.util.List;
 
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis.Z;
 import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Direction.LEFT;
@@ -60,10 +57,10 @@ public class PamplemouseAuto extends LinearOpMode {
                 telemetry.addData("FL", drive.getMotorPower(2));
                 telemetry.addData("BL", drive.getMotorPower(3));
                 telemetry.addData("BR", drive.getMotorPower(4));
-                telemetry.addData("FR", drive.getEncoder(1));
-                telemetry.addData("FL", drive.getEncoder(2));
-                telemetry.addData("BL", drive.getEncoder(3));
-                telemetry.addData("BR", drive.getEncoder(4));
+                telemetry.addData("FR", drive.getMotorEncoder(1));
+                telemetry.addData("FL", drive.getMotorEncoder(2));
+                telemetry.addData("BL", drive.getMotorEncoder(3));
+                telemetry.addData("BR", drive.getMotorEncoder(4));
                 telemetry.addData("Distance", distance_to_stop);
                 telemetry.update();
             }
@@ -261,7 +258,7 @@ public class PamplemouseAuto extends LinearOpMode {
             }
             driveVector.setRad(gyroOutput.convert(Z, gyroOutput.getOrientation(Z)));
         }
-        //drive.refresh();
+        //drive.reset();
     }
 
     /**

@@ -59,10 +59,10 @@ public class MethodTesting extends LinearOpMode{
                 telemetry.addData("FL", drive.getMotorPower(2));
                 telemetry.addData("BL", drive.getMotorPower(3));
                 telemetry.addData("BR", drive.getMotorPower(4));
-                telemetry.addData("FR", drive.getEncoder(1));
-                telemetry.addData("FL", drive.getEncoder(2));
-                telemetry.addData("BL", drive.getEncoder(3));
-                telemetry.addData("BR", drive.getEncoder(4));
+                telemetry.addData("FR", drive.getMotorEncoder(1));
+                telemetry.addData("FL", drive.getMotorEncoder(2));
+                telemetry.addData("BL", drive.getMotorEncoder(3));
+                telemetry.addData("BR", drive.getMotorEncoder(4));
                 telemetry.addData("Distance", distance_to_stop);
                 telemetry.update();
             }
@@ -231,7 +231,7 @@ public class MethodTesting extends LinearOpMode{
             }
             driveVector.setRad(gyroOutput.convert(Z, gyroOutput.getOrientation(Z)));
         }
-        drive.refresh();
+        drive.reset();
     }
 
     /**
