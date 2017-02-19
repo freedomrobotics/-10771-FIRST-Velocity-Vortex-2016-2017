@@ -284,7 +284,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         if (relative){
             driveVector.setRad(Rotation.degreesToRadians(robot.getRotation().getDegrees() + degrees));
         } else {
-            driveVector.setRad(Rotation.degreesToRadians(degrees));
+            driveVector.setRad(Rotation.degreesToRadians(degrees + 90));
         }
         while(!drive.isAtRotation() && opModeIsActive()){
             imuHandler.streamIMUData();
