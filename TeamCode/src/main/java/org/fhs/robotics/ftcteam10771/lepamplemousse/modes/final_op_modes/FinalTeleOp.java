@@ -68,6 +68,7 @@ public class FinalTeleOp extends OpMode{
     private float bumperVel = 0f;
     private float bumperMax = 0f;
     private float power = 0f;
+    private float imu_offset = 0f;
 
     //Flags
     private boolean blueTeam;
@@ -208,7 +209,13 @@ public class FinalTeleOp extends OpMode{
 
     public void loop(){
         // TODO: 2/18/2017 move into imu thread
-        robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z));
+        if (controls.getDigital("calibrate")){
+            imu_offset = (float)((2.0 * Math.PI) + gyrometer.getOrientation(IMU.Axis.Z));
+        }
+        if (controls.getToggle("imu")){
+            robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z) - imu_offset);
+        }
+        else robot.getRotation().setRadians(0f);
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
         if (intakePower < 0){
@@ -217,7 +224,6 @@ public class FinalTeleOp extends OpMode{
             intakePower = 1;
         }
         intakePower += gamepad1.right_stick_y / settings.getInt("intake_divisor");
-
         driveVector.setX(controls.getAnalog("drivetrain_x"));
         driveVector.setY(controls.getAnalog("drivetrain_y"));
 
