@@ -27,7 +27,6 @@ public class Drive {
     DcMotor brMotor;
     DcMotor blMotor;
     Config.ParsedData driveSettings;
-    IMU.Gyrometer gyrometer;
     boolean vectorDriveActive;
     boolean blueTeam;
     boolean relativeDrive;

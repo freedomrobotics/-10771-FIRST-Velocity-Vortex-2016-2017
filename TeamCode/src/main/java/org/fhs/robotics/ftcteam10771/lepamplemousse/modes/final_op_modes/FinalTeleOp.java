@@ -215,10 +215,6 @@ public class FinalTeleOp extends OpMode{
         if (controls.getDigital("calibrate")){
             imu_offset = twopi + gyrometer.getOrientation(IMU.Axis.Z);
         }
-        if (controls.getToggle("imu")){
-            robot.getRotation().setRadians(twopi + gyrometer.getOrientation(IMU.Axis.Z) - imu_offset);
-        }
-        else robot.getRotation().setRadians(0f);
         */
         robot.getRotation().setRadians(twopi + gyrometer.getOrientation(IMU.Axis.Z));
         long changeTime = System.currentTimeMillis() - lastTime;
