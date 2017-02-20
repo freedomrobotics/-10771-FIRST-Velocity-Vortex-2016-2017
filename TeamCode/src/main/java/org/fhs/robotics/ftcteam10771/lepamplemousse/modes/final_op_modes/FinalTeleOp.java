@@ -185,13 +185,12 @@ public class FinalTeleOp extends OpMode{
         Log.d(TAG, "CATAPULT DONE");
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imuHandler = new IMU(imu);//todo put in config
+        imuHandler = new IMU(imu, robot);//todo put in config
         imuHandler.imuInit(); //todo remember to init imu
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
         imuHandler.setStreamDelay(75);
         imuHandler.streamIMUData();
-        robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
         imuHandler.imuThread.start();
 
         Log.d(TAG, "IMU SETUP DONE");
@@ -209,7 +208,6 @@ public class FinalTeleOp extends OpMode{
 
     public void loop(){
         // TODO: 2/18/2017 move into imu thread
-        robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
         if (intakePower < 0){

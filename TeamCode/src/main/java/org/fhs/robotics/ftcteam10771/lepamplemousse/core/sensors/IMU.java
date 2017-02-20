@@ -4,6 +4,7 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -33,13 +34,16 @@ public class IMU {
     public BNO055IMU.Parameters parameters = null;
     boolean imuInitialized = false;
     private String calibrationFileName = "imu.json";
+    private final float twopi = (float)Math.PI * 2.0f;
+
+    public Gyrometer gyrometer = new Gyrometer();
 
     //Runnable variables
     private Orientation orientation = null;    //might move to main IMU class
     private AngularVelocity angularVelocity = null;   //might move to main IMU class
     private final Orientation zero = new Orientation();
 
-
+    private Robot robot = new Robot();
 
     //Stream flags that can be toggled on or off
     private boolean gyroStreamEnabled = false;
@@ -75,6 +79,24 @@ public class IMU {
         if (initialize){
             imuInitialized = this.imu.initialize(parameters);
         }
+    }
+
+    public IMU(BNO055IMU imu, boolean calibrating, boolean initialize, Robot robot){
+        this(imu, calibrating, initialize);
+        this.robot = robot;
+    }
+
+    public IMU(BNO055IMU imu, Robot robot){
+        this(imu);
+        this.robot = robot;
+    }
+
+    public void setRobot(Robot robot){
+        this.robot = robot;
+    }
+
+    public Robot getRobot(){
+        return robot;
     }
 
     /**
@@ -185,6 +207,7 @@ public class IMU {
     public void streamIMUData(){
         if (gyroStreamEnabled && isImuInit()){
             orientation = imu.getAngularOrientation();
+            robot.getRotation().setRadians(twopi + gyrometer.getOrientation(Axis.Z));
             //angularVelocity = imu.getAngularVelocity();
         }
         else orientation = zero;
@@ -483,7 +506,7 @@ public class IMU {
      * @return the new instance of private Gyro class
      */
     public IMU.Gyrometer getGyrometer(){
-        return new IMU.Gyrometer();
+        return gyrometer;
     }
 
     /**

@@ -74,7 +74,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
                 settings, telemetry);
 
         //setup imu
-        imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, settings.subData("imu").getString("map_name")));
+        imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, settings.subData("imu").getString("map_name")), robot);
         imuHandler.imuInit(); //todo remember to init imu
         gyrometer = imuHandler.getGyrometer();
         gyrometer.enableStream(true);
@@ -279,14 +279,12 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         // FIXME: 2/19/2017 put in thread maybe?
         drive.startVelocity();
         imuHandler.streamIMUData();
-        robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
 
         driveVector.setAllRad(robot.getPosition().getX(), robot.getPosition().getY(),
-                relative ? (float) Math.toRadians(robot.getRotation().getDegrees() + degrees) : (float) Math.toRadians(degrees - 90));
+                relative ? (float) Math.toRadians(robot.getRotation().getDegrees() + degrees) : (float) Math.toRadians(degrees + 90));
         drive.startPosition();
         while(!drive.isAtRotation() && opModeIsActive()){
             imuHandler.streamIMUData();
-            robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
         }
         drive.startVelocity();
         driveVector.setAllRad(0, 0, 0);
@@ -391,13 +389,11 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     private void coordinate(float x, float y){
         drive.startVelocity();
         imuHandler.streamIMUData();
-        robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
 
         driveVector.setAllRad(Coordinate.convertTo(x, Coordinate.UNIT.CM_TO_UNIT), Coordinate.convertTo(y, Coordinate.UNIT.CM_TO_UNIT), robot.getRotation().getRadians());
         drive.startPosition();
         while(!drive.isAtPosition() && opModeIsActive()){
             imuHandler.streamIMUData();
-            robot.getRotation().setHeading(gyrometer.getOrientation(IMU.Axis.Z));
         }
         drive.startVelocity();
         driveVector.setAllRad(0, 0, 0);

@@ -102,7 +102,7 @@ public class Drive {
                     rotation = vectorR.getRawR();
 
                     if (!relativeDrive) { //if the robot drives relative to the field
-                        theta = theta - (float)((Math.PI * 2.0) + robot.getRotation().getHeading());
+                        theta -= robot.getRotation().getRadians();
                     }
                 } else {
                     VectorR difference = VectorR.sub(vectorR, robot.getVectorR());
