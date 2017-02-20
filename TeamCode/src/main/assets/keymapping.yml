@@ -11,6 +11,7 @@
 # ball_drop             = lift or drop the ball dropper         - digital         - boolean
 # bumper_angle          = adjust the bumper angle               - analog(-1, 1)   - float
 # bumper_preset         = move the bumper to the preset angle   - analog(-1, 1)   - float
+# imu_toggle            = toggles absolute drive                - digital(toggle) - boolean
 gamepad1:
   left_stick_x:
     function: drive_x
@@ -38,7 +39,7 @@ gamepad1:
     digital: true
 
   dpad_down:
-    function: null
+    function: imu_toggle
     inverted: false
     digital: true
 
