@@ -78,7 +78,7 @@ public class Drive {
                         }
 
                         robotTheta = absoluteTheta + robotRotation;*/
-                        robotTheta = joystickTheta - (float)((Math.PI * 2.0) + robot.getRotation().getRadians());
+                        robotTheta = joystickTheta - robot.getRotation().getRadians();
                     }
                 } else {
                     float vectorX = vectorR.getX() - robot.getVectorR().getX();

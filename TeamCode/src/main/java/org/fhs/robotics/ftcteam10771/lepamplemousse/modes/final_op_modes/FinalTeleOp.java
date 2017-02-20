@@ -18,6 +18,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.entities.Robot;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.vector.VectorR;
 
@@ -69,6 +70,7 @@ public class FinalTeleOp extends OpMode{
     private float bumperMax = 0f;
     private float power = 0f;
     private float imu_offset = 0f;
+    private final float twopi = (float) (2.0 * Math.PI);
 
     //Flags
     private boolean blueTeam;
@@ -211,14 +213,14 @@ public class FinalTeleOp extends OpMode{
         // TODO: 2/18/2017 move into imu thread
         /*
         if (controls.getDigital("calibrate")){
-            imu_offset = (float)((2.0 * Math.PI) + gyrometer.getOrientation(IMU.Axis.Z));
+            imu_offset = twopi + gyrometer.getOrientation(IMU.Axis.Z);
         }
         if (controls.getToggle("imu")){
-            robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z) + imu_offset);
+            robot.getRotation().setRadians(twopi + gyrometer.getOrientation(IMU.Axis.Z) - imu_offset);
         }
         else robot.getRotation().setRadians(0f);
         */
-        robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z));
+        robot.getRotation().setRadians(twopi + gyrometer.getOrientation(IMU.Axis.Z));
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
         if (intakePower < 0){
