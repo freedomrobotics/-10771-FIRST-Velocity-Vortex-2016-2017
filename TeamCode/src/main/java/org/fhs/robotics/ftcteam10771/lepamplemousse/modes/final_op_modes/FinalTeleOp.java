@@ -209,13 +209,16 @@ public class FinalTeleOp extends OpMode{
 
     public void loop(){
         // TODO: 2/18/2017 move into imu thread
+        /*
         if (controls.getDigital("calibrate")){
             imu_offset = (float)((2.0 * Math.PI) + gyrometer.getOrientation(IMU.Axis.Z));
         }
         if (controls.getToggle("imu")){
-            robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z) - imu_offset);
+            robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z) + imu_offset);
         }
         else robot.getRotation().setRadians(0f);
+        */
+        robot.getRotation().setRadians(gyrometer.getOrientation(IMU.Axis.Z));
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
         if (intakePower < 0){
@@ -267,6 +270,8 @@ public class FinalTeleOp extends OpMode{
         telemetry.addData("y", controls.getAnalog("drivetrain_y"));
         telemetry.addData("rot", controls.getAnalog("drivetrain_rotate"));
         telemetry.addData("IntakeSpeed", intakePower);
+        telemetry.addData("IMU drive", controls.getToggle("imu"));
+        telemetry.addData("IMU offset", imu_offset);
         telemetry.update();
     }
 
