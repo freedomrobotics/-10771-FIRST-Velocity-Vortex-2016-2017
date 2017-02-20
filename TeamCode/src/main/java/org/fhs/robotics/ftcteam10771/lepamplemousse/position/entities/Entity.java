@@ -29,16 +29,20 @@ public interface Entity {
             this.y += y;
         }
         public void moveXY(float x, float y){
-            this.x = x;
-            this.y = y;
+            this.x += x;
+            this.y += y;
         }
-        public void move(float distance, float angRad){
-            this.x = (float)Math.cos(angRad) * distance;
-            this.x = (float)Math.sin(angRad) * distance;
+        public void movePolar(float radius, float theta){
+            this.x += (float)Math.cos(theta) * radius;
+            this.y += (float)Math.sin(theta) * radius;
         }
-        public void moveDeg(float distance, float angDeg){
-            this.x = (float)Math.cos((angDeg / (float)Math.PI) * 180.0f) * distance;
-            this.x = (float)Math.sin((angDeg / (float)Math.PI) * 180.0f) * distance;
+        public void movePolarDeg(float radius, float theta){
+            this.x = (float)Math.cos((theta / (float)Math.PI) * 180.0f) * radius;
+            this.y += (float)Math.sin((theta / (float)Math.PI) * 180.0f) * radius;
+        }
+        public void moveVectorR(VectorR vectorR){
+            this.x += vectorR.getX();
+            this.y += vectorR.getY();
         }
     }
     class Size extends Coordinate{
@@ -51,6 +55,10 @@ public interface Entity {
         public void scale(float scalar){
             this.x *= scalar;
             this.y *= scalar;
+        }
+        public void scaleVectorR(VectorR vectorR){
+            this.x *= vectorR.getX();
+            this.y *= vectorR.getY();
         }
     }
     class Offset extends Coordinate{
