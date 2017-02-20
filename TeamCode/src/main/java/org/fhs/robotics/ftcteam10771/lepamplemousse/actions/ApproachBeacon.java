@@ -41,7 +41,7 @@ public class ApproachBeacon {
         this.linearOpMode = linearOpMode;
         hardwareMap = linearOpMode.hardwareMap;
 
-        alliance = (settings.getString("alliance") == "red") ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
+        alliance = (settings.getString("alliance").equals("red")) ? Alliance.RED_ALLIANCE : Alliance.BLUE_ALLIANCE;
         //rgb = new RGB(hardwareMap.colorSensor.get("color_sensor_left"), hardwareMap.colorSensor.get("color_sensor_right"));
         rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"),
                 hardwareMap.led.get("left_led"), settings);
@@ -126,58 +126,53 @@ public class ApproachBeacon {
         return cameraVision.imageInSight(cameraVision.target());
     }
 
-    public Alliance checkRightSide(){
-        float theta = 0f;
-        float radius = 0.3f; // todo put speed in config
-        drive.startVelocity();
-        //while (the color sensor does not see a bright color)
-        while (linearOpMode.opModeIsActive()){
-            driveVector.setPolar(radius, theta);
-        }
-        driveVector.setPolar(0f, 0f);
-        rightSideChecked = true;
-        rgb.convertToHSV();
-        return rgb.beaconSide();
-    }
-
-    public Alliance checkLeftSide(){
-        float targetX = 0.0f;
-        if (rightSideChecked && targeted()){
-            float distance = 8.0f; //todo put in config
-            targetX = (float)cameraVision.getX() + distance;
-        }
-        else if (!rightSideChecked) targetX = (float)3.0; //todo put number in config
-        drive.startVelocity();
-        while (cameraVision.getX() < targetX && targeted() && linearOpMode.opModeIsActive()){
-            float theta = 0.0f;
-            if (!rightSideChecked){
-                theta = cameraVision.getX() > targetX ? (float)Math.toRadians(180.0) : 0.0f;
-            }
-            driveVector.setPolar(0.3f, theta);//todo put power in config
-        }
-        rgb.convertToHSV();
-        return rgb.beaconSide();
-    }
-
     public void press(){
-        long waitTime = 1500; //todo put in config file
+        long waitTime = settings.subData("beacon").getInt("press_time"); //todo put in config file
         long lastTime = System.currentTimeMillis();
+        float radius = settings.subData("beacon").getFloat("power");
+        drive.startVelocity();
         while (System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
-            driveVector.setPolar(0.3f, (float)Math.toRadians(270.0));
+            driveVector.setPolar(radius, (float)Math.toRadians(270.0));
+            linearOpMode.telemetry.addData("Beacon", "pressing");
+            linearOpMode.telemetry.update();
         }
+        driveVector.setPolar(0.0f, 0.0f);
     }
 
-    public void chooseSide(RGB.Direction direction){
-        float distance = Math.abs(180.0f); //todo put in config file
-        float targetX = direction==LEFT ? distance : -distance;
-        float theta = direction==LEFT ? 0.0f : (float)Math.toRadians(180.0);
-        float radius = 0.3f;
-        float margin = 10.0f; //todo configure
-        if (direction==NEITHER) return;
+    public void chooseSide(){
+        long lastTime = 0;
+        long waitTime = 0;
+        int sidesChecked = 0;
+        float theta = 0.0f;
+        float radius = settings.subData("beacon").getFloat("shift_power");
         drive.startVelocity();
-        while (targeted() && linearOpMode.opModeIsActive() &&
-                Math.abs(targetX-cameraVision.getX()) > margin){
+        while (linearOpMode.opModeIsActive() && rgb.beaconSide().equals(Alliance.UNKNOWN)){
             driveVector.setPolar(radius, theta);
+            linearOpMode.telemetry.addData("Beacon", "unknown");
+            linearOpMode.telemetry.update();
+        }
+        lastTime = System.currentTimeMillis();
+        waitTime = settings.subData("beacon").getInt("check_time");
+        Alliance beaconAlliance = rgb.beaconSide();
+        while  (linearOpMode.opModeIsActive() && System.currentTimeMillis() - lastTime < waitTime){
+            driveVector.setPolar(0.0f, 0.0f);
+            beaconAlliance = rgb.beaconSide();
+        }
+        if (alliance.equals(beaconAlliance)){
+            waitTime = settings.subData("beacon").getInt("shift_time");
+            theta = (float)Math.toRadians(180.0);
+            radius = settings.subData("beacon").getFloat("power");
+            lastTime = System.currentTimeMillis();
+            while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
+                driveVector.setPolar(radius, theta);
+                linearOpMode.telemetry.addData("Beacon", "correct");
+                linearOpMode.telemetry.update();
+            }
+        }
+        else while(linearOpMode.opModeIsActive() && !(rgb.beaconSide().equals(alliance) || rgb.beaconSide().equals(Alliance.UNKNOWN))){
+            driveVector.setPolar(radius, theta);
+            linearOpMode.telemetry.addData("Beacon", "incorrect");
+            linearOpMode.telemetry.update();
         }
         driveVector.setPolar(0.0f, 0.0f);
     }
@@ -189,8 +184,8 @@ public class ApproachBeacon {
         float theta = (float)Math.toRadians(90.0);
         float power = 0.3f;//todo config
         float distance = 800.9f;//todo config
-        float waitTime = 1500f;
-        float lastTime = System.currentTimeMillis();
+        long waitTime = settings.subData("beacon").getInt("reverse_time");
+        long lastTime = System.currentTimeMillis();
         if (targeted()){
             while (targeted() && linearOpMode.opModeIsActive() &&
                     Math.abs(cameraVision.getZ()) < distance){

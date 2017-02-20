@@ -211,6 +211,10 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             approachBeacon.cameraVision().stop();
         }
 
+        if (commandParser.command().equalsIgnoreCase("claim_beacon")){
+            claimBeacon();
+        }
+
         if (commandParser.command().equalsIgnoreCase("rotate")){
             if (commandParser.getArgsSize() == 2){
                 rotate(commandParser.getArgFloat(0), commandParser.getArgBool(1));
@@ -415,14 +419,17 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
      * Claim beacon
      */
     private void claimBeacon(){
-        Alliance rightSide = approachBeacon.checkRightSide();
-        Alliance leftSide = approachBeacon.checkLeftSide();
-        if (leftSide==rightSide) return;
-        RGB.Direction direction = alliance==leftSide ? RGB.Direction.LEFT : RGB.Direction.NEITHER;
-        if (direction!= RGB.Direction.LEFT){
-            direction = alliance==rightSide ? RGB.Direction.RIGHT : RGB.Direction.NEITHER;
+        long wait = settings.subData("beacon").getInt("press_time");
+        long last = System.currentTimeMillis();
+        float theta = (float) Math.toRadians(180.0);
+        float radius = settings.subData("beacon").getFloat("shift_power");
+        drive.startVelocity();
+        while (System.currentTimeMillis() - last < wait && opModeIsActive()){
+            driveVector.setPolar(radius, theta);
         }
-        approachBeacon.chooseSide(direction);
+        driveVector.setPolar(0f, 0f);
+        approachBeacon.chooseSide();
+        //rotate(180.0, false);
         approachBeacon.press();
     }
 

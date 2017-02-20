@@ -16,6 +16,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.UltrasonicRange;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Coordinate;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.position.core.Rotation;
@@ -52,7 +53,6 @@ public class SensorTest extends LinearOpMode{
     private DcMotor motorFL;
     private DcMotor motorBL;
     private DcMotor motorBR;
-
     private boolean led = false;
 
     @Override
@@ -128,7 +128,6 @@ public class SensorTest extends LinearOpMode{
         else if (settings.getString("alliance").equals("blue")){
             alliance = Alliance.BLUE_ALLIANCE;
         }
-
         waitForStart();
         rgb.switchLED(false);
         ultraLeft.enable();

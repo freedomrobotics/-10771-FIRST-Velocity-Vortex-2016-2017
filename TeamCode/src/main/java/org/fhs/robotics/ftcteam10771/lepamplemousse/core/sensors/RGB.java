@@ -29,6 +29,7 @@ public class RGB {
     private LED leftLED = null;
     private LED rightLED = null;
     private float[] hsv = new float[3];
+    float blue_min, blue_max, red_min, red_max;
 
     /*
         Constructor with 2 RGB devices
@@ -39,7 +40,11 @@ public class RGB {
         this.rightColorSensor = rightColorSensor;
         this.leftLED = leftLED;
         this.rightLED = rightLED;
-        this.beaconSettings = settings.subData("beacon");
+        Config.ParsedData colorSettings = settings.subData("beacon");
+        red_min = colorSettings.subData("red").getFloat("min");
+        red_max = colorSettings.subData("red").getFloat("max");
+        blue_min = colorSettings.subData("blue").getFloat("min");
+        blue_max = colorSettings.subData("blue").getFloat("max");
     }
 
     /*
@@ -235,13 +240,13 @@ public class RGB {
      */
     public Alliance beaconSide(Direction direction){
         convertToHSV(direction);
-        if (hsv[2]<3 || hsv[1]<3){
+        if (hsv[0] < blue_min){
             return Alliance.UNKNOWN;
         }
-        if (hsv[0] < 10 || hsv[0] > 350) {
+        if (hsv[0] > red_min && hsv[0] < red_max) {
             return Alliance.RED_ALLIANCE;
         }
-        else if (hsv[0] > 225 || hsv[0] < 250){
+        else if (hsv[0] > blue_min && hsv[0] < blue_max){
             return Alliance.BLUE_ALLIANCE;
         }
         return Alliance.UNKNOWN;
