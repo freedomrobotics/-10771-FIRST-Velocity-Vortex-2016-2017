@@ -217,7 +217,8 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         }
 
         if (commandParser.command().equalsIgnoreCase("claim_beacon")){
-            claimBeacon(CameraVision.Image.getImage(commandParser.getArgString(0)));
+            if (commandParser.getArgsSize()==1) claimBeacon(commandParser.getArgBool(0));
+            else claimBeacon(true);
         }
 
         if (commandParser.command().equalsIgnoreCase("rotate")){
@@ -423,11 +424,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     /**
      * Claim beacon
      */
-    private void claimBeacon(CameraVision.Image image){
-        boolean left = true;
-        if (image.equals(CameraVision.Image.WHEELS) || image.equals(CameraVision.Image.GEARS)){
-            left = false;
-        }
+    private void claimBeacon(boolean left){
         long wait = settings.subData("beacon").getInt("press_time");
         long last = System.currentTimeMillis();
         float theta = left ? (float) Math.toRadians(180.0) : 0f;
