@@ -15,6 +15,7 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB;
+import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.UltrasonicRange;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.phone.camera.CameraVision;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
@@ -44,6 +45,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     private ApproachBeacon approachBeacon;
     private Alliance alliance;
     private String teamColor;
+    private UltrasonicRange backSensor;
 
     /**
      * Override this method and place your code here.
@@ -84,6 +86,9 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
                 hardwareMap.dcMotor.get(drivetrainMotors.subData("back_left").getString("map_name")),
                 hardwareMap.dcMotor.get(drivetrainMotors.subData("back_right").getString("map_name")),
                 settings, telemetry);
+
+        backSensor = new UltrasonicRange(hardwareMap.analogInput.get("ultrasonic_back"),
+                hardwareMap.digitalChannel.get("switch_back"));
 
         //setup imu
         imuHandler = new IMU(hardwareMap.get(BNO055IMU.class, settings.subData("imu").getString("map_name")));
@@ -212,7 +217,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         }
 
         if (commandParser.command().equalsIgnoreCase("claim_beacon")){
-            claimBeacon();
+            claimBeacon(CameraVision.Image.getImage(commandParser.getArgString(0)));
         }
 
         if (commandParser.command().equalsIgnoreCase("rotate")){
@@ -418,19 +423,39 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
     /**
      * Claim beacon
      */
-    private void claimBeacon(){
+    private void claimBeacon(CameraVision.Image image){
+        boolean left = true;
+        if (image.equals(CameraVision.Image.WHEELS) || image.equals(CameraVision.Image.GEARS)){
+            left = false;
+        }
         long wait = settings.subData("beacon").getInt("press_time");
         long last = System.currentTimeMillis();
-        float theta = (float) Math.toRadians(180.0);
+        float theta = left ? (float) Math.toRadians(180.0) : 0f;
         float radius = settings.subData("beacon").getFloat("shift_power");
         drive.startVelocity();
         while (System.currentTimeMillis() - last < wait && opModeIsActive()){
             driveVector.setPolar(radius, theta);
         }
         driveVector.setPolar(0f, 0f);
-        approachBeacon.chooseSide();
+        approachBeacon.chooseSide(left);
         //rotate(180.0, false);
         approachBeacon.press();
     }
 
+    public void aimVortex(){
+        float margin = settings.subData("ultrasonic").getFloat("margin");
+        float distance = settings.subData("ultrasonic").getFloat("distance_to_stop");
+        float radius = settings.subData("ultrasonic").getFloat("power");
+        backSensor.enable();
+        backSensor.streamDistance();
+        while(opModeIsActive() && Math.abs(backSensor.getDistance()-distance) > margin){
+            backSensor.streamDistance();
+            float theta = (float)Math.PI * 0.5f;
+            if (backSensor.getDistance() < distance){
+                theta *= 3f;
+            }
+            driveVector.setPolar(radius, theta);
+        }
+        driveVector.setPolar(0f, 0f);
+    }
 }
