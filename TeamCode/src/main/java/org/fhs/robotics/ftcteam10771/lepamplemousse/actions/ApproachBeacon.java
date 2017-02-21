@@ -140,11 +140,11 @@ public class ApproachBeacon {
         driveVector.setPolar(0.0f, 0.0f);
     }
 
-    public void chooseSide(){
+    public void chooseSide(boolean left){
         long lastTime = 0;
         long waitTime = 0;
         int sidesChecked = 0;
-        float theta = 0.0f;
+        float theta = left ? 0.0f : (float)Math.toRadians(180.0);
         float radius = settings.subData("beacon").getFloat("shift_power");
         drive.startVelocity();
         while (linearOpMode.opModeIsActive() && rgb.beaconSide().equals(Alliance.UNKNOWN)){
@@ -169,7 +169,7 @@ public class ApproachBeacon {
             }
             if (!beaconAlliance.equals(Alliance.UNKNOWN)){
                 waitTime = settings.subData("beacon").getInt("shift_time");
-                theta = (float)Math.toRadians(180.0);
+                theta = left ? (float)Math.toRadians(180.0) : 0.0f;
                 radius = settings.subData("beacon").getFloat("power");
                 lastTime = System.currentTimeMillis();
                 while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
