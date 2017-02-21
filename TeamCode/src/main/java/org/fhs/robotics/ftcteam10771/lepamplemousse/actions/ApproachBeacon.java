@@ -1,5 +1,6 @@
 package org.fhs.robotics.ftcteam10771.lepamplemousse.actions;
 
+import com.qualcomm.robotcore.eventloop.SyncdDevice;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -159,14 +160,23 @@ public class ApproachBeacon {
             beaconAlliance = rgb.beaconSide();
         }
         if (alliance.equals(beaconAlliance)){
-            waitTime = settings.subData("beacon").getInt("shift_time");
-            theta = (float)Math.toRadians(180.0);
-            radius = settings.subData("beacon").getFloat("power");
-            lastTime = System.currentTimeMillis();
-            while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
+            while (linearOpMode.opModeIsActive() && rgb.beaconSide().equals(alliance)){
                 driveVector.setPolar(radius, theta);
-                linearOpMode.telemetry.addData("Beacon", "correct");
-                linearOpMode.telemetry.update();
+            }
+            lastTime = System.currentTimeMillis();
+            while (linearOpMode.opModeIsActive() && System.currentTimeMillis() - lastTime < waitTime){
+                beaconAlliance = rgb.beaconSide();
+            }
+            if (!beaconAlliance.equals(Alliance.UNKNOWN)){
+                waitTime = settings.subData("beacon").getInt("shift_time");
+                theta = (float)Math.toRadians(180.0);
+                radius = settings.subData("beacon").getFloat("power");
+                lastTime = System.currentTimeMillis();
+                while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
+                    driveVector.setPolar(radius, theta);
+                    linearOpMode.telemetry.addData("Beacon", "correct");
+                    linearOpMode.telemetry.update();
+                }
             }
         }
         else while(linearOpMode.opModeIsActive() && !(rgb.beaconSide().equals(alliance) || rgb.beaconSide().equals(Alliance.UNKNOWN))){
