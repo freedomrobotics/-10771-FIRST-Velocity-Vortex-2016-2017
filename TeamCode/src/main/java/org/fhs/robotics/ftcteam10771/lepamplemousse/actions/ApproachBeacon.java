@@ -279,7 +279,7 @@ public class ApproachBeacon {
         driveVector.setPolar(0.0f, 0.0f);
     }
 
-    private void claimBeacon(){
+    public void claimBeacon(){
         long wait = settings.subData("beacon").getInt("offset_time");
         long last = System.currentTimeMillis();
         float theta = (float) Math.toRadians(180.0);

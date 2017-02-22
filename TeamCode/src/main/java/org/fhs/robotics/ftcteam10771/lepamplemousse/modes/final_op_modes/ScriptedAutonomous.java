@@ -218,7 +218,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
 
         if (commandParser.command().equalsIgnoreCase("claim_beacon")){
             if (commandParser.getArgsSize()==1) claimBeacon(commandParser.getArgBool(0));
-            else claimBeacon(true);
+            else approachBeacon.claimBeacon();
         }
 
         if (commandParser.command().equalsIgnoreCase("rotate")){
