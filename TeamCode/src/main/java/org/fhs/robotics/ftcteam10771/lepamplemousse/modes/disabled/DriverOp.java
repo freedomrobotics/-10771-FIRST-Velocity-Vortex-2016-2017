@@ -1,9 +1,10 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.final_op_modes;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled;
 
 import android.util.Log;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -32,6 +33,7 @@ import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU.Axis
 /**
  * Created by joelv on 2/17/2017.
  */
+@Disabled
 @TeleOp(name="Driver Op")
 public class DriverOp extends LinearOpMode {
 

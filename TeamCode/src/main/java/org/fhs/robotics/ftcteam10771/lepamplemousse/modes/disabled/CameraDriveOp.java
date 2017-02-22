@@ -1,7 +1,8 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
@@ -26,6 +27,7 @@ import static org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.RGB.Dire
  * Created by joelv on 2/3/2017.
  */
 @Autonomous(name="Camera Drive", group="Test")
+@Disabled
 public class CameraDriveOp extends LinearOpMode {
 
     private long lastTime;

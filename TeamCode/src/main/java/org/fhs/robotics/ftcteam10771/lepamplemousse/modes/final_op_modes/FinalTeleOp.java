@@ -215,7 +215,7 @@ public class FinalTeleOp extends OpMode{
 
     public void loop(){
         // TODO: 2/18/2017 move into imu thread
-
+        //TODO: test out the offset method for the imu in tele op
         if (controls.getDigital("calibrate")){
             imu_offset = twopi + gyrometer.getOrientation(IMU.Axis.Z);
         }

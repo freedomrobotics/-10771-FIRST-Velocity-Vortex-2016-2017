@@ -1,6 +1,7 @@
-package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.tests;
+package org.fhs.robotics.ftcteam10771.lepamplemousse.modes.disabled;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.fhs.robotics.ftcteam10771.lepamplemousse.actions.Drive;
@@ -21,6 +22,7 @@ import java.util.List;
  * Op mode to test out the drive class and the fieldmap file
  * Created by joelv on 2/6/2017.
  */
+@Disabled
 @Autonomous(name="PositionalTest", group = "Test")
 public class PositionalOpMode extends LinearOpMode {
 

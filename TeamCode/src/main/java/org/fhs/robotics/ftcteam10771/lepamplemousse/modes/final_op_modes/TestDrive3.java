@@ -282,8 +282,6 @@ public class TestDrive3 extends LinearOpMode{
             bumperLeft.setPosition(bumperPos + bumpers.subData("left_servo").getFloat("offset") / bumperRange);
             bumperRight.setPosition(bumperPos + bumpers.subData("right_servo").getFloat("offset") / bumperRange);
 
-            telemetry.addData("X inches", getX());
-            telemetry.addData("Y inches", getY());
             telemetry.update();
 
             if (controls.getDigital("launch")){
@@ -296,44 +294,6 @@ public class TestDrive3 extends LinearOpMode{
         //fixme threads not allowed after loop
         catapult.stop();
         Aliases.clearAll();
-    }
-
-    private float getX(){
-        //todo put in config file
-        float centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
-        //todo put in settings settings>encoder>centimeters_per_pulse
-        double motorAngle = Math.toRadians(settings.subData("drivetrain").getFloat("motor_angle"));
-        float A = -motorFR.getCurrentPosition()*centimeters_per_pulse;
-        float B = -motorFL.getCurrentPosition()*centimeters_per_pulse;
-        float C = -motorBL.getCurrentPosition()*centimeters_per_pulse;
-        float D = -motorBR.getCurrentPosition()*centimeters_per_pulse;
-        float AC = ((A*(float)Math.cos(Math.PI-motorAngle)) + (C*(float)Math.cos(Math.PI-motorAngle)))/2.0f;
-        float BD = ((B*(float)Math.cos(motorAngle)) + (D*(float)Math.cos(motorAngle)))/2.0f;
-        return  ((AC + BD) / 2.0f) + initialX;
-    }
-
-    private float getY(){
-        float centimeters_per_pulse = settings.subData("encoder").getFloat("centimeters_per_pulse");
-        float A = -motorFR.getCurrentPosition()*centimeters_per_pulse;
-        float B = -motorFL.getCurrentPosition()*centimeters_per_pulse;
-        float C = -motorBL.getCurrentPosition()*centimeters_per_pulse;
-        float D = -motorBR.getCurrentPosition()*centimeters_per_pulse;
-        float AC = (A+C)/2.0f;
-        float BD = (B+D)/2.0f;
-        return  ((AC + BD) / 2.0f) + initialY;
-    }
-
-    private void refresh(){
-        initialX = getX();
-        initialY = getY();
-        motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void setToggle(){

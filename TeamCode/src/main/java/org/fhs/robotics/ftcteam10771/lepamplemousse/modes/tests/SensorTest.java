@@ -47,12 +47,12 @@ public class SensorTest extends LinearOpMode{
     private UltrasonicRange ultraBack;
     private Alliance alliance = Alliance.UNKNOWN;
 
-    private Drive drive;
-    private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
-    private DcMotor motorFR;
-    private DcMotor motorFL;
-    private DcMotor motorBL;
-    private DcMotor motorBR;
+    //private Drive drive;
+    //private VectorR driveVector = new VectorR(new Coordinate(), new Rotation());
+    //private DcMotor motorFR;
+    //private DcMotor motorFL;
+    //private DcMotor motorBL;
+    //private DcMotor motorBR;
     private boolean led = false;
 
     @Override
@@ -104,13 +104,14 @@ public class SensorTest extends LinearOpMode{
         controls = new Controllers(gamepad1, gamepad2, keymapping);
         controls.initialize();
         Log.d(TAG, "controllers-init");
-
+        /*
         motorFR = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("front_right").getString("map_name"));
         motorFL = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("front_left").getString("map_name"));
         motorBL = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("back_left").getString("map_name"));
         motorBR = hardwareMap.dcMotor.get(settings.subData("drivetrain").subData("motor").subData("back_right").getString("map_name"));
 
         drive = new Drive(driveVector, new Robot(), motorFR, motorFL, motorBL, motorBR, settings, telemetry);
+        */
         ods = hardwareMap.opticalDistanceSensor.get("ods");
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         rgb = new RGB(hardwareMap.colorSensor.get("left_rgb"),
@@ -134,7 +135,7 @@ public class SensorTest extends LinearOpMode{
         ultraRight.enable();
         ultraBack.enable();
         imuHandler.imuInit();
-        drive.startVelocity();
+        //drive.startVelocity();
         try {
             while (opModeIsActive()){
 
@@ -145,7 +146,7 @@ public class SensorTest extends LinearOpMode{
                 ultraRight.streamDistance();
                 ultraBack.streamDistance();
                 imuHandler.streamIMUData();
-
+                /*
                 double joystickTheta = Math.atan2((controls.getAnalog("drivetrain_y")),(controls.getAnalog("drivetrain_x"))); //declares the angle of joystick position in standard polar coordinates
                 joystickTheta -= (Math.PI * 2.0) + gyrometer.getOrientation(IMU.Axis.Z);
 
@@ -163,7 +164,7 @@ public class SensorTest extends LinearOpMode{
                 double rotationalPower = controls.getAnalog("drivetrain_rotate"); //sets the power of rotation by finding the difference between the left and right triggers
                 driveVector.setPolar((float)joystickRadius, (float)joystickTheta);
                 driveVector.setRad((float)rotationalPower);
-
+                */
 
                 telemetry.addData("Alliance", settings.getString("alliance"));
                 telemetry.addData("===========", "==============");
@@ -177,13 +178,14 @@ public class SensorTest extends LinearOpMode{
                 telemetry.addData("Blue-L", rgb.blue());
                 telemetry.addData("Red", rgb.red());
                 telemetry.addData("Green", rgb.green());
+                telemetry.addData("BeaconStatus", rgb.beaconSide().getAlliance());
                 telemetry.addData("===========", "==============");
                 telemetry.addData("Gyro-Z", Math.abs(gyrometer.convert(Z, gyrometer.getOrientation(Z))));
                 telemetry.addData("ODS", ods.getLightDetected());
                 telemetry.update();
             }
         } catch (Exception e){
-            drive.stop();
+            //drive.stop();
         }
 
     }
