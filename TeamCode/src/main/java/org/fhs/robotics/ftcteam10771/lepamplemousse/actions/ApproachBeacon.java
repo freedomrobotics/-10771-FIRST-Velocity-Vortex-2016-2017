@@ -130,7 +130,7 @@ public class ApproachBeacon {
     public void press(){
         long waitTime = settings.subData("beacon").getInt("press_time"); //todo put in config file
         long lastTime = System.currentTimeMillis();
-        float radius = settings.subData("beacon").getFloat("power");
+        float radius = settings.subData("beacon").getFloat("press_power");
         drive.startVelocity();
         while (System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
             driveVector.setPolar(radius, (float)Math.toRadians(270.0));
@@ -141,30 +141,29 @@ public class ApproachBeacon {
     }
 
     public void chooseSide(boolean left){
+        Alliance beaconAlliance = rgb.beaconSide();
         long lastTime = 0;
         long waitTime = 0;
         int sidesChecked = 0;
         float theta = left ? 0.0f : (float)Math.toRadians(180.0);
         float radius = settings.subData("beacon").getFloat("shift_power");
         drive.startVelocity();
-        while (linearOpMode.opModeIsActive() && rgb.beaconSide().equals(Alliance.UNKNOWN)){
+        while (linearOpMode.opModeIsActive() && beaconAlliance.equalsAlliance(Alliance.UNKNOWN)){
             driveVector.setPolar(radius, theta);
-            linearOpMode.telemetry.addData("Beacon", "unknown");
-            linearOpMode.telemetry.addData("Alliance", alliance.getAlliance());
-            linearOpMode.telemetry.addData("BeaconSide", rgb.beaconSide().getAlliance());
-            linearOpMode.telemetry.update();
-        }
-        lastTime = System.currentTimeMillis();
-        waitTime = settings.subData("beacon").getInt("check_time");
-        Alliance beaconAlliance = rgb.beaconSide();
-        while  (linearOpMode.opModeIsActive() && System.currentTimeMillis() - lastTime < waitTime){
-            driveVector.setPolar(0.0f, 0.0f);
             beaconAlliance = rgb.beaconSide();
         }
-        if (alliance.equals(beaconAlliance)){
-            while (linearOpMode.opModeIsActive() && rgb.beaconSide().equals(alliance)){
+        driveVector.setPolar(0.0f, 0.0f);
+        lastTime = System.currentTimeMillis();
+        waitTime = settings.subData("beacon").getInt("check_time");
+        while  (linearOpMode.opModeIsActive() && System.currentTimeMillis() - lastTime < waitTime){
+            beaconAlliance = rgb.beaconSide();
+        }
+        if (alliance.equalsAlliance(beaconAlliance)){
+            while (linearOpMode.opModeIsActive() && beaconAlliance.equalsAlliance(alliance)){
                 driveVector.setPolar(radius, theta);
+                beaconAlliance = rgb.beaconSide();
             }
+            driveVector.setPolar(0,0);
             lastTime = System.currentTimeMillis();
             while (linearOpMode.opModeIsActive() && System.currentTimeMillis() - lastTime < waitTime){
                 beaconAlliance = rgb.beaconSide();
@@ -172,31 +171,32 @@ public class ApproachBeacon {
             if (!beaconAlliance.equals(Alliance.UNKNOWN)){
                 waitTime = settings.subData("beacon").getInt("shift_time");
                 long addedValue = settings.subData("beacon").getInt("add_time");
-                int divisor = settings.subData("beacon").getInt("right_side_divisor");
+                //int divisor = settings.subData("beacon").getInt("right_side_divisor");
                 //todo right side
-                waitTime = left ? waitTime + addedValue : waitTime / divisor;
+                waitTime = waitTime + addedValue;
                 theta = left ? (float)Math.toRadians(180.0) : 0.0f;
-                radius = settings.subData("beacon").getFloat("power");
+                radius = settings.subData("beacon").getFloat("fast_power");
                 lastTime = System.currentTimeMillis();
-                while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
-                    driveVector.setPolar(radius, theta);
-                    linearOpMode.telemetry.addData("Beacon", "correct");
-                    linearOpMode.telemetry.addData("Alliance", alliance.getAlliance());
-                    linearOpMode.telemetry.addData("BeaconSide", rgb.beaconSide().getAlliance());
-                    linearOpMode.telemetry.update();
+                if (left){
+                    while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
+                        driveVector.setPolar(radius, theta);
+                    }
+                }
+                else {
+                    beaconAlliance = rgb.beaconSide();
+                    while (linearOpMode.opModeIsActive() && !alliance.equalsAlliance(beaconAlliance)) {
+                        driveVector.setPolar(radius, theta);
+                        beaconAlliance = rgb.beaconSide();
+                    }
                 }
             }
         }
         else while(linearOpMode.opModeIsActive() && !(rgb.beaconSide().equals(alliance) || rgb.beaconSide().equals(Alliance.UNKNOWN))){
             driveVector.setPolar(radius, theta);
-            linearOpMode.telemetry.addData("Beacon", "incorrect");
-            linearOpMode.telemetry.addData("Alliance", alliance.getAlliance());
-            linearOpMode.telemetry.addData("BeaconSide", rgb.beaconSide().getAlliance());
-            linearOpMode.telemetry.update();
         }
         if (!left){
             waitTime = settings.subData("beacon").getInt("shift_time");
-            radius = settings.subData("beacon").getFloat("power");
+            radius = settings.subData("beacon").getFloat("fast_power");
             lastTime = System.currentTimeMillis();
             while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
                 driveVector.setPolar(radius, theta);
@@ -235,5 +235,9 @@ public class ApproachBeacon {
             Coordinate coordinate = cameraVision.updateCoordinates();
             drive.initPosition(coordinate.getX(), coordinate.getY());
         }
+    }
+
+    public String beaconAlliance(){
+        return rgb.beaconSide().getAlliance();
     }
 }

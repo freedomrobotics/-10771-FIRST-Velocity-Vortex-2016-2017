@@ -246,7 +246,7 @@ public class RGB {
             return Alliance.UNKNOWN;
         }
         if (red_max < red_min) {
-            if (hsv[0] < red_min || hsv[0] > red_max)
+            if (hsv[0] > red_min || hsv[0] < red_max)
                 return Alliance.RED_ALLIANCE;
         }
         if (hsv[0] > red_min && hsv[0] < red_max) {

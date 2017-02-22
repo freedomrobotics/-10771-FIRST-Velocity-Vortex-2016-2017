@@ -34,6 +34,7 @@ public class FinalTeleOp extends OpMode{
     private DcMotor motorBL;
     private DcMotor motorBR;
     private DcMotor intakeMotor;
+    private DcMotor liftMotor;
 
     //Servos used
     private Servo bumperLeft;
@@ -152,6 +153,9 @@ public class FinalTeleOp extends OpMode{
 
         Log.d(TAG, "DRIVETRAIN SETUP DONE");
 
+        //lift motor
+        //liftMotor = hardwareMap.dcMotor.get("lift");
+        //todo 2/22
         intakeMotor = hardwareMap.dcMotor.get("motorIntake");
         ballDropper = hardwareMap.servo.get("drop");
         if (settings.subData("drop").getBool("reversed")){
@@ -223,6 +227,11 @@ public class FinalTeleOp extends OpMode{
         } if (intakePower > 1){
             intakePower = 1;
         }
+        /*
+        if (controls.getToggle("lift")){
+
+        }
+        */
         intakePower += gamepad1.right_stick_y / settings.getInt("intake_divisor");
         driveVector.setX(controls.getAnalog("drivetrain_x"));
         driveVector.setY(controls.getAnalog("drivetrain_y"));
