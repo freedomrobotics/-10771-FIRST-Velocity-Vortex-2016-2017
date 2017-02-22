@@ -425,10 +425,10 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
      * Claim beacon
      */
     private void claimBeacon(boolean left){
-        long wait = settings.subData("beacon").getInt("press_time");
+        long wait = settings.subData("beacon").getInt("offset_time");
         long last = System.currentTimeMillis();
         float theta = left ? (float) Math.toRadians(180.0) : 0f;
-        float radius = settings.subData("beacon").getFloat("shift_power");
+        float radius = settings.subData("beacon").getFloat("fast_power");
         drive.startVelocity();
         while (System.currentTimeMillis() - last < wait && opModeIsActive()){
             driveVector.setPolar(radius, theta);

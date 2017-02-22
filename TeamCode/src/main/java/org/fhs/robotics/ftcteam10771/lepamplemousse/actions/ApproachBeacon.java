@@ -240,4 +240,57 @@ public class ApproachBeacon {
     public String beaconAlliance(){
         return rgb.beaconSide().getAlliance();
     }
+
+    public void defaultChoose(){
+        long lastTime = 0;
+        long waitTime = 0;
+        int sidesChecked = 0;
+        float theta = 0.0f;
+        float radius = settings.subData("beacon").getFloat("shift_power");
+        drive.startVelocity();
+        while (linearOpMode.opModeIsActive() && rgb.beaconSide().equals(Alliance.UNKNOWN)){
+            driveVector.setPolar(radius, theta);
+            linearOpMode.telemetry.addData("Beacon", "unknown");
+            linearOpMode.telemetry.update();
+        }
+        lastTime = System.currentTimeMillis();
+        waitTime = settings.subData("beacon").getInt("check_time");
+        Alliance beaconAlliance = rgb.beaconSide();
+        while  (linearOpMode.opModeIsActive() && System.currentTimeMillis() - lastTime < waitTime){
+            driveVector.setPolar(0.0f, 0.0f);
+            beaconAlliance = rgb.beaconSide();
+        }
+        if (alliance.equals(beaconAlliance)){
+            waitTime = settings.subData("beacon").getInt("shift_time");
+            theta = (float)Math.toRadians(180.0);
+            radius = settings.subData("beacon").getFloat("power");
+            lastTime = System.currentTimeMillis();
+            while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
+                driveVector.setPolar(radius, theta);
+                linearOpMode.telemetry.addData("Beacon", "correct");
+                linearOpMode.telemetry.update();
+            }
+        }
+        else while(linearOpMode.opModeIsActive() && !(rgb.beaconSide().equals(alliance) || rgb.beaconSide().equals(Alliance.UNKNOWN))){
+            driveVector.setPolar(radius, theta);
+            linearOpMode.telemetry.addData("Beacon", "incorrect");
+            linearOpMode.telemetry.update();
+        }
+        driveVector.setPolar(0.0f, 0.0f);
+    }
+
+    private void claimBeacon(){
+        long wait = settings.subData("beacon").getInt("offset_time");
+        long last = System.currentTimeMillis();
+        float theta = (float) Math.toRadians(180.0);
+        float radius = settings.subData("beacon").getFloat("fast_power");
+        drive.startVelocity();
+        while (System.currentTimeMillis() - last < wait && linearOpMode.opModeIsActive()){
+            driveVector.setPolar(radius, theta);
+        }
+        driveVector.setPolar(0f, 0f);
+        defaultChoose();
+        //rotate(180.0, false);
+        press();
+    }
 }
