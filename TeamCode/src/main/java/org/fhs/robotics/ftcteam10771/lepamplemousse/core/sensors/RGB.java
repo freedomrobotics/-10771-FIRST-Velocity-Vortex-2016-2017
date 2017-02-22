@@ -242,7 +242,7 @@ public class RGB {
      */
     public Alliance beaconSide(Direction direction){
         convertToHSV(direction);
-        if (hsv[2] < value_min || hsv[1] < saturation_min){
+        if (hsv[2] < value_min && hsv[1] < saturation_min){
             return Alliance.UNKNOWN;
         }
         if (red_max < red_min) {

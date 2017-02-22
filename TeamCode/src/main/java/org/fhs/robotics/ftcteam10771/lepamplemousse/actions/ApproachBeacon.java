@@ -150,6 +150,8 @@ public class ApproachBeacon {
         while (linearOpMode.opModeIsActive() && rgb.beaconSide().equals(Alliance.UNKNOWN)){
             driveVector.setPolar(radius, theta);
             linearOpMode.telemetry.addData("Beacon", "unknown");
+            linearOpMode.telemetry.addData("Alliance", alliance.getAlliance());
+            linearOpMode.telemetry.addData("BeaconSide", rgb.beaconSide().getAlliance());
             linearOpMode.telemetry.update();
         }
         lastTime = System.currentTimeMillis();
@@ -179,6 +181,8 @@ public class ApproachBeacon {
                 while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
                     driveVector.setPolar(radius, theta);
                     linearOpMode.telemetry.addData("Beacon", "correct");
+                    linearOpMode.telemetry.addData("Alliance", alliance.getAlliance());
+                    linearOpMode.telemetry.addData("BeaconSide", rgb.beaconSide().getAlliance());
                     linearOpMode.telemetry.update();
                 }
             }
@@ -186,6 +190,8 @@ public class ApproachBeacon {
         else while(linearOpMode.opModeIsActive() && !(rgb.beaconSide().equals(alliance) || rgb.beaconSide().equals(Alliance.UNKNOWN))){
             driveVector.setPolar(radius, theta);
             linearOpMode.telemetry.addData("Beacon", "incorrect");
+            linearOpMode.telemetry.addData("Alliance", alliance.getAlliance());
+            linearOpMode.telemetry.addData("BeaconSide", rgb.beaconSide().getAlliance());
             linearOpMode.telemetry.update();
         }
         if (!left){

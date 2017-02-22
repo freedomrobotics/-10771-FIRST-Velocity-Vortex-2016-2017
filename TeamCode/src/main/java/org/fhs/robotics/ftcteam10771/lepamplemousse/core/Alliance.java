@@ -5,7 +5,7 @@ package org.fhs.robotics.ftcteam10771.lepamplemousse.core;
  */
 
 public enum Alliance {
-    UNKNOWN ("unknown", "general"),
+    UNKNOWN ("unknown", "unknown"),
     RED_ALLIANCE ("red", "general"),
     RED_ALLIANCE_INSIDE ("red", "inside"),
     RED_ALLIANCE_OUTSIDE ("red", "outside"),
@@ -34,5 +34,13 @@ public enum Alliance {
 
     public String toString() {
         return this.name();
+    }
+
+    public boolean equalsAlliance(Alliance alliance){
+        return alliance.getAlliance().equalsIgnoreCase(this.alliance);
+    }
+
+    public boolean equalsPosition(Alliance alliance) {
+        return alliance.getPosition().equalsIgnoreCase(this.position);
     }
 }
