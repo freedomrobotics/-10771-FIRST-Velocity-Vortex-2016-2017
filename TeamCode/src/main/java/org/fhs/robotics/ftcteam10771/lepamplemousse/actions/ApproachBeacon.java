@@ -169,6 +169,10 @@ public class ApproachBeacon {
             }
             if (!beaconAlliance.equals(Alliance.UNKNOWN)){
                 waitTime = settings.subData("beacon").getInt("shift_time");
+                long addedValue = settings.subData("beacon").getInt("add_time");
+                int divisor = settings.subData("beacon").getInt("right_side_divisor");
+                //todo right side
+                waitTime = left ? waitTime + addedValue : waitTime / divisor;
                 theta = left ? (float)Math.toRadians(180.0) : 0.0f;
                 radius = settings.subData("beacon").getFloat("power");
                 lastTime = System.currentTimeMillis();
@@ -183,6 +187,14 @@ public class ApproachBeacon {
             driveVector.setPolar(radius, theta);
             linearOpMode.telemetry.addData("Beacon", "incorrect");
             linearOpMode.telemetry.update();
+        }
+        if (!left){
+            waitTime = settings.subData("beacon").getInt("shift_time");
+            radius = settings.subData("beacon").getFloat("power");
+            lastTime = System.currentTimeMillis();
+            while(System.currentTimeMillis() - lastTime < waitTime && linearOpMode.opModeIsActive()){
+                driveVector.setPolar(radius, theta);
+            }
         }
         driveVector.setPolar(0.0f, 0.0f);
     }

@@ -149,12 +149,12 @@ public class RGB {
     public int red(Direction direction){
         if (direction==LEFT){
             if (leftColorSensor != null) {
-                return leftColorSensor.red();
+                return leftColorSensor.red()/4;
             }
         }
         else if (direction==RIGHT){
             if (rightColorSensor != null) {
-                return rightColorSensor.red();
+                return rightColorSensor.red()/4;
             }
         }
         else {
@@ -173,12 +173,12 @@ public class RGB {
     public int green(Direction direction){
         if (direction==LEFT){
             if (leftColorSensor != null) {
-                return leftColorSensor.green();
+                return leftColorSensor.green()/4;
             }
         }
         else if (direction==RIGHT){
             if (rightColorSensor != null) {
-                return rightColorSensor.green();
+                return rightColorSensor.green()/4;
             }
         }
         else {
@@ -197,12 +197,12 @@ public class RGB {
     public int blue(Direction direction){
         if (direction==LEFT){
             if (leftColorSensor != null) {
-                return leftColorSensor.blue();
+                return leftColorSensor.blue()/4;
             }
         }
         else if (direction==RIGHT){
             if (rightColorSensor != null) {
-                return rightColorSensor.blue();
+                return rightColorSensor.blue()/4;
             }
         }
         else {
