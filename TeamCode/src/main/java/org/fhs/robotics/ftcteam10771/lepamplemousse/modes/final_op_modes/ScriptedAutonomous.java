@@ -441,7 +441,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         driveVector.setPolar(0f, 0f);
         approachBeacon.chooseSide(left);
         //rotate(180.0, false);
-        //approachBeacon.press();
+        approachBeacon.press();
     }
 
     public void aimVortex(){
