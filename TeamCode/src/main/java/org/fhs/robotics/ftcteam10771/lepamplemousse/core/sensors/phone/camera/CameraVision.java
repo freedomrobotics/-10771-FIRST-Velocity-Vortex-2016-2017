@@ -577,6 +577,12 @@ public class CameraVision {
             y = Coordinate.convertTo(y, Coordinate.UNIT.MM_TO_UNIT);
             x = targetedImage.getxCoordinate() - x;
             y = targetedImage.getyCoordinate() - y;
+            if (targetedImage==Image.GEARS || targetedImage==Image.TOOLS){
+                y -= 22.86;
+            }
+            if (targetedImage==Image.WHEELS || targetedImage==Image.LEGOS){
+                x += 22.86;
+            }
             coordinate.setX(x);
             coordinate.setY(y);
             return coordinate;
