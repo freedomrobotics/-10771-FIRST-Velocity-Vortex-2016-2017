@@ -41,6 +41,8 @@ public class Drive {
     //Positional drive stuff
     private float initialX = 0.0f;
     private float initialY = 0.0f;
+    private float archivedX = 0.0f;
+    private float archivedY = 0.0f;
     private Config.ParsedData settings;
 
 
@@ -384,9 +386,7 @@ public class Drive {
         return vectorDriveActive;
     }
 
-    public void refresh(){
-        initialX = getX();
-        initialY = getY();
+    public void resetEncoders(){
         frMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         blMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -398,9 +398,18 @@ public class Drive {
     }
 
     public void initPosition(float x, float y){
-        refresh();
         initialX = x;
         initialY = y;
+    }
+
+    public void archivePosition(){
+        archivedX = robot.getPosition().getX();
+        archivedY = robot.getPosition().getY();
+    }
+
+    public void setArchivedPosition(){
+        initialX = archivedX;
+        initialY = archivedY;
     }
 
     public boolean isAtPosition(){

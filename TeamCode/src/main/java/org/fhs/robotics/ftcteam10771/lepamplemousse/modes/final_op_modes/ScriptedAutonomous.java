@@ -221,6 +221,11 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             else approachBeacon.claimBeacon();
         }
 
+        if (commandParser.command().equalsIgnoreCase("reset_position")){
+            drive.resetEncoders();
+            drive.initPosition(0f, 0f);
+        }
+
         if (commandParser.command().equalsIgnoreCase("rotate")){
             if (commandParser.getArgsSize() == 2){
                 rotate(commandParser.getArgFloat(0), commandParser.getArgBool(1));
