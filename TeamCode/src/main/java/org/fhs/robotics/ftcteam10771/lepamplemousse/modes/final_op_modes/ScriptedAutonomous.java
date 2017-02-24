@@ -171,8 +171,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             return;
         }
 
-
-        if (commandParser.command().equalsIgnoreCase("detect_image")) {
+        if (commandParser.command().equalsIgnoreCase("approach_beacon")){
             approachBeacon.cameraVision().vuforiaInit();
             if (commandParser.getArgsSize() == 1) {
                 approachBeacon.cameraVision().setAutoTarget(false);
@@ -188,42 +187,16 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             }
             drive.setRelative(true);
             drive.startVelocity();
-            return;
-        }
-
-        if (commandParser.command().equalsIgnoreCase("rotate_image")){
-            approachBeacon.rotate();
-            return;
-        }
-
-        if (commandParser.command().equalsIgnoreCase("center_image")){
-            approachBeacon.center();
-            return;
-        }
-
-        if (commandParser.command().equalsIgnoreCase("approach_image")){
-            approachBeacon.approach();
-            return;
-        }
-
-        if (commandParser.command().equalsIgnoreCase("center_rotate_image")){
             approachBeacon.centerRotate();
-            return;
-        }
-
-        if (commandParser.command().equalsIgnoreCase("stop_camera")){
+            approachBeacon.approach();
             approachBeacon.cameraVision().toggleVuforia(false);
             approachBeacon.cameraVision().stop();
+            return;
         }
 
         if (commandParser.command().equalsIgnoreCase("claim_beacon")){
             if (commandParser.getArgsSize()==1) claimBeacon(commandParser.getArgBool(0));
             else approachBeacon.claimBeacon();
-        }
-
-        if (commandParser.command().equalsIgnoreCase("reset_position")){
-            drive.resetEncoders();
-            drive.initPosition(0f, 0f);
         }
 
         if (commandParser.command().equalsIgnoreCase("rotate")){
@@ -256,7 +229,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             return;
         }
 
-        if (commandParser.command().equalsIgnoreCase("coordinate")){
+        if (commandParser.command().equalsIgnoreCase("move")){
             coordinate(commandParser.getArgFloat(0), commandParser.getArgFloat(1));
             return;
         }

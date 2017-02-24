@@ -202,24 +202,6 @@ public class Drive {
 
         this.settings = settings;
         String team = settings.getString("alliance");
-        //if (fieldmap!=null) this.fieldmap = fieldmap.subData("coordinates").subData(team);
-
-        /*
-        if (this.settings.subData("drive").getBool("init_with_fieldmap")){
-            String initial_position = settings.getString("position");
-            if (((!initial_position.equals("inside"))) && (!initial_position.equals("outside"))){
-                initial_position = "inside";
-            }
-            robot.position.setX(this.fieldmap.subData(initial_position).getFloat("x"));
-            robot.position.setY(this.fieldmap.subData(initial_position).getFloat("y"));
-            robot.rotation.setRadians(0.0f);
-        }
-
-        else {
-            robot.position.setX(settings.subData("robot").subData("initial_position").getFloat("x"));
-            robot.position.setY(settings.subData("robot").subData("initial_position").getFloat("y"));
-            robot.rotation.setRadians(settings.subData("robot").getFloat("initial_rotation"));
-        }*/
 
         //fixme would this work?
         initialX = settings.subData("robot").subData("initial_position").getFloat("x");
