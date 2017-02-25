@@ -116,6 +116,7 @@ public class Catapult {
                     while (!Thread.currentThread().isInterrupted() && !launch) {
                         if (!catapultReady()) break;
                         oscillate();
+                        Thread.yield();
                     }
 
                     //In case the previous loop was broken for interrupted signal, break to the end here
@@ -135,6 +136,7 @@ public class Catapult {
                 }
                 //runs this until catapult is ready for whatever reason.
                 runCatapult();
+                Thread.yield();
             }
             //Last things run (outside the isInterrupted() loop).
             catapult.setTargetPosition(0);

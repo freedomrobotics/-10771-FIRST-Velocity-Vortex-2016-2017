@@ -88,87 +88,97 @@ public class Drive {
         @Override
         public void run() {
 
-            while (!Thread.currentThread().isInterrupted()) {
+            synchronized (this) {
+                while (!Thread.currentThread().isInterrupted()) {
 
-                if (pause) continue;
-
-                float theta = vectorR.getTheta();
-                float velocity;
-                float rotation;
-                updatePosition();
-                if (vectorDriveActive) {
-                    //sets values from the vectorR needed for movement
-                    velocity = vectorR.getRadius();
-                    rotation = vectorR.getRawR();
-
-                    if (!relativeDrive) { //if the robot drives relative to the field
-                        theta -= robot.getRotation().getRadians();
+                    while (pause) {
+                        try {
+                            this.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
-                } else {
-                    VectorR difference = VectorR.sub(vectorR, robot.getVectorR());
-                    theta = difference.getTheta();
 
-                    //todo put drivetrain/positional/position_margin
-                    atPosition = Coordinate.convertTo(difference.getRadius(), Coordinate.UNIT.UNIT_TO_CM) < Math.abs(position_tolerance);
+                    float theta = vectorR.getTheta();
+                    float velocity;
+                    float rotation;
+                    updatePosition();
+                    if (vectorDriveActive) {
+                        //sets values from the vectorR needed for movement
+                        velocity = vectorR.getRadius();
+                        rotation = vectorR.getRawR();
 
-                    if (!atPosition)
-                        velocity = position_speed;
-                    else velocity = 0;
+                        if (!relativeDrive) { //if the robot drives relative to the field
+                            theta -= robot.getRotation().getRadians();
+                        }
+                    } else {
+                        VectorR difference = VectorR.sub(vectorR, robot.getVectorR());
+                        theta = difference.getTheta();
+
+                        //todo put drivetrain/positional/position_margin
+                        atPosition = Coordinate.convertTo(difference.getRadius(), Coordinate.UNIT.UNIT_TO_CM) < Math.abs(position_tolerance);
+
+                        if (!atPosition)
+                            velocity = position_speed;
+                        else velocity = 0;
 
 
-                    float factor = difference.getRad() > 3.1415927f ? (6.2831854f - difference.getRad()) / 3.1415927f : difference.getRad() / 3.1415927f;
-                    atRotation = factor < rotation_tolerance;
+                        float factor = difference.getRad() > 3.1415927f ? (6.2831854f - difference.getRad()) / 3.1415927f : difference.getRad() / 3.1415927f;
+                        atRotation = factor < rotation_tolerance;
 
-                    if (!atRotation) {
-                        float sign = vectorR.getRad() - robot.getVectorR().getRad();
-                        rotation = (float) Math.copySign(Range.scale(factor, 0, 1,
-                                rotation_speed_min, rotation_speed),
-                                difference.getRad() > 3.1415927f ? -sign : sign);
-                    } else rotation = 0;
+                        if (!atRotation) {
+                            float sign = vectorR.getRad() - robot.getVectorR().getRad();
+                            rotation = (float) Math.copySign(Range.scale(factor, 0, 1,
+                                    rotation_speed_min, rotation_speed),
+                                    difference.getRad() > 3.1415927f ? -sign : sign);
+                        } else rotation = 0;
+                    }
+
+                    //calculates the shaft magnitude (AC shaft has diagonal motors "A" and "C")
+                    float ACShaftPower = (float) -((Math.sin(theta - (Math.PI / 4))) * velocity);
+                    float BDShaftPower = (float) -((Math.cos(theta - (Math.PI / 4))) * velocity);
+
+                    //sets the motor power where the ratio of input from translational motion is dictated by the magnitude of the rotational motion
+                    double ACRotationalPower = (rotation + ACShaftPower) == 0 ? 0 : (rotation * Math.abs(rotation)) / (Math.abs(rotation) + Math.abs(ACShaftPower));
+                    double BDRotationalPower = (rotation + BDShaftPower) == 0 ? 0 : (rotation * Math.abs(rotation)) / (Math.abs(rotation) + Math.abs(BDShaftPower));
+
+                    fr = (-ACRotationalPower) + (ACShaftPower * (1.0 - Math.abs(ACRotationalPower)));
+                    fl = (BDRotationalPower) + (BDShaftPower * (1.0 - Math.abs(BDRotationalPower)));
+                    bl = (ACRotationalPower) + (ACShaftPower * (1.0 - Math.abs(ACRotationalPower)));
+                    br = (-BDRotationalPower) + (BDShaftPower * (1.0 - Math.abs(BDRotationalPower)));
+
+                    frPow = Range.scale(fr, -1, 1, -motorScale, motorScale);
+                    flPow = Range.scale(fl, -1, 1, -motorScale, motorScale);
+                    blPow = Range.scale(bl, -1, 1, -motorScale, motorScale);
+                    brPow = Range.scale(br, -1, 1, -motorScale, motorScale);
+
+                    //calculates the motor powers
+                    if (!Thread.currentThread().isInterrupted()) {
+                        frMotor.setPower(frPow);
+                        flMotor.setPower(flPow);
+                        blMotor.setPower(blPow);
+                        brMotor.setPower(brPow);
+                    } else {
+                        frMotor.setPower(0.0f);
+                        flMotor.setPower(0.0f);
+                        blMotor.setPower(0.0f);
+                        brMotor.setPower(0.0f);
+                    }
+
+
+                    double currentVelocity = (blMotor.getCurrentPosition() - pastPosition) * (/*time**/pastPositionTime);
+                    //TODO: Continue work here(uncomment first)
+                    pastPositionTime = System.nanoTime();
+
+                    if (currentVelocity > 0) {
+                        velocityFeedback.setX((float) ((currentVelocity) * (Math.cos(Math.PI / 3))));
+                        velocityFeedback.setY((float) ((currentVelocity) * (Math.cos(Math.PI / 3))));
+                    }
+                    pastPosition = blMotor.getCurrentPosition();
+                    this.notifyAll();
+                    Thread.yield();
                 }
-
-                //calculates the shaft magnitude (AC shaft has diagonal motors "A" and "C")
-                float ACShaftPower = (float) -((Math.sin(theta - (Math.PI / 4))) * velocity);
-                float BDShaftPower = (float) -((Math.cos(theta - (Math.PI / 4))) * velocity);
-
-                //sets the motor power where the ratio of input from translational motion is dictated by the magnitude of the rotational motion
-                double ACRotationalPower = (rotation+ACShaftPower) == 0 ? 0 : (rotation*Math.abs(rotation))/(Math.abs(rotation)+Math.abs(ACShaftPower));
-                double BDRotationalPower = (rotation+BDShaftPower) == 0 ? 0 : (rotation*Math.abs(rotation))/(Math.abs(rotation)+Math.abs(BDShaftPower));
-
-                fr = (-ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
-                fl = (BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
-                bl = (ACRotationalPower)+(ACShaftPower*(1.0-Math.abs(ACRotationalPower)));
-                br = (-BDRotationalPower)+(BDShaftPower*(1.0-Math.abs(BDRotationalPower)));
-
-                frPow = Range.scale(fr, -1, 1, -motorScale, motorScale);
-                flPow = Range.scale(fl, -1, 1, -motorScale, motorScale);
-                blPow = Range.scale(bl, -1, 1, -motorScale, motorScale);
-                brPow = Range.scale(br, -1, 1, -motorScale, motorScale);
-
-                //calculates the motor powers
-                if (!Thread.currentThread().isInterrupted()){
-                    frMotor.setPower(frPow);
-                    flMotor.setPower(flPow);
-                    blMotor.setPower(blPow);
-                    brMotor.setPower(brPow);
-                }
-                else{
-                    frMotor.setPower(0.0f);
-                    flMotor.setPower(0.0f);
-                    blMotor.setPower(0.0f);
-                    brMotor.setPower(0.0f);
-                }
-
-
-                double currentVelocity = (blMotor.getCurrentPosition()-pastPosition)*(/*time**/pastPositionTime);
-                //TODO: Continue work here(uncomment first)
-                pastPositionTime = System.nanoTime();
-
-                if(currentVelocity>0){
-                    velocityFeedback.setX((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
-                    velocityFeedback.setY((float) ((currentVelocity)*(Math.cos(Math.PI/3))));
-                }
-                pastPosition = blMotor.getCurrentPosition();
+                this.notifyAll();
             }
             frMotor.setPower(0.0);
             flMotor.setPower(0.0);
@@ -268,6 +278,8 @@ public class Drive {
         vectorDriveActive = true;
         if (!driveThread.isAlive())
             driveThread.start();
+        else
+            this.notifyAll();
     }
 
     /**
@@ -282,10 +294,55 @@ public class Drive {
         atPosition = false;
         if (!driveThread.isAlive())
             driveThread.start();
+        else
+            this.notifyAll();
     }
 
     public void pause(){
+        waitOneLoop();
         pause = true;
+    }
+
+    public void resume(){
+        pause = false;
+        if (driveThread.isAlive())
+            this.notifyAll();
+    }
+
+    public void waitOneLoop(){
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void waitAtPosition(){
+        synchronized (this) {
+            while (!atPosition) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+        }
+    }
+
+    public void waitAtRotation(){
+        synchronized (this) {
+            while (!atRotation) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+        }
     }
 
     /**

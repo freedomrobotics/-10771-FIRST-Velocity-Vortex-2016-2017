@@ -14,7 +14,6 @@ import org.fhs.robotics.ftcteam10771.lepamplemousse.config.Config;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Alliance;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Components;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.Controllers;
-import org.fhs.robotics.ftcteam10771.lepamplemousse.core.components.Aliases;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.mechanisms.Catapult;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.sensors.IMU;
 import org.fhs.robotics.ftcteam10771.lepamplemousse.core.vars.Static;
@@ -95,16 +94,6 @@ public class FinalTeleOp extends OpMode{
             Log.d(TAG, "keymapping-read-again");
         }
 
-        Config components = new Config(Static.configPath, Static.configCompFileName + Static.configFileSufffix, telemetry, "components");
-        Log.d(TAG, "components");
-        if (components.read() == Config.State.DEFAULT_EXISTS) {
-            components.create(true);
-            Log.d(TAG, "components-read-fail-create");
-            if (components.read() == Config.State.DEFAULT_EXISTS)
-                components.read(true);
-            Log.d(TAG, "components-read-again");
-        }
-
         rawSettings = new Config(Static.configPath, Static.configVarFileName + Static.configFileSufffix, telemetry, "settings");
         Log.d(TAG, "settings");
         if (rawSettings.read() == Config.State.DEFAULT_EXISTS) {
@@ -125,9 +114,6 @@ public class FinalTeleOp extends OpMode{
         robot = new Robot(initialX, initialY, initialRot, blueTeam ? Alliance.BLUE_ALLIANCE : Alliance.RED_ALLIANCE);
         robot.getRotation().setHeading(initialRot);
 
-        this.components = new Components(hardwareMap, telemetry, components);
-        Log.d(TAG, "components-object");
-        this.components.initialize();
         Log.d(TAG, "components-init");
         controls = new Controllers(gamepad1, gamepad2, keymapping);
         controls.initialize();
@@ -150,8 +136,12 @@ public class FinalTeleOp extends OpMode{
 
         Log.d(TAG, "DRIVETRAIN SETUP DONE");
 
-        intakeMotor = hardwareMap.dcMotor.get("motorIntake");
-        ballDropper = hardwareMap.servo.get("drop");
+        intakeMotor = hardwareMap.dcMotor.get(settings.subData("intake").getString("map_name"));
+        if (settings.subData("intake").getBool("reversed"))
+            intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+        else intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        ballDropper = hardwareMap.servo.get(settings.subData("drop").getString("map_name"));
         if (settings.subData("drop").getBool("reversed")){
             ballDropper.setDirection(Servo.Direction.REVERSE);
         } else{
@@ -167,8 +157,8 @@ public class FinalTeleOp extends OpMode{
         bumperVel = bumpers.getFloat("max_ang_vel");
         bumperMax = bumpers.getFloat("max_rotate");
 
-        bumperLeft = Aliases.servoMap.get(bumpers.subData("left_servo").getString("map_name"));
-        bumperRight = Aliases.servoMap.get(bumpers.subData("right_servo").getString("map_name"));
+        bumperLeft = hardwareMap.servo.get(bumpers.subData("left_servo").getString("map_name"));
+        bumperRight = hardwareMap.servo.get(bumpers.subData("right_servo").getString("map_name"));
         if (bumpers.subData("left_servo").getBool("reversed"))
             bumperLeft.setDirection(Servo.Direction.REVERSE);
         if (bumpers.subData("right_servo").getBool("reversed"))
@@ -210,12 +200,8 @@ public class FinalTeleOp extends OpMode{
         // TODO: 2/18/2017 move into imu thread
         long changeTime = System.currentTimeMillis() - lastTime;
         lastTime += changeTime;
-        if (intakePower < 0){
-            intakePower = 0;
-        } if (intakePower > 1){
-            intakePower = 1;
-        }
-        intakePower += gamepad1.right_stick_y / settings.getInt("intake_divisor");
+
+        runIntake();
 
         driveVector.setX(controls.getAnalog("drivetrain_x"));
         driveVector.setY(controls.getAnalog("drivetrain_y"));
@@ -223,12 +209,6 @@ public class FinalTeleOp extends OpMode{
         driveVector.setRad(controls.getAnalog("drivetrain_rotate"));
 
         drive.setRelative(controls.getToggle("drive_mode"));
-
-        if (controls.getToggle("intake")){
-            intakeMotor.setPower(-Range.scale(intakePower, 0, 1, -.778, .778));
-        } else {
-            intakeMotor.setPower(0);
-        }
 
         //servo
         dropBalls(controls.getToggle("drop"));
@@ -287,6 +267,24 @@ public class FinalTeleOp extends OpMode{
         }else {
             ballDropper.setPosition(down + offset);
             telemetry.addData("dropper", "down");
+        }
+    }
+
+    /**
+     *  intake controls
+     */
+    public void runIntake(){
+        if (intakePower < 0){
+            intakePower = 0;
+        } if (intakePower > 1){
+            intakePower = 1;
+        }
+        intakePower += gamepad1.right_stick_y / settings.subData("intake").getInt("divisor");
+
+        if (controls.getToggle("intake")){
+            intakeMotor.setPower(Range.scale(intakePower, 0, 1, -1, 1));
+        } else {
+            intakeMotor.setPower(0);
         }
     }
 }

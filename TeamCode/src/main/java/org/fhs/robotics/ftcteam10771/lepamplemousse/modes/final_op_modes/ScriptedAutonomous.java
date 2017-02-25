@@ -4,6 +4,7 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -138,7 +139,8 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
                 drive.setRelative(true);
                 driveVector.setPolar(commandParser.getArgFloat(0), (float)(3.0/2.0*Math.PI));
                 sleep(commandParser.getArgInt(1));
-                driveVector.setPolar(0, 0);
+                driveVector.setAllRad(0, 0, 0);
+                drive.pause();
                 //define function for a 2 argument command
                 //drive(commandParser.getArgFloat(0), commandParser.getArgFloat(1));
 
@@ -147,7 +149,8 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
                 drive.setRelative(true);
                 driveVector.setPolar(commandParser.getArgFloat(0), (float)Math.toRadians(commandParser.getArgFloat(1)));
                 sleep(commandParser.getArgInt(2));
-                driveVector.setPolar(0, 0);
+                driveVector.setAllRad(0, 0, 0);
+                drive.pause();
                 //move_position 3.5,3,500
             }
             return;
@@ -167,7 +170,8 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
             //centerRotate();
             //approach();
             //
-            driveVector.setPolar(0, 0);
+            driveVector.setAllRad(0, 0, 0);
+            drive.pause();
             return;
         }
 
@@ -284,10 +288,12 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
                 relative ? (float) Math.toRadians(robot.getRotation().getDegrees() + degrees) : (float) Math.toRadians(degrees + 90));
         drive.startPosition();
         while(!drive.isAtRotation() && opModeIsActive()){
-            imuHandler.streamIMUData();
+            drive.waitAtRotation();
         }
-        drive.startVelocity();
+        drive.startPosition();
         driveVector.setAllRad(0, 0, 0);
+        drive.pause();
+
     }
 
     /**
@@ -338,7 +344,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         bumperRight.setPosition(bumpers.subData("right_servo").getFloat("offset") / bumperRange);
 
         //ball dropper
-        ballDropper = hardwareMap.servo.get("drop");
+        ballDropper = hardwareMap.servo.get(settings.subData("drop").getString("map_name"));
         if (settings.subData("drop").getBool("reversed")){
             ballDropper.setDirection(Servo.Direction.REVERSE);
         } else{
@@ -347,7 +353,10 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         dropBalls(false);
 
         //intake motor
-        intakeMotor = hardwareMap.dcMotor.get("motorIntake");
+        intakeMotor = hardwareMap.dcMotor.get(settings.subData("intake").getString("map_name"));
+        if (settings.subData("intake").getBool("reversed"))
+            intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+        else intakeMotor.setDirection(DcMotor.Direction.FORWARD);
     }
 
     /**
@@ -395,8 +404,9 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         while(!drive.isAtPosition() && opModeIsActive()){
             imuHandler.streamIMUData();
         }
-        drive.startVelocity();
+        drive.startPosition();
         driveVector.setAllRad(0, 0, 0);
+        drive.pause();
     }
 
     /**

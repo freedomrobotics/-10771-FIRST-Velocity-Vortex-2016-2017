@@ -73,16 +73,6 @@ public class TestDrive3 extends LinearOpMode{
             Log.d(TAG, "keymapping-read-again");
         }
 
-        Config components = new Config(Static.configPath, Static.configCompFileName + Static.configFileSufffix, telemetry, "components");
-        Log.d(TAG, "components");
-        if (components.read() == Config.State.DEFAULT_EXISTS) {
-            components.create(true);
-            Log.d(TAG, "components-read-fail-create");
-            if (components.read() == Config.State.DEFAULT_EXISTS)
-                components.read(true);
-            Log.d(TAG, "components-read-again");
-        }
-
         rawSettings = new Config(Static.configPath, Static.configVarFileName + Static.configFileSufffix, telemetry, "settings");
         Log.d(TAG, "settings");
         if (rawSettings.read() == Config.State.DEFAULT_EXISTS) {
@@ -100,9 +90,6 @@ public class TestDrive3 extends LinearOpMode{
         initialX = settings.subData("robot").subData("initial_position").getFloat("x");
         initialY = settings.subData("robot").subData("initial_position").getFloat("y");
 
-        this.components = new Components(hardwareMap, telemetry, components);
-        Log.d(TAG, "components-object");
-        this.components.initialize();
         Log.d(TAG, "components-init");
         controls = new Controllers(gamepad1, gamepad2, keymapping);
         controls.initialize();
@@ -123,8 +110,12 @@ public class TestDrive3 extends LinearOpMode{
 
         Log.d(TAG, "MOTOR SETUP");
 
-        intakeMotor = hardwareMap.dcMotor.get("motorIntake");
-        ballDropper = hardwareMap.servo.get("drop");
+        intakeMotor = hardwareMap.dcMotor.get(settings.subData("intake").getString("map_name"));
+        if (settings.subData("intake").getBool("reversed"))
+            intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+        else intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        ballDropper = hardwareMap.servo.get(settings.subData("drop").getString("map_name"));
         if (settings.subData("drop").getBool("reversed")){
             ballDropper.setDirection(Servo.Direction.REVERSE);
         } else{
@@ -175,8 +166,8 @@ public class TestDrive3 extends LinearOpMode{
         float bumperVel = bumpers.getFloat("max_ang_vel");
         float bumperMax = bumpers.getFloat("max_rotate");
 
-        Servo bumperLeft = Aliases.servoMap.get(bumpers.subData("left_servo").getString("map_name"));
-        Servo bumperRight = Aliases.servoMap.get(bumpers.subData("right_servo").getString("map_name"));
+        Servo bumperLeft = hardwareMap.servo.get(bumpers.subData("left_servo").getString("map_name"));
+        Servo bumperRight = hardwareMap.servo.get(bumpers.subData("right_servo").getString("map_name"));
         if (bumpers.subData("left_servo").getBool("reversed"))
             bumperLeft.setDirection(Servo.Direction.REVERSE);
         if (bumpers.subData("right_servo").getBool("reversed"))
@@ -202,7 +193,7 @@ public class TestDrive3 extends LinearOpMode{
             } if (intakePower > 1){
                 intakePower = 1;
             }
-            intakePower += gamepad1.right_stick_y / settings.getInt("intake_divisor");
+            intakePower += gamepad1.right_stick_y / settings.subData("intake").getInt("divisor");
 
             double joystickTheta = Math.atan2((controls.getAnalog("drivetrain_y")),(controls.getAnalog("drivetrain_x"))); //declares the angle of joystick position in standard polar coordinates
             double joystickRadius = Math.sqrt((controls.getAnalog("drivetrain_x"))*(controls.getAnalog("drivetrain_x"))+(controls.getAnalog("drivetrain_y"))*(controls.getAnalog("drivetrain_y"))); //declares the magnitude of the radius of the joystick position
@@ -295,7 +286,6 @@ public class TestDrive3 extends LinearOpMode{
         }
         //fixme threads not allowed after loop
         catapult.stop();
-        Aliases.clearAll();
     }
 
     private float getX(){
