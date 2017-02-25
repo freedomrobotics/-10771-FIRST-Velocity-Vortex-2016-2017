@@ -85,6 +85,8 @@ public class ApproachBeacon {
         }
         driveVector.setRad(0);
         driveVector.setPolar(0, 0);
+        drive.archivePosition();
+        updatePosition(true);
     }
 
     public void rotate(){
@@ -370,6 +372,7 @@ public class ApproachBeacon {
         defaultChoose();
         //rotate(180.0, false);
         press();
+        updatePosition(false);
     }
 
     public String beaconStat(){
@@ -377,5 +380,31 @@ public class ApproachBeacon {
         if (rightSide && !leftSide) return "right";
         if (!leftSide && !rightSide) return "neither";
         else return "both";
+    }
+
+    private void updatePosition(boolean beforeBeaconClaim){
+        if (beforeBeaconClaim){
+            drive.initPosition(0f, 0f);
+            drive.resetEncoders();
+        }
+        else{
+            drive.startPosition();
+            driveVector.setX(0f);
+            driveVector.setY(61.4f);
+            boolean proceed = false;
+            while (!proceed){
+                proceed = drive.isAtPosition();
+            }
+            drive.startVelocity();
+            driveVector.setPolar(0f, 0f);
+            if (cameraVision.target()!=null){
+                drive.initPosition(cameraVision.target().getxCoordinate(),
+                        cameraVision.target().getyCoordinate());
+            }
+            else {
+                drive.setArchivedPosition();
+            }
+            drive.resetEncoders();
+        }
     }
 }

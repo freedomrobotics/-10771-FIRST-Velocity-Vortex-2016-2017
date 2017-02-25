@@ -66,10 +66,10 @@ public class CameraVision {
 
     public enum Image{
 
-        WHEELS("Wheels", 0, -182.9f, Coordinate.convertTo(3.0f, Coordinate.UNIT.FT_TO_UNIT)),
-        TOOLS("Tools", 1, Coordinate.convertTo(-3.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f),
-        LEGOS("Legos", 2, -182.9f, Coordinate.convertTo(-1.0f, Coordinate.UNIT.FT_TO_UNIT)),
-        GEARS("Gears", 3, Coordinate.convertTo(1.0f, Coordinate.UNIT.FT_TO_UNIT), 182.9f);
+        WHEELS("Wheels", 0, -91.44f, Coordinate.convertTo(3.0f, Coordinate.UNIT.FT_TO_UNIT)),
+        TOOLS("Tools", 1, Coordinate.convertTo(-3.0f, Coordinate.UNIT.FT_TO_UNIT), 91.44f),
+        LEGOS("Legos", 2, -91.44f, Coordinate.convertTo(-1.0f, Coordinate.UNIT.FT_TO_UNIT)),
+        GEARS("Gears", 3, Coordinate.convertTo(1.0f, Coordinate.UNIT.FT_TO_UNIT), 91.44f);
 
         private String name;
         private int index;
