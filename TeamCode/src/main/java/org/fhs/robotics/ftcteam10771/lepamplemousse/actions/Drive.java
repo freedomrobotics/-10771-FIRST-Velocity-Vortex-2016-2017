@@ -274,28 +274,32 @@ public class Drive {
      * Starts driveThread and changes vectorDriveActive to true
      */
     public void startVelocity(){
-        pause = false;
-        vectorDriveActive = true;
-        if (!driveThread.isAlive())
-            driveThread.start();
-        else
-            this.notifyAll();
+        synchronized (this) {
+            pause = false;
+            vectorDriveActive = true;
+            if (!driveThread.isAlive())
+                driveThread.start();
+            else
+                this.notifyAll();
+        }
     }
 
     /**
      * Uses driveThread to move robot to position
      */
     public void startPosition(){
-        pause = false;
-        //this flag should be enough to announce that a math change is needed. Robot's current
-        // position can be gained from getVectorR and the vectorR provided is the aim position.
-        vectorDriveActive = false;
-        atRotation = false;
-        atPosition = false;
-        if (!driveThread.isAlive())
-            driveThread.start();
-        else
-            this.notifyAll();
+        synchronized (this) {
+            pause = false;
+            //this flag should be enough to announce that a math change is needed. Robot's current
+            // position can be gained from getVectorR and the vectorR provided is the aim position.
+            vectorDriveActive = false;
+            atRotation = false;
+            atPosition = false;
+            if (!driveThread.isAlive())
+                driveThread.start();
+            else
+                this.notifyAll();
+        }
     }
 
     public void pause(){
@@ -304,9 +308,11 @@ public class Drive {
     }
 
     public void resume(){
-        pause = false;
-        if (driveThread.isAlive())
-            this.notifyAll();
+        synchronized (this) {
+            pause = false;
+            if (driveThread.isAlive())
+                this.notifyAll();
+        }
     }
 
     public void waitOneLoop(){
