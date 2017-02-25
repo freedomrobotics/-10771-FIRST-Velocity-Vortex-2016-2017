@@ -351,7 +351,7 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         bumperRight.setPosition(bumpers.subData("right_servo").getFloat("offset") / bumperRange);
 
         //ball dropper
-        ballDropper = hardwareMap.servo.get("drop");
+        ballDropper = hardwareMap.servo.get(settings.subData("drop").getString("map_name"));
         if (settings.subData("drop").getBool("reversed")){
             ballDropper.setDirection(Servo.Direction.REVERSE);
         } else{
@@ -360,7 +360,10 @@ public class ScriptedAutonomous extends LinearOpMode implements ScriptRunner {
         dropBalls(false);
 
         //intake motor
-        intakeMotor = hardwareMap.dcMotor.get("motorIntake");
+        intakeMotor = hardwareMap.dcMotor.get(settings.subData("intake").getString("map_name"));
+        if (settings.subData("intake").getBool("reversed"))
+            intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+        else intakeMotor.setDirection(DcMotor.Direction.FORWARD);
     }
 
     /**
