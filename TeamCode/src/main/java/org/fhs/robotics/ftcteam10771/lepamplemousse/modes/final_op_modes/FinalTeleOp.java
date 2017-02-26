@@ -55,7 +55,7 @@ public class FinalTeleOp extends OpMode{
     private Catapult catapult;
     private Drive drive;
     private VectorR driveVector = new VectorR();
-    private Robot robot;
+    private Robot robot = new Robot();
     //private IMU.Gyrometer gyrometer;
     //private IMU imuHandler;
 
@@ -140,7 +140,10 @@ public class FinalTeleOp extends OpMode{
         Log.d(TAG, "DRIVETRAIN SETUP DONE");
 
         //lift motor
-        //liftMotor = hardwareMap.dcMotor.get("lift");
+        liftMotor = hardwareMap.dcMotor.get(settings.subData("lift").getString("map_name"));
+        if (settings.subData("lift").getBool("reversed"))
+            liftMotor.setDirection(DcMotor.Direction.REVERSE);
+        else liftMotor.setDirection(DcMotor.Direction.FORWARD);
         //todo 2/22
         intakeMotor = hardwareMap.dcMotor.get(settings.subData("intake").getString("map_name"));
         if (settings.subData("intake").getBool("reversed"))
@@ -215,7 +218,7 @@ public class FinalTeleOp extends OpMode{
 
         runIntake();
 
-        if (controls.getToggle("lift")){
+        if (controls.getToggle("lift_toggle")){
             liftMotor.setPower(controls.getAnalog("lift"));
         }
 

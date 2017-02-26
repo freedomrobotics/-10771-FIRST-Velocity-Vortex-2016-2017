@@ -327,10 +327,10 @@ public class ApproachBeacon {
             linearOpMode.telemetry.addData("Beacon", "unknown");
             linearOpMode.telemetry.update();
         }
+        driveVector.setPolar(0.0f, 0.0f);
         lastTime = System.currentTimeMillis();
         waitTime = settings.subData("beacon").getInt("check_time");
         while  (linearOpMode.opModeIsActive() && System.currentTimeMillis() - lastTime < waitTime){
-            driveVector.setPolar(0.0f, 0.0f);
             beacon = rgb.beaconSide();
         }
         if (alliance.equals(beacon)){

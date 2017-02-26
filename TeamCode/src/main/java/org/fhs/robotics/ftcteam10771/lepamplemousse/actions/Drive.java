@@ -43,6 +43,7 @@ public class Drive {
     private float initialY = 0.0f;
     private float archivedX = 0.0f;
     private float archivedY = 0.0f;
+
     private Config.ParsedData settings;
 
 
@@ -202,6 +203,24 @@ public class Drive {
 
         this.settings = settings;
         String team = settings.getString("alliance");
+        //if (fieldmap!=null) this.fieldmap = fieldmap.subData("coordinates").subData(team);
+
+        /*
+        if (this.settings.subData("drive").getBool("init_with_fieldmap")){
+            String initial_position = settings.getString("position");
+            if (((!initial_position.equals("inside"))) && (!initial_position.equals("outside"))){
+                initial_position = "inside";
+            }
+            robot.position.setX(this.fieldmap.subData(initial_position).getFloat("x"));
+            robot.position.setY(this.fieldmap.subData(initial_position).getFloat("y"));
+            robot.rotation.setRadians(0.0f);
+        }
+
+        else {
+            robot.position.setX(settings.subData("robot").subData("initial_position").getFloat("x"));
+            robot.position.setY(settings.subData("robot").subData("initial_position").getFloat("y"));
+            robot.rotation.setRadians(settings.subData("robot").getFloat("initial_rotation"));
+        }*/
 
         //fixme would this work?
         initialX = settings.subData("robot").subData("initial_position").getFloat("x");
@@ -369,6 +388,8 @@ public class Drive {
     }
 
     public void resetEncoders(){
+        initialX = getX();
+        initialY = getY();
         frMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         blMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -380,18 +401,9 @@ public class Drive {
     }
 
     public void initPosition(float x, float y){
+        resetEncoders();
         initialX = x;
         initialY = y;
-    }
-
-    public void archivePosition(){
-        archivedX = robot.getPosition().getX();
-        archivedY = robot.getPosition().getY();
-    }
-
-    public void setArchivedPosition(){
-        initialX = archivedX;
-        initialY = archivedY;
     }
 
     public boolean isAtPosition(){
@@ -405,4 +417,16 @@ public class Drive {
     public VectorR getVectorR(){
         return vectorR;
     }
+
+    public void archivePosition(){
+        archivedX = robot.getPosition().getX();
+        archivedY = robot.getPosition().getY();
+    }
+
+    public void setArchivedPosition(){
+        initialX = archivedX;
+        initialY = archivedY;
+    }
+
+
 }
