@@ -46,6 +46,104 @@ public interface LSM9DS0{
 
     }
 
+    class GyroEnums{
+        enum ODR{
+            G_95_HZ(0), G_190_HZ(1), G_380_HZ(2), G_760_HZ(3);
+            public final byte bVal; ODR(int i){ bVal = (byte)(i<<6);}
+        }
+
+        enum Bandwidth{
+            G_LOW(0), G_MEDIUM(1), G_HIGH(2), G_VERY_HIGH(3);
+            public final byte bVal; Bandwidth(int i){ bVal = (byte)(i<<4); }
+        }
+
+        enum PowerMode{
+            POWER_DOWN(0), SLEEP(8), NORMAL(15);
+            public final byte bVal; PowerMode(int i){ bVal = (byte)i; }
+        }
+
+        //Page 43 of the datasheet
+        //TODO: BETTER NAMING SCHEMES
+        enum HighPassFilterMode{
+            G_NORMAL_WITH_HP_RESET_FILTER(0),
+            G_REFERENCE_SIGNAL_FOR_FILTERING(1),
+            G_NORMAL(2),
+            G_AUTORESET_ON_INTERRUPT(3);
+            public final byte bVal; HighPassFilterMode(int i){ bVal = (byte)(i<<4); }
+        }
+
+        enum HPFCutoffFrequencyScale{
+            G_10(0), G_9(1), G_8(2), G_7(3), G_6(4), G_5(5), G_4(6), G_3(7), G_2(8), G_1(9);
+            public final byte bVal; HPFCutoffFrequencyScale(int i){ bVal = (byte)i; }
+        }
+
+        enum InterruptEnabled {
+            DISABLED(0), ENABLED(1);
+            public final byte bVal; InterruptEnabled(int i) { bVal = (byte)(i<<7); }
+        }
+
+        enum BootStatus{
+            DISABLED(0), ENABLED(1);
+            public final byte bVal; BootStatus(int i) { bVal = (byte)(i<<6); }
+        }
+
+        enum InterruptActiveConfig{
+            HIGH(0), LOW(1);
+            public final byte bVal; InterruptActiveConfig(int i) { bVal = (byte)(i<<5); }
+        }
+
+        enum PP_OD{
+            PUSH_PULL(0), OPEN_DRAIN(1);
+            public final byte bVal; PP_OD(int i) { bVal = (byte)(i<<4); }
+        }
+
+        enum DateReady{
+            DISABLED(0), ENABLED(1);
+            public final byte bVal; DateReady(int i) { bVal = (byte)(i<<3); }
+        }
+
+        enum WatermarkInt{
+            DISABLED(0), ENABLED(1);
+            public final byte bVal; WatermarkInt(int i) { bVal = (byte)(i<<2); }
+        }
+
+        enum OverrunInt{
+            DISABLED(0), ENABLED(1);
+            public final byte bVal; OverrunInt(int i) { bVal = (byte)(i<<1); }
+        }
+
+        enum EmptyInt{
+            DISABLED(0), ENABLED(1);
+            public final byte bVal; EmptyInt(int i) { bVal = (byte)(i); }
+        }
+
+        enum BlockDataUpdate{
+            CONTINUOUS(0), SEGMENTED(1);
+            public final byte bVal; BlockDataUpdate(int i) { bVal = (byte)(i<<7); }
+        }
+
+        //Page 44
+        //TODO: LEARN MORE
+        enum OutputDataLowerAddress{
+            LSB(0), MSB(1);
+            public final byte bVal; OutputDataLowerAddress(int i) { bVal = (byte)(i<<6); }
+        }
+
+        //TODO: CONTINUE ON PAGE 44 AT TABLE 29
+
+        enum FullScale{
+
+        }
+
+        enum SelfTestEnable{
+
+        }
+
+        enum SPIModeSelection{
+            //not needed for i2c
+        }
+    }
+
     //System Status
 
     //System error here
