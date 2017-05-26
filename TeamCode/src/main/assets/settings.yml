@@ -9,47 +9,119 @@
 
 # flags
 alliance: red
-position: inside
+position: general
 
 catapult:
-  light_tolerance: 0.2 #put in settings(test first)
-  ready_position: 1440 #put in settings
-  target_position: 14440 #put in settings
-  oscillation_max: 0.1 #put in settings
-  position_margin: 20
-  power_increment: 0.01 #put in settings
-  launch_power: 0.8
-  use_encoder: false #change in settings
-  map_name: launcher
+  map_name: catapult
+  reversed: true
+  light_sensor:
+    map_name: ods
+    threshold: .75
+  power: .75
+  position_tuning: 720
+  tuning_power: .15
+  forward_position: 1440
+  grace: 500
+  oscillation_max: .2
+  power_increment: .001
+
+#catapult:
+#  light_tolerance: .75
+#  target_position: 14400
+#  ready_position: 1440
+#  oscillation_max: 0.4
+#  position_margin: 0
+#  power_increment: 0.01
+#  launch_power: 0.75
+#  use_encoder: false
+#  map_name: catapult
+#  grace: 350
+
+imu:
+  map_name: imu
+
+drop:
+  full_rotate: 180.0
+  offset: 0.0
+  up_angle: 110.0
+  down_angle: 0.0
+  reversed: true
+  map_name: drop
+  
+drive:
+  diameter: 4.0
+  gyro_margin: 3.0
+  update_using: encoders
+  init_using_fieldmap: false
+  x_margin: 4.0
+  y_margin: 4.0
+  camera_settings:
+    wait_time: 5000
+    speed: 0.6
+    centering_margin: 80.0
+    distance_to_stop: 180.0
+    angle_margin: 2.0
+    beacon_check_distance: 100.0
+    rotate_speed: 0.6
+    rotate_factor: 1.6
+  
+auto:
+  delay: 15000
+  drive: 2750
+  power: .81
+  power_ratio: .778
+
+lift:
+  map_name: lift
+  reversed: true
+
+intake:
+  divisor: 500
+  map_name: intake
+  reversed: false
 
 robot:
   initial_position:
-    x: 0.0  #needed in testDrive3
-    y: 0.0
-  intial_rotation: 0.0
+    x: 40
+    y: -158.0
+    initial_rotation: 0.0
+    rot: 0.0
   size:
     x: 444.5    #width approx 17.5in
     y: 431.8    #length approx 15in
+  imu_offset:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    r: 0.0
+  phone_offset:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    r: 0.0
 
 encoder:
   output_pulses: 1440
   encoder_pulses: 28
-  centimeters_per_pulse: 0.29 #add this to settings
+  centimeters_per_pulse: 0.0287
 
 # The drivetrain's settings.
 drivetrain:
-  motor_angle: 60.0
-  motor_scale: .85
-  gear_ratio: 1
+  motor_max_power: 1
+  motor_angle: 30
+  gear_ratio: 2.5
+  motor_scale: .778
+  power: .778
   motion:
     max_velocity: 100 # mm/s
     max_acceleration: 100 # mm^2/s
     max_jerk: 100 # mm^3/s
   positional:
-    speed: .67
-    rotation: .25
-    rotational_tolerance: 3 #degrees
-    translational_tolerance: 10 #mm
+    rotation_min: 0.3
+    rotational_tolerance: 1
+    position_tolerance: 3.0
+    speed: .778
+    rotation: 0.6
   motor:
     front_left:
       map_name: drive_front_left
@@ -58,36 +130,30 @@ drivetrain:
       map_name: drive_front_right
       reversed: false
     back_right:
-      map_name: drive_back_left
+      map_name: drive_back_right
       reversed: true
     back_left:
-      map_name: drive_back_right
+      map_name: drive_back_left
       reversed: false
   wheel:
     diameter: 101.6 # 4 inches
 
-# Intake
-intake:
-  map_name: intake
-  reversed: true
-  increments_per_second: .2
-
 # Front Bumper-thing Settings
 bumper:
   enabled: true
-  max_ang_vel: 80.0
+  max_ang_vel: 80
   full_rotate: 180.0  #180 degree servo
-  max_rotate: 65.0    #programmed limit
-  preset: 45.0
+  max_rotate: 60   #programmed limit
+  preset: 45
   start_pos: 0.0
   left_servo:
     map_name: bumper_left
     reversed: true
-    offset: 18.0
+    offset: 18
   right_servo:
     map_name: bumper_right
     reversed: false
-    offset: 0.0
+    offset: 0
 
 #color sensors
 color_sensor:
@@ -101,115 +167,98 @@ color_sensor:
 
 #Beacon colors
 beacon:
-  red_alliance:
-    min:        #lower range of values
-      red: 1
-      green: 1
-      blue: 1
-    max:        #upper range of values
-      red: 2
-      green: 2
-      blue: 2
-  blue_alliance:
-    min:
-      red: 1
-      green: 1
-      blue: 1
-    max:
-      red: 2
-      green: 2
-      blue: 2
+  add_time: 250
+  right_side_divisor: 3
+  shift_time: 1300
+  reverse_time: 2500
+  press_time: 600
+  check_time: 1000
+  offset_time: 300
+  max_check_time: 9000
+  power: 0.6
+  shift_power: 0.3
+  press_power: 0.4
+  fast_power: 0.6
+  red:
+    min: 300      #lower range of values
+    max: 400       #upper range of values
+  blue:
+    min: 200
+    max: 300
+  value_min: 0
+  saturation_min: 0.0
 
-auto:
-  time:
-  encoder:
-
-drive:
-  gyro_margin: 5.0 #degrees (put in settings)
-  diameter: 10.16 #cm (put in settings)
-  wait_time: 3000 #put in settings
-  update_using: encoders
-  init_with_fieldmap: false
-  x_margin: 4.0 #cm
-  y_margin: 4.0 #cm
-  camera_settings:
-    centering_margin: 5.0 #mm
-    distance_to_stop: 150.0 #mm
-    angle_margin: 5.0 #degrees
-    beacon_check_distance: 100.0 #mm
-    detect_time: 8000 #miliseconds put in settings
-    slow_speed: 0.2 #put in settings
-    speed: 0.6 #put in settings
+scriptauto:
+  rotate:
+    angle_margin: 1
+    rotate_speed: .8
+    min_speed: 0.2
 
 autonomous:
-  red_alliance:
-    starting_pos:
-      x: 10.0
-      y: 10.0
-      rot: 0.0
-    #Compute later
-    travel_to_beacon:
-      - move 100
-      - stop
-    travel_to_park:
-      - move 100
-      - stop
-    travel_to_low:
-      near:
-        - move 100
-        - stop
-      far:
-        - move 100
-        - stop
-    travel_to_mid:
-      near:
-        - move 100
-        - stop
-      far:
-        - move 100
-        - stop
-
-  blue_alliance:
-    starting_pos:
-      x: 10.0
-      y: 20.0
-      rot: 0.0
-    #Compute later
-    travel_to_beacon:
-      - move 100
-      - stop
-    travel_to_park:
-      - move 100
-      - stop
-    travel_to_low:
-      near:
-        - move 100
-        - stop
-      far:
-        - move 100
-        - stop
-    travel_to_mid:
-      near:
-        - move 100
-        - stop
-      far:
-        - move 100
-        - stop
-
   # This is the autonomous commands!
   command_list:
-    - move 500
-    - travel_to_beacon
-    - drop_off_people
-    - move -1000
-    - climb_mountain_low near
+    - blue
     - stop
+  blue:
+    - pause 1000
+    - catapult
+    - move 100.0,-30.48
+    - rotate 90,false
+    - approach_beacon
+    - claim_beacon
+    - move_time .5,1000
+    - rotate 0
+    - move_time .5,5000
+    - stop
+    
+  red:
+    - pause 10000
+    - move -20,-150
+    - move -20,-158
+    - catapult
+    - pause 1000
+    - catapult
+    - move -100.0,-95.0
+    - rotate 315,false
+    - move_time .5,4000
+    - stop
+  drive:
+    - coordinate 61.4,0.0
+    - coordinate 0.0,61.4
+    - coordinate 0.0,0.0
+    - stop
+  approach_beacon:
+    - detect_image tools
+    - center_rotate_image
+    - approach_image
+    - center_image
 
   # The below define the other commands that aren't alliance specific (make up your own if you want)
-  drop_off_people:
-    - winch_servo 50
-    - winch_motor out,2
-    - winch_servo down,5
-    - winch_motor in,1
+  test:
+    - pause 1000
+    - rotate 15
+    - pause 1000
+    - rotate 30
+    - pause 1000
+    - rotate 45
+    - pause 1000
+    - rotate 60
+    - pause 1000
+    - rotate 75
+    - pause 1000
+    - rotate 90,true
+    - pause 1000
+    - rotate 105,true
+    - pause 1000
+    - rotate 120
+    - pause 1000
+    - rotate 135
+    - pause 1000
+    - rotate 150
+    - pause 1000
+    - rotate 165
+    - pause 1000
+    - rotate 180
+    - test
 
 

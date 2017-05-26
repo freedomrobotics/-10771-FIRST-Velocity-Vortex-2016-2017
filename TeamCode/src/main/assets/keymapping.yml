@@ -1,35 +1,34 @@
 # Gamepad mappings
 # Function List:
-# drive_x               = the x axis of the drivetrain          - analog(-1, 1)   - float
-# drive_y               = the y axis of the drivetrain          - analog(-1, 1)   - float
-# drive_rotate          = the rotation for the drivetrain       - analog(-1, 1)   - float
-# drive_l_rotate        = the rotation for the drivetrain (ccw) - analog(0, 1)    - float
-# drive_r_rotate        = the rotation for the drivetrain (cw)  - analog(0, 1)    - float
+# drivetrain_x          = the x axis of the drivetrain          - analog(-1, 1)   - float
+# drivetrain_y          = the y axis of the drivetrain          - analog(-1, 1)   - float
+# drivetrain_rotate     = the rotation for the drivetrain       - analog(-1, 1)   - float
+# drivetrain_l_rotate   = the rotation for the drivetrain (ccw) - analog(0, 1)    - float
+# drivetrain_r_rotate   = the rotation for the drivetrain (cw)  - analog(0, 1)    - float
 # intake_speed          = the speed control of the intake mech  - analog(-1, 1)   - float
-# intake                = toggle for intake                     - digital(toggle) - boolean
-# launch                = launch the catapult                   - digital         - boolean
-# ball_drop             = lift or drop the ball dropper         - digital         - boolean
+# intake_in             = toggle for inwards intake             - digital         - boolean
+# intake_out            = toggle for outwards in(out)take       - digital         - boolean
+# flywheel_on           = toggle the flywheel on                - digital         - boolean
+# flywheel_speed        = adjust the flywheel speed             - analog(-1, 1)   - float
 # bumper_angle          = adjust the bumper angle               - analog(-1, 1)   - float
-# bumper_preset         = move the bumper to the preset angle   - analog(-1, 1)   - float
-# imu_toggle            = toggles absolute drive                - digital(toggle) - boolean
 gamepad1:
   left_stick_x:
-    function: drive_x
+    function: null
     inverted: false
     digital: false
 
   left_stick_y:
-    function: drive_y
-    inverted: true
+    function: lift
+    inverted: true # because it's already inverted in code
     digital: false
 
   right_stick_x:
-    function: drive_rotate
-    inverted: true  #because counterclockwise is a positive rotation and the stick to the left is negative
+    function: null
+    inverted: false
     digital: false
 
   right_stick_y:
-    function: null
+    function: intake_speed
     inverted: true
     digital: false
 
@@ -39,7 +38,7 @@ gamepad1:
     digital: true
 
   dpad_down:
-    function: imu_toggle
+    function: lift_toggle
     inverted: false
     digital: true
 
@@ -49,17 +48,17 @@ gamepad1:
     digital: true
 
   dpad_right:
-    function: null
+    function: image
     inverted: false
     digital: true
 
   a_button:
-    function: null
+    function: intake
     inverted: false
     digital: true
 
   b_button:
-    function: null
+    function: drop
     inverted: false
     digital: true
 
@@ -69,7 +68,7 @@ gamepad1:
     digital: true
 
   y_button:
-    function: null
+    function: launch
     inverted: false
     digital: true
 
@@ -122,23 +121,23 @@ gamepad1:
 
 gamepad2:
   left_stick_x:
-    function: null
+    function: drivetrain_x drive_x
     inverted: false
     digital: false
 
   left_stick_y:
-    function: bumper_angle
-    inverted: false
+    function: drivetrain_y drive_y
+    inverted: true
     digital: false
 
   right_stick_x:
-    function: null
-    inverted: false
+    function: drivetrain_rotate drive_rotate
+    inverted: true
     digital: false
 
   right_stick_y:
-    function: intake_speed
-    inverted: true
+    function: null
+    inverted: false
     digital: false
 
   dpad_up:
@@ -147,7 +146,7 @@ gamepad2:
     digital: true
 
   dpad_down:
-    function: null
+    function: drive_mode
     inverted: false
     digital: true
 
@@ -162,22 +161,22 @@ gamepad2:
     digital: true
 
   a_button:
-    function: intake
+    function: calibrate
     inverted: false
     digital: true
 
   b_button:
-    function: ball_drop
-    inverted: false
-    digital: true
-
-  x_button:
     function: null
     inverted: false
     digital: true
 
+  x_button:
+    function: led
+    inverted: false
+    digital: true
+
   y_button:
-    function: launch
+    function: null
     inverted: false
     digital: true
 
@@ -198,7 +197,7 @@ gamepad2:
 
   left_bumper:
     function: null
-    inverted: false
+    inverted: true
     digital: true
 
   right_bumper:
@@ -217,8 +216,8 @@ gamepad2:
     digital: true
 
   left_trigger:
-    function: null
-    inverted: false
+    function: bumper_angle
+    inverted: true
     digital: false
 
   right_trigger:

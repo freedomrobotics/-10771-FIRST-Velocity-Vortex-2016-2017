@@ -7,10 +7,18 @@ values:
   rotation: 0.0
   orgin_x: 182.88
   origin_y: 182.88
-  distance_from_vortex: 100.0 #cm
 
 coordinates:
   red:
+    script_size: 3.0
+    script:
+      - custom1
+      - custom2
+      - custom3
+    command: 
+      1: wheels
+      2: legos
+      3: corner
     inside:
       x: -42.00
       y: -145.00
@@ -29,19 +37,21 @@ coordinates:
     center:
       x: -28.00
       y: -28.00
-    center_vortex:
-      x: -26.94
-      y: -26.94
     custom1:
-      x: 50.0
-      y: 0.0
-    custom2:
-      x: 50.0
-      y: 50.0
-    custom3:
       x: 0.0
-      y: 50.0
+      y: -61.4
+    custom2:
+      x: 0.0
+      y: 0.0
+    custom3:
+      x: 61.4
+      y: 0.0
   blue:
+    script_size: 3.0
+    script:
+      - gears
+      - custom1
+      - center
     inside:
       x: 145.00
       y: -34.00
@@ -60,9 +70,6 @@ coordinates:
     center:
       x: 28.00
       y: 28.00
-    center_vortex:
-      x: 26.94
-      y: 26.94
     custom1:
       x: 0.0
       y: 0.0
